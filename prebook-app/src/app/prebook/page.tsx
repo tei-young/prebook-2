@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
+import { supabase } from '@/lib/supabase';
 
 interface FormData {
   termsAgreed: boolean;
@@ -48,11 +49,57 @@ const CustomerReservationPage = () => {
     }
     
     try {
-      // TODO: API 호출 및 파일 업로드 처리
-      console.log('예약 요청:', formData);
+      // 이미지 파일 업로드
+      let frontPhotoUrl = null;
+      let closedPhotoUrl = null;
+  
+      if (formData.frontPhoto) {
+        const frontPhotoPath = `reservation-photos/${Date.now()}_front`;
+        const { data: frontData, error: frontError } = await supabase.storage
+          .from('photos')
+          .upload(frontPhotoPath, formData.frontPhoto);
+        
+        if (frontError) throw frontError;
+        frontPhotoUrl = frontData.path;
+      }
+  
+      if (formData.closedPhoto) {
+        const closedPhotoPath = `reservation-photos/${Date.now()}_closed`;
+        const { data: closedData, error: closedError } = await supabase.storage
+          .from('photos')
+          .upload(closedPhotoPath, formData.closedPhoto);
+        
+        if (closedError) throw closedError;
+        closedPhotoUrl = closedData.path;
+      }
+  
+      // 예약 데이터 저장
+      const { data, error } = await supabase
+        .from('reservations')
+        .insert([
+          {
+            customer_name: formData.name,
+            gender: formData.gender,
+            age: parseInt(formData.age),
+            phone: formData.phone,
+            desired_service: formData.desiredService,
+            referral_source: formData.referralSource,
+            desired_dates: [formData.desiredDates], // 문자열을 배열로 변환
+            prior_experience: formData.priorExperience,
+            front_photo_url: frontPhotoUrl,
+            closed_photo_url: closedPhotoUrl,
+            status: 'pending'
+          }
+        ])
+        .select();
+  
+      if (error) throw error;
+  
+      console.log('예약 요청 성공:', data);
       setSubmitted(true);
     } catch (error) {
       console.error('예약 요청 중 오류 발생:', error);
+      alert('예약 요청 중 오류가 발생했습니다. 다시 시도해주세요.');
     }
   };
 
