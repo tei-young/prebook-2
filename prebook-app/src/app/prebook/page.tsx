@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, ChangeEvent, FormEvent } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -23,7 +23,7 @@ interface FormData {
   closedPhoto: File | null;
 }
 
-export default function PreBook() {
+const CustomerReservationPage = () => {
   const [formData, setFormData] = useState<FormData>({
     termsAgreed: false,
     name: '',
@@ -40,7 +40,7 @@ export default function PreBook() {
   
   const [submitted, setSubmitted] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!formData.termsAgreed) {
       alert('예약 전 숙지사항 확인이 필요합니다.');
@@ -56,14 +56,13 @@ export default function PreBook() {
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     if (type === 'file') {
       const fileInput = e.target as HTMLInputElement;
-      const files = fileInput.files;
       setFormData(prev => ({
         ...prev,
-        [name]: files?.[0] || null
+        [name]: fileInput.files?.[0] || null
       }));
     } else {
       setFormData(prev => ({
@@ -168,11 +167,11 @@ export default function PreBook() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="referralSource">방문 경로</Label>
+                  <Label htmlFor="referralSource">방문 경로 (선택사항)</Label>
                   <Input
                     id="referralSource"
                     name="referralSource"
-                    required
+                    placeholder="ex) 인스타그램 광고, 지인추천"
                     value={formData.referralSource}
                     onChange={handleChange}
                   />
@@ -193,7 +192,7 @@ export default function PreBook() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="priorExperience">시술 경험</Label>
+                  <Label htmlFor="priorExperience">시술 경험 (선택사항)</Label>
                   <Textarea
                     id="priorExperience"
                     name="priorExperience"
@@ -243,4 +242,6 @@ export default function PreBook() {
       </div>
     </div>
   );
-}
+};
+
+export default CustomerReservationPage;
