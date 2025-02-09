@@ -160,7 +160,7 @@ const CustomerReservationPage = () => {
             {submitted ? (
               <Alert>
                 <AlertDescription>
-                  예약 요청이 접수되었습니다. 원장님 확인 후 예약 확정 메시지를 보내드리겠습니다.
+                  예약 요청이 접수되었어요! 확인 후 예약 확정 메시지를 보내드릴께요!
                 </AlertDescription>
               </Alert>
             ) : (
