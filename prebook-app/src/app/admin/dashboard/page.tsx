@@ -13,7 +13,7 @@ interface Reservation {
   phone: string;
   desired_service: string;
   referral_source: string | null;
-  desired_dates: string[];
+  desired_dates: string[] | string;
   prior_experience: string | null;
   front_photo_url: string | null;
   closed_photo_url: string | null;
@@ -117,13 +117,17 @@ export default function AdminDashboard() {
                 </div>
                 
                 <div>
-                  <h3 className="font-medium text-gray-700">예약 정보</h3>
-                  <div className="mt-2 space-y-2">
-                    <p>희망 시술: {selectedReservation.desired_service}</p>
-                    <p>희망 날짜: {selectedReservation.desired_dates.join(', ')}</p>
-                    <p>방문 경로: {selectedReservation.referral_source || '-'}</p>
-                    <p>시술 경험: {selectedReservation.prior_experience || '없음'}</p>
-                  </div>
+                    <h3 className="font-medium text-gray-700">예약 정보</h3>
+                    <div className="mt-2 space-y-2">
+                        <p>희망 시술: {selectedReservation.desired_service}</p>
+                        <p>희망 날짜: {
+                        Array.isArray(selectedReservation.desired_dates) 
+                            ? selectedReservation.desired_dates.join(', ')
+                            : selectedReservation.desired_dates
+                        }</p>
+                        <p>방문 경로: {selectedReservation.referral_source || '-'}</p>
+                        <p>시술 경험: {selectedReservation.prior_experience || '없음'}</p>
+                    </div>
                 </div>
               </div>
 
