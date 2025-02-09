@@ -49,17 +49,24 @@ const CustomerReservationPage = () => {
     }
     
     try {
+      console.log('폼 제출 시작');
+      
       // 이미지 파일 업로드
       let frontPhotoUrl = null;
       let closedPhotoUrl = null;
-  
+    
       if (formData.frontPhoto) {
+        console.log('앞면 사진 업로드 시작');
         const frontPhotoPath = `reservation-photos/${Date.now()}_front`;
         const { data: frontData, error: frontError } = await supabase.storage
           .from('photos')
           .upload(frontPhotoPath, formData.frontPhoto);
         
-        if (frontError) throw frontError;
+        if (frontError) {
+          console.error('앞면 사진 업로드 실패:', frontError);
+          throw frontError;
+        }
+        console.log('앞면 사진 업로드 성공:', frontData);
         frontPhotoUrl = frontData.path;
       }
   
@@ -73,7 +80,20 @@ const CustomerReservationPage = () => {
         closedPhotoUrl = closedData.path;
       }
   
-      // 예약 데이터 저장
+      console.log('예약 데이터 저장 시작', {
+        customer_name: formData.name,
+        gender: formData.gender,
+        age: formData.age,
+        phone: formData.phone,
+        desired_service: formData.desiredService,
+        referral_source: formData.referralSource,
+        desired_dates: formData.desiredDates,
+        prior_experience: formData.priorExperience,
+        front_photo_url: frontPhotoUrl,
+        closed_photo_url: closedPhotoUrl,
+        status: 'pending'
+      });
+      
       const { data, error } = await supabase
         .from('reservations')
         .insert([
@@ -92,13 +112,23 @@ const CustomerReservationPage = () => {
           }
         ])
         .select();
-  
-      if (error) throw error;
-  
+      
+      if (error) {
+        console.error('예약 데이터 저장 실패:', error);
+        throw error;
+      }
+      
       console.log('예약 요청 성공:', data);
       setSubmitted(true);
-    } catch (error) {
-      console.error('예약 요청 중 오류 발생:', error);
+
+    } catch (err) {
+      const error = err as any;  // 또는 더 구체적인 타입으로 단언가능
+      console.error('예약 요청 중 오류 발생 상세:', {
+        error,
+        message: error?.message,
+        details: error?.details,
+        code: error?.code
+      });
       alert('예약 요청 중 오류가 발생했습니다. 다시 시도해주세요.');
     }
   };
