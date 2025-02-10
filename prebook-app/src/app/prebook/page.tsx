@@ -9,6 +9,8 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/lib/supabase';
+import { useEffect } from 'react';
+import Calendar from '@/components/calendar/Calendar';
 
 interface FormData {
   termsAgreed: boolean;
@@ -255,9 +257,8 @@ const CustomerReservationPage = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="desiredDates">
-                    희망 시술일정 (2~3개 기재)
-                  </Label>
+                  <Label htmlFor="desiredDates">희망 시술일정 (1~3개 선택)</Label>
+          
                   <Textarea
                     id="desiredDates"
                     name="desiredDates"
