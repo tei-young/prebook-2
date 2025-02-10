@@ -115,64 +115,192 @@ const CustomerReservationPage = () => {
                </AlertDescription>
              </Alert>
            ) : (
-             <form onSubmit={handleSubmit} className="space-y-6">
-               {/* 기존 입력 필드들 */}
-               
-               <div className="space-y-4">
-                 <Label htmlFor="desiredDates">희망 시술일정 (1~3개 선택)</Label>
-                 <Calendar
-                   bookedSlots={reservedSlots}
-                   onSelectSlot={(slot) => {
-                     setFormData(prev => ({
-                       ...prev,
-                       desired_slots: [
-                         ...(prev.desired_slots || []).slice(0, 2),
-                         slot
-                       ].slice(0, 3)
-                     }));
-                   }}
-                   maxSelections={3}
-                 />
-                 
-                 {/* 선택된 시간대 표시 */}
-                 {formData.desired_slots.length > 0 && (
-                   <div className="mt-4 space-y-2">
-                     <h4 className="font-medium">선택된 시간</h4>
-                     <div className="space-y-2">
-                       {formData.desired_slots.map((slot, index) => (
-                         <div
-                           key={index}
-                           className="flex justify-between items-center p-3 bg-green-50 rounded"
-                         >
-                           <span>
-                             {format(slot.date, 'M월 d일', { locale: ko })} {slot.time}
-                           </span>
-                           <Button
-                             type="button"
-                             variant="ghost"
-                             size="sm"
-                             onClick={() => {
-                               setFormData(prev => ({
-                                 ...prev,
-                                 desired_slots: prev.desired_slots.filter((_, i) => i !== index)
-                               }));
-                             }}
-                           >
-                             삭제
-                           </Button>
-                         </div>
-                       ))}
-                     </div>
-                   </div>
-                 )}
-               </div>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {/* 숙지사항 체크 */}
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      id="terms"
+                      checked={formData.termsAgreed}
+                      onCheckedChange={(checked) => 
+                        setFormData(prev => ({ ...prev, termsAgreed: checked as boolean }))
+                      }
+                    />
+                    <Label htmlFor="terms">예약 전 숙지사항 필독하셨나요?</Label>
+                  </div>
+                </div>
 
-               {/* 나머지 입력 필드들 */}
+                {/* 기본 정보 */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="name">성함</Label>
+                    <Input
+                      id="name"
+                      name="name"
+                      required
+                      value={formData.name}
+                      onChange={handleChange}
+                    />
+                  </div>
 
-               <Button type="submit" className="w-full">
-                 예약 요청하기
-               </Button>
-             </form>
+                  <div className="space-y-2">
+                    <Label htmlFor="gender">성별</Label>
+                    <select
+                      id="gender"
+                      name="gender"
+                      className="w-full h-10 px-3 border rounded-md"
+                      required
+                      value={formData.gender}
+                      onChange={handleChange}
+                    >
+                      <option value="">선택해주세요</option>
+                      <option value="female">여성</option>
+                      <option value="male">남성</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="age">나이</Label>
+                    <Input
+                      id="age"
+                      name="age"
+                      type="number"
+                      required
+                      value={formData.age}
+                      onChange={handleChange}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="phone">연락처</Label>
+                    <Input
+                      id="phone"
+                      name="phone"
+                      type="tel"
+                      required
+                      value={formData.phone}
+                      onChange={handleChange}
+                    />
+                  </div>
+                </div>
+
+                {/* 시술 정보 */}
+                <div className="space-y-2">
+                  <Label htmlFor="desiredService">희망시술</Label>
+                  <Textarea
+                    id="desiredService"
+                    name="desiredService"
+                    placeholder="ex) 자연눈썹/콤보/섀도우/원장님 추천/잔흔제거"
+                    required
+                    value={formData.desiredService}
+                    onChange={handleChange}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="referralSource">방문 경로 (선택사항)</Label>
+                  <Input
+                    id="referralSource"
+                    name="referralSource"
+                    placeholder="ex) 인스타그램 광고, 지인추천"
+                    value={formData.referralSource}
+                    onChange={handleChange}
+                  />
+                </div>
+
+                {/* 여기가 캘린더로 교체된 부분 */}
+                <div className="space-y-4">
+                  <Label htmlFor="desiredDates">희망 시술일정 (1~3개 선택)</Label>
+                  <Calendar
+                    bookedSlots={reservedSlots}
+                    onSelectSlot={(slot) => {
+                      setFormData(prev => ({
+                        ...prev,
+                        desired_slots: [
+                          ...(prev.desired_slots || []).slice(0, 2),
+                          slot
+                        ].slice(0, 3)
+                      }));
+                    }}
+                    maxSelections={3}
+                  />
+                  
+                  {formData.desired_slots.length > 0 && (
+                    <div className="mt-4 space-y-2">
+                      <h4 className="font-medium">선택된 시간</h4>
+                      <div className="space-y-2">
+                        {formData.desired_slots.map((slot, index) => (
+                          <div
+                            key={index}
+                            className="flex justify-between items-center p-3 bg-green-50 rounded"
+                          >
+                            <span>
+                              {format(slot.date, 'M월 d일', { locale: ko })} {slot.time}
+                            </span>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                setFormData(prev => ({
+                                  ...prev,
+                                  desired_slots: prev.desired_slots.filter((_, i) => i !== index)
+                                }));
+                              }}
+                            >
+                              삭제
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="priorExperience">시술 경험 (선택사항)</Label>
+                  <Textarea
+                    id="priorExperience"
+                    name="priorExperience"
+                    value={formData.priorExperience}
+                    onChange={handleChange}
+                  />
+                </div>
+
+                <div className="space-y-4">
+                  <h3 className="font-medium">사진첨부</h3>
+                  <p className="text-sm text-gray-600">
+                    기본카메라로 노메이크업 상태의 정면눈썹 사진 2장 전송부탁드립니다.
+                  </p>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="frontPhoto">정면 사진 (눈 뜬 상태)</Label>
+                    <Input
+                      id="frontPhoto"
+                      name="frontPhoto"
+                      type="file"
+                      accept="image/*"
+                      required
+                      onChange={handleChange}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="closedPhoto">정면 사진 (눈 감은 상태)</Label>
+                    <Input
+                      id="closedPhoto"
+                      name="closedPhoto"
+                      type="file"
+                      accept="image/*"
+                      required
+                      onChange={handleChange}
+                    />
+                  </div>
+                </div>
+                <Button type="submit" className="w-full">
+                  예약 요청하기
+                </Button>
+              </form>
            )}
          </CardContent>
        </Card>
