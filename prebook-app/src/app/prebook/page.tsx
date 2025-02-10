@@ -213,6 +213,7 @@ const CustomerReservationPage = () => {
                   <Label htmlFor="desiredDates">희망 시술일정 (1~3개 선택)</Label>
                   <Calendar
                     bookedSlots={reservedSlots}
+                    selectedSlots={formData.desired_slots}
                     onSelectSlot={(slot) => {
                       setFormData(prev => ({
                         ...prev,
