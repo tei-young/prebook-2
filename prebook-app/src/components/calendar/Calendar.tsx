@@ -140,21 +140,22 @@ export default function Calendar({
              );
              
              return (
-               <button
-                 key={time}
-                 onClick={() => isAvailable && !isSelected && handleTimeClick(time)}
-                 className={cn(
-                   "px-4 py-3 rounded text-lg w-full",
-                   isSelected && "bg-green-500 text-white",
-                   !isAvailable && "bg-gray-200 text-gray-400 cursor-not-allowed",
-                   isAvailable && !isSelected && "bg-white hover:bg-green-50 border"
-                 )}
-                 disabled={!isAvailable || isSelected}
-               >
-                 {time.split(':')[0]}시
-               </button>
-             );
-           })}
+                <button
+                  key={time}
+                  onClick={() => isAvailable && !isSelected && handleTimeClick(time)}
+                  className={cn(
+                    "px-4 py-3 rounded text-lg w-full",
+                    isSelected ? "bg-green-500 text-white" : 
+                      !isAvailable ? "bg-gray-200 text-gray-400" :
+                      "bg-white hover:bg-green-50 border",
+                    !isAvailable && "cursor-not-allowed"
+                  )}
+                  disabled={!isAvailable || isSelected}
+                >
+                  {time.split(':')[0]}시
+                </button>
+              );
+             })}
          </div>
        </div>
      )}
