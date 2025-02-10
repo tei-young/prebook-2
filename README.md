@@ -1,6 +1,4 @@
 # PreBook - 뷰티샵 예약 자동화 시스템
-<br>
-
 ## 1. 프로젝트 개요
 ### 1.1 개발 배경
 
@@ -16,107 +14,127 @@
 
 <br>
 
-## 2. 시스템 아키텍처
-### 2.1 전체 구조
+## 2. 예약 프로세스
+### 2.1 전체 Flow
 ```
-mermaidCopygraph TB
-    A[고객] -->|예약 요청| B[PreBook 웹 폼]
-    B -->|데이터 저장| C[Backend Server]
-    C -->|예약 대기| D[관리자 대시보드]
-    D -->|승인| E[자동화 프로세스]
-    E -->|일정 등록| F[타임블록]
-    E -->|메시지 발송| G[카카오톡]
+mermaidCopygraph TD
+    A[예약 신청] --> B[관리자 검토]
+    B --> C[예약 승인]
+    C --> D[예약금 안내 메시지]
+    D --> E[고객 예약금 송금]
+    E --> F[관리자 입금 확인]
+    F --> G[예약 확정]
+    G --> H1[타임블록 일정 등록]
+    G --> H2[카카오톡 확정 메시지]
+```
+### 2.2 예약 상태
+```
+typescriptCopytype ReservationStatus = 
+  | 'pending'           // 신청됨
+  | 'approved'          // 승인됨 (예약금 안내 전)
+  | 'deposit_wait'      // 예약금 대기중
+  | 'deposit_confirmed' // 예약금 확인됨
+  | 'confirmed'         // 예약 확정
+  | 'rejected'          // 거절됨
 ```
 
-### 2.2 기술 스택
+<br>
+
+## 3. 시스템 아키텍처
+### 3.1 기술 스택
 
 - Frontend: Next.js, TypeScript, Tailwind CSS, shadcn/ui
-- Backend: (추후 결정 필요)
-- Database: (추후 결정 필요)
+- Database: Supabase
+- Storage: Supabase Storage
 - 자동화: Selenium (타임블록 웹 자동화)
 - API: 카카오톡 비즈니스 채널 API
 
-<br>
-
-## 3. 핵심 기능
-### 3.1 예약 접수 (PreBook.tsx)
-
-- 고객 정보 입력 (고객명, 성별, 나이, 연락처)
-- 시술 정보 입력 (희망 시술, 시술 경험)
-- 희망 일정 입력 (2-3개 선택지)
-- 사진 첨부 (눈썹 사진 2장)
-
-### 3.2 관리자 대시보드 (AdminDashboard.tsx)
-
-- 예약 요청 목록 확인
-- 예약 승인/거절 처리
-- 예약 현황 관리
-
-### 3.3 자동화 프로세스
-
-- 예약 승인 시:
-
-1. 타임블록 캘린더 자동 등록
-2. 카카오톡 예약 확정 메시지 자동 발송
-
-<br>
-
-## 4. 데이터 흐름
-### 4.1 예약 요청 데이터
+### 3.2 데이터베이스 구조
 ```
-typescriptCopyinterface ReservationRequest {
-    customerName: string;
+typescriptCopyinterface Reservation {
+    id: string;
+    customer_name: string;
     gender: string;
     age: number;
     phone: string;
-    desiredService: string;
-    referralSource: string;
-    desiredDates: string[];
-    priorExperience: string;
-    photos: {
-        front: File;
-        closed: File;
-    };
-}
-```
-
-### 4.2 예약 확정 데이터
-```
-typescriptCopyinterface ConfirmedReservation {
-    customerName: string;
-    date: string;
-    time: string;
-    service: string;
-    status: 'confirmed';
+    desired_service: string;
+    referral_source: string | null;
+    desired_dates: string[];
+    prior_experience: string | null;
+    front_photo_url: string | null;
+    closed_photo_url: string | null;
+    status: ReservationStatus;
+    deposit_amount?: number;
+    deposit_account?: string;
+    deposit_deadline?: Date;
+    deposit_confirmed_at?: Date;
+    status_updated_at: Date;
+    created_at: Date;
+    updated_at: Date;
 }
 ```
 
 <br>
 
-## 5. 구현 단계
-- 현재 진행 상황
+## 4. 주요 기능
+### 4.1 예약 신청 페이지 (/prebook)
 
-✅ 프로젝트 초기 설정<br>
-✅ 예약 폼 UI 구현<br>
-⬜ 관리자 대시보드 구현<br>
-⬜ 백엔드 API 구현<br>
-⬜ 타임블록 자동화 구현<br>
-⬜ 카카오톡 메시지 연동<br>
+- 고객 정보 입력
+- 시술 정보 입력
+- 희망 일정 입력
+- 사진 첨부 기능
 
-<br>
-다음 단계
+### 4.2 관리자 대시보드 (/admin/dashboard)
 
-- 컴포넌트 구현 완료
-- 백엔드 설계 및 구현
-- 자동화 프로세스 구현
-- 테스트 및 배포
-
+- 예약 목록 조회 및 필터링
+- 예약 상세 정보 확인
+- 예약 상태 관리
 <br>
 
-## 6. 향후 확장 가능성
+- 승인/거절
+- 예약금 확인
+- 예약 확정
+<br>
 
+- 카카오톡 메시지 발송
+- 타임블록 일정 등록
+
+### 4.3 자동화 기능
+
+- 예약 확정 시 타임블록 자동 등록
+- 상태별 카카오톡 메시지 자동 발송
+<br>
+
+- 예약금 안내 메시지
+- 예약 확정 메시지
+
+<br>
+
+## 5. 구현 현황
+### 5.1 완료된 기능
+✅ 프로젝트 초기 설정
+✅ 예약 신청 페이지 구현
+✅ 관리자 대시보드 기본 구현
+✅ Supabase 연동
+✅ 파일 업로드 기능
+### 5.2 진행 중인 기능
+⬜ 예약 상태 관리 확장
+⬜ 예약금 관리 기능
+⬜ 필터링 & 검색 기능
+### 5.3 예정된 기능
+⬜ 타임블록 자동화
+⬜ 카카오톡 메시지 연동
+⬜ 관리자 인증
+
+<br>
+
+## 6. 향후 개선 사항
+
+- 입금 확인 자동화 (은행 API 연동)
 - 예약 통계 및 분석 기능
 - 고객 관리 시스템 통합
 - 매출 관리 연동
+
+<br>
 
 이 프로젝트는 단순한 예약 시스템을 넘어, 뷰티샵 운영의 효율성을 높이는 것을 목표로 합니다. 현재는 예약 프로세스 자동화에 집중하고 있으며, 추후 더 많은 운영 관리 기능을 추가할 수 있습니다.
