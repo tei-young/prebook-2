@@ -13,10 +13,12 @@ interface TimeSlot {
 }
 
 interface CalendarProps {
- bookedSlots?: TimeSlot[];
- onSelectSlot?: (slot: TimeSlot) => void;
- maxSelections?: number;
-}
+    bookedSlots?: TimeSlot[];
+    selectedSlots: TimeSlot[];  // 부모에서 관리
+    onSelectSlot?: (slot: TimeSlot) => void;
+    onRemoveSlot?: (slot: TimeSlot) => void;
+    maxSelections?: number;
+   }
 
 const AVAILABLE_TIMES = ['10:00', '13:00', '15:00', '17:00', '19:00'];
 
