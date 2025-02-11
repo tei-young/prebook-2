@@ -49,14 +49,14 @@ const CustomerReservationPage = () => {
     closedPhoto: null
   });
  
- const [reservedSlots, setReservedSlots] = useState<TimeSlot[]>([]);
+ const [reservedSlots, setReservedSlots] = useState<BookedSlot[]>([]);
  const [submitted, setSubmitted] = useState(false);
 
  useEffect(() => {
    async function fetchReservedSlots() {
      const { data, error } = await supabase
        .from('reservations')
-       .select('desired_slots, status')
+       .select('desired_slots, status, selected_slot')
        .not('status', 'eq', 'rejected');
 
      if (error) {
