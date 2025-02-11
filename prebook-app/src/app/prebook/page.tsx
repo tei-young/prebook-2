@@ -25,20 +25,37 @@ interface DesiredSlot {
   time: string;
  }
 
+interface FormData {
+  termsAgreed: boolean;
+  name: string;
+  gender: string;
+  age: string;
+  phone: string;
+  desiredService: string;
+  referralSource: string;
+  desired_slots: Array<{
+    date: string;
+    time: string;
+  }>;
+  priorExperience: string;
+  frontPhoto: File | null;
+  closedPhoto: File | null;
+}
+
 const CustomerReservationPage = () => {
- const [formData, setFormData] = useState({
-   termsAgreed: false,
-   name: '',
-   gender: '',
-   age: '',
-   phone: '',
-   desiredService: '',
-   referralSource: '',
-   desired_slots: [] as TimeSlot[],
-   priorExperience: '',
-   frontPhoto: null,
-   closedPhoto: null
- });
+  const [formData, setFormData] = useState<FormData>({
+    termsAgreed: false,
+    name: '',
+    gender: '',
+    age: '',
+    phone: '',
+    desiredService: '',
+    referralSource: '',
+    desired_slots: [],
+    priorExperience: '',
+    frontPhoto: null,
+    closedPhoto: null
+  });
  
  const [reservedSlots, setReservedSlots] = useState<TimeSlot[]>([]);
  const [submitted, setSubmitted] = useState(false);
