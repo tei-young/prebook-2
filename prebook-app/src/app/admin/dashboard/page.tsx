@@ -149,7 +149,7 @@ export default function AdminDashboard() {
                     <h3 className="font-medium text-gray-700">고객 정보</h3>
                     <div className="mt-2 space-y-2">
                       <p>이름: {selectedReservation.customer_name}</p>
-                      <p>성별: {selectedReservation.gender}</p>
+                      <p>성별: {selectedReservation.gender === 'female' ? '여성' : '남성'}</p>
                       <p>나이: {selectedReservation.age}세</p>
                       <p>연락처: {selectedReservation.phone}</p>
                     </div>
