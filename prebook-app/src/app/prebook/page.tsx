@@ -64,13 +64,14 @@ const CustomerReservationPage = () => {
        return;
      }
 
-     const slots = data.flatMap(reservation =>  
-      reservation.desired_slots.map((slot: DesiredSlot) => ({
-        date: new Date(slot.date),
+     const slots: BookedSlot[] = data.flatMap(reservation => 
+      reservation.desired_slots.map((slot: TimeSlot) => ({
+        date: slot.date,
         time: slot.time,
-        status: reservation.status
-       }))
-     );
+        status: reservation.status,
+        selected_slot: reservation.selected_slot
+      }))
+    );
 
      setReservedSlots(slots);
    }
@@ -264,58 +265,58 @@ const CustomerReservationPage = () => {
 
                 {/* 캘린더 교체 부분 */}
                 <div className="space-y-4">
-                  <Label htmlFor="desiredDates">희망 시술일정 (1~3개 선택)</Label>
-                  <Calendar
-                    BookedSlots={reservedSlots}  // BookedSlot[] 타입으로 가져와야 함
-                    selectedSlots={formData.desired_slots}  // TimeSlot[] 타입
-                    onSelectSlot={(slot) => {
-                      setFormData(prev => ({
-                        ...prev,
-                        desired_slots: [...prev.desired_slots, slot]
-                      }));
-                    }}
-                    onRemoveSlot={(slotToRemove) => {
-                      setFormData(prev => ({
-                        ...prev,
-                        desired_slots: prev.desired_slots.filter(
-                          slot => slot.date !== slotToRemove.date || slot.time !== slotToRemove.time
-                        )
-                      }));
-                    }}
-                    maxSelections={3}
-                  />
-                  
-                  {formData.desired_slots.length > 0 && (
-                    <div className="mt-4 space-y-2">
-                      <h4 className="font-medium">선택된 시간</h4>
-                      <div className="space-y-2">
-                        {formData.desired_slots.map((slot, index) => (
-                          <div
-                            key={index}
-                            className="flex justify-between items-center p-3 bg-green-50 rounded"
+                <Label htmlFor="desiredDates">희망 시술일정 (1~3개 선택)</Label>
+                <Calendar
+                  bookedSlots={reservedSlots}
+                  selectedSlots={formData.desired_slots}
+                  onSelectSlot={(slot) => {
+                    setFormData(prev => ({
+                      ...prev,
+                      desired_slots: [...prev.desired_slots, slot]
+                    }));
+                  }}
+                  onRemoveSlot={(slotToRemove) => {
+                    setFormData(prev => ({
+                      ...prev,
+                      desired_slots: prev.desired_slots.filter(
+                        slot => slot.date !== slotToRemove.date || slot.time !== slotToRemove.time
+                      )
+                    }));
+                  }}
+                  maxSelections={3}
+                />
+                
+                {formData.desired_slots.length > 0 && (
+                  <div className="mt-4 space-y-2">
+                    <h4 className="font-medium">선택된 시간</h4>
+                    <div className="space-y-2">
+                      {formData.desired_slots.map((slot, index) => (
+                        <div
+                          key={index}
+                          className="flex justify-between items-center p-3 bg-green-50 rounded"
+                        >
+                          <span>
+                            {format(new Date(slot.date), 'M월 d일', { locale: ko })} {slot.time}
+                          </span>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setFormData(prev => ({
+                                ...prev,
+                                desired_slots: prev.desired_slots.filter((_, i) => i !== index)
+                              }));
+                            }}
                           >
-                            <span>
-                              {format(slot.date, 'M월 d일', { locale: ko })} {slot.time}
-                            </span>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => {
-                                setFormData(prev => ({
-                                  ...prev,
-                                  desired_slots: prev.desired_slots.filter((_, i) => i !== index)
-                                }));
-                              }}
-                            >
-                              삭제
-                            </Button>
-                          </div>
-                        ))}
-                      </div>
+                            삭제
+                          </Button>
+                        </div>
+                      ))}
                     </div>
-                  )}
-                </div>
+                  </div>
+                )}
+              </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="priorExperience">시술 경험 (선택사항)</Label>
