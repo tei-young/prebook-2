@@ -7,17 +7,21 @@ import { ko } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 
 interface TimeSlot {
- date: Date;
- time: string;
- status: 'available' | 'pending' | 'deposit_wait' | 'deposit_confirmed' | 'confirmed' | 'rejected';
+  date: Date;
+  time: string;
+  status: 'available' | 'pending' | 'deposit_wait' | 'deposit_confirmed' | 'confirmed' | 'rejected';
+  selected_slot?: {
+    date: string;
+    time: string;
+  };
 }
 
 interface CalendarProps {
- bookedSlots?: TimeSlot[];
- selectedSlots: TimeSlot[];
- onSelectSlot?: (slot: TimeSlot) => void;
- onRemoveSlot?: (slot: TimeSlot) => void;
- maxSelections?: number;
+  bookedSlots?: TimeSlot[];
+  selectedSlots: TimeSlot[];
+  onSelectSlot?: (slot: TimeSlot) => void;
+  onRemoveSlot?: (slot: TimeSlot) => void;
+  maxSelections?: number;
 }
 
 const AVAILABLE_TIMES = ['10:00', '13:00', '15:00', '17:00', '19:00'];
@@ -42,15 +46,16 @@ export default function Calendar({
  }, [currentMonth]);
 
  const isTimeSlotAvailable = (date: Date, time: string) => {
-   const slot = bookedSlots.find(s => 
-     isSameDay(s.date, date) && s.time === time
-   );
-
-   if (!slot) return true;
-   if (slot.status === 'rejected') return true;
-   
-   return !['pending', 'deposit_wait', 'deposit_confirmed', 'confirmed'].includes(slot.status);
- };
+  return bookedSlots.some(slot => {
+    // 승인된 예약의 선택된 시간대만 체크
+    if (slot.status === 'deposit_wait' || slot.status === 'confirmed') {
+      return isSameDay(slot.date, date) && 
+             slot.time === time && 
+             slot.selected_slot?.time === time;
+    }
+    return false;
+  });
+};
 
  const handleDateClick = (date: Date) => {
    setSelectedDate(date);
