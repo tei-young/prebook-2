@@ -7,17 +7,19 @@ import { ko } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 
 interface TimeSlot {
-  date: Date;
+  date: string;
   time: string;
-  status: 'available' | 'pending' | 'deposit_wait' | 'deposit_confirmed' | 'confirmed' | 'rejected';
-  selected_slot?: {
-    date: string;
-    time: string;
-  };
+}
+
+interface BookedSlot {
+  date: string;
+  time: string;
+  status: 'pending' | 'deposit_wait' | 'deposit_confirmed' | 'confirmed' | 'rejected';
+  selected_slot?: TimeSlot;
 }
 
 interface CalendarProps {
-  bookedSlots?: TimeSlot[];
+  bookedSlots?: BookedSlot[];
   selectedSlots: TimeSlot[];
   onSelectSlot?: (slot: TimeSlot) => void;
   onRemoveSlot?: (slot: TimeSlot) => void;
@@ -46,15 +48,13 @@ export default function Calendar({
  }, [currentMonth]);
 
  const isTimeSlotAvailable = (date: Date, time: string) => {
-  return bookedSlots.some(slot => {
-    // 승인된 예약의 선택된 시간대만 체크
+  return bookedSlots?.some(slot => {
     if (slot.status === 'deposit_wait' || slot.status === 'confirmed') {
-      return isSameDay(slot.date, date) && 
-             slot.time === time && 
+      return isSameDay(new Date(slot.selected_slot?.date), date) && 
              slot.selected_slot?.time === time;
     }
     return false;
-  });
+  }) || false;
 };
 
  const handleDateClick = (date: Date) => {
