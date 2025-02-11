@@ -11,6 +11,11 @@ import { cn } from '@/lib/utils';
 
 type ReservationStatus = 'pending' | 'deposit_wait' | 'deposit_confirmed' | 'confirmed' | 'rejected';
 
+interface TimeSlot {
+  date: string;
+  time: string;
+}
+
 interface Reservation {
   id: string;
   customer_name: string;
@@ -19,21 +24,20 @@ interface Reservation {
   phone: string;
   desired_service: string;
   referral_source: string | null;
-  desired_slots: Array<{
-    date: string;
-    time: string;
-    status: string;
-  }>;
+  desired_slots: TimeSlot[];
+  selected_slot?: TimeSlot;
   prior_experience: string | null;
   front_photo_url: string | null;
   closed_photo_url: string | null;
   status: ReservationStatus;
+  status_updated_at: string;
   created_at: string;
 }
 
 export default function AdminDashboard() {
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [selectedReservation, setSelectedReservation] = useState<Reservation | null>(null);
+  const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -58,6 +62,58 @@ export default function AdminDashboard() {
 
   const handleReservationClick = (reservation: Reservation) => {
     setSelectedReservation(reservation);
+    setSelectedSlot(reservation.selected_slot || null);
+  };
+
+  const handleSlotSelect = (slot: TimeSlot) => {
+    setSelectedSlot(slot);
+  };
+
+  const handleApproveWithSlot = async (reservationId: string) => {
+    if (!selectedSlot) return;
+    
+    try {
+      const { error } = await supabase
+        .from('reservations')
+        .update({ 
+          status: 'deposit_wait',
+          selected_slot: selectedSlot,
+          status_updated_at: new Date().toISOString()
+        })
+        .eq('id', reservationId);
+
+      if (error) throw error;
+
+      setReservations(prev =>
+        prev.map(reservation =>
+          reservation.id === reservationId
+            ? { 
+                ...reservation, 
+                status: 'deposit_wait', 
+                selected_slot: selectedSlot,
+                status_updated_at: new Date().toISOString()
+              }
+            : reservation
+        )
+      );
+
+      if (selectedReservation?.id === reservationId) {
+        setSelectedReservation(prev => 
+          prev ? { 
+            ...prev, 
+            status: 'deposit_wait', 
+            selected_slot: selectedSlot,
+            status_updated_at: new Date().toISOString()
+          } : null
+        );
+      }
+
+      // TODO: 예약금 안내 메시지 발송
+
+    } catch (error) {
+      console.error('예약 승인 중 오류 발생:', error);
+      alert('예약 승인 중 오류가 발생했습니다.');
+    }
   };
 
   const handleStatusChange = async (reservationId: string, newStatus: ReservationStatus) => {
@@ -74,9 +130,6 @@ export default function AdminDashboard() {
 
       // 상태별 자동화 처리
       switch (newStatus) {
-        case 'deposit_wait':
-          // TODO: 예약금 안내 메시지 발송
-          break;
         case 'confirmed':
           // TODO: 예약 확정 메시지 발송 + 타임블록 등록
           break;
@@ -85,14 +138,22 @@ export default function AdminDashboard() {
       setReservations(prev =>
         prev.map(reservation =>
           reservation.id === reservationId
-            ? { ...reservation, status: newStatus }
+            ? { 
+                ...reservation, 
+                status: newStatus,
+                status_updated_at: new Date().toISOString()
+              }
             : reservation
         )
       );
 
       if (selectedReservation?.id === reservationId) {
         setSelectedReservation(prev => 
-          prev ? { ...prev, status: newStatus } : null
+          prev ? { 
+            ...prev, 
+            status: newStatus,
+            status_updated_at: new Date().toISOString()
+          } : null
         );
       }
 
@@ -158,7 +219,10 @@ export default function AdminDashboard() {
 
         <Dialog 
           isOpen={!!selectedReservation} 
-          onClose={() => setSelectedReservation(null)}
+          onClose={() => {
+            setSelectedReservation(null);
+            setSelectedSlot(null);
+          }}
         >
           {selectedReservation && (
             <div className="space-y-4">
@@ -179,11 +243,28 @@ export default function AdminDashboard() {
                   <h3 className="font-medium text-gray-700">예약 정보</h3>
                   <div className="mt-2 space-y-2">
                     <p>희망 시술: {selectedReservation.desired_service}</p>
-                    <div className="space-y-1">
-                      {selectedReservation.desired_slots.map((slot: { date: string; time: string }, index: number) => (
-                        <p key={index}>
+                    <div className="space-y-2">
+                      <h4 className="font-medium text-gray-700">희망 시간대</h4>
+                      {selectedReservation.desired_slots.map((slot, index) => (
+                        <button
+                          key={index}
+                          onClick={() => handleSlotSelect(slot)}
+                          disabled={selectedReservation.status !== 'pending'}
+                          className={cn(
+                            "w-full p-3 rounded border text-left",
+                            selectedSlot?.time === slot.time && selectedSlot?.date === slot.date
+                              ? "bg-green-100 border-green-500"
+                              : selectedReservation.status === 'pending'
+                                ? "hover:bg-gray-50"
+                                : "bg-gray-50 cursor-not-allowed",
+                            selectedReservation.selected_slot?.time === slot.time && 
+                            selectedReservation.selected_slot?.date === slot.date
+                              ? "ring-2 ring-green-500"
+                              : ""
+                          )}
+                        >
                           {index + 1}순위: {format(new Date(slot.date), 'M월 d일', { locale: ko })} {slot.time}
-                        </p>
+                        </button>
                       ))}
                     </div>
                     <p>방문 경로: {selectedReservation.referral_source || '-'}</p>
@@ -231,8 +312,14 @@ export default function AdminDashboard() {
                       예약 거절
                     </button>
                     <button
-                      onClick={() => handleStatusChange(selectedReservation.id, 'deposit_wait')}
-                      className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+                      onClick={() => handleApproveWithSlot(selectedReservation.id)}
+                      className={cn(
+                        "px-4 py-2 rounded",
+                        selectedSlot
+                          ? "bg-green-500 text-white hover:bg-green-600"
+                          : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                      )}
+                      disabled={!selectedSlot}
                     >
                       예약 승인
                     </button>
