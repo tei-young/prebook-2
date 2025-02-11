@@ -13,23 +13,24 @@ interface TimeSlot {
 }
 
 interface CalendarProps {
-    bookedSlots?: TimeSlot[];
-    selectedSlots: TimeSlot[];  // 부모에서 관리
-    onSelectSlot?: (slot: TimeSlot) => void;
-    onRemoveSlot?: (slot: TimeSlot) => void;
-    maxSelections?: number;
-   }
+ bookedSlots?: TimeSlot[];
+ selectedSlots: TimeSlot[];
+ onSelectSlot?: (slot: TimeSlot) => void;
+ onRemoveSlot?: (slot: TimeSlot) => void;
+ maxSelections?: number;
+}
 
 const AVAILABLE_TIMES = ['10:00', '13:00', '15:00', '17:00', '19:00'];
 
 export default function Calendar({ 
  bookedSlots = [], 
+ selectedSlots,
  onSelectSlot,
+ onRemoveSlot,
  maxSelections = 3 
 }: CalendarProps) {
  const [currentMonth, setCurrentMonth] = useState(new Date());
  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
- const [selectedSlots, setSelectedSlots] = useState<TimeSlot[]>([]);
 
  const days = useMemo(() => {
    const start = startOfMonth(currentMonth);
@@ -64,10 +65,7 @@ export default function Calendar({
      status: 'available'
    };
 
-   if (selectedSlots.length < maxSelections) {
-     setSelectedSlots(prev => [...prev, newSlot]);
-     onSelectSlot(newSlot);
-   }
+   onSelectSlot(newSlot);
  };
 
  const isPastDate = (date: Date) => {
@@ -109,21 +107,21 @@ export default function Calendar({
          const isSelected = selectedDate ? isSameDay(day, selectedDate) : false;
 
          return (
-            <div
-              key={day.toString()}
-              onClick={() => !isDisabled && handleDateClick(day)}
-              className={cn(
-                "p-4 text-center",
-                !isCurrentMonth && "text-gray-300", 
-                isPastDate(day) && "text-gray-300 bg-gray-50",
-                !isPastDate(day) && !isDisabled && "cursor-pointer hover:bg-gray-50",
-                isSelected && "bg-green-50 font-bold",
-                "border rounded-lg"
-              )}
-            >
-              <span>{format(day, 'd')}</span>
-            </div>
-           );
+           <div
+             key={day.toString()}
+             onClick={() => !isDisabled && handleDateClick(day)}
+             className={cn(
+               "p-4 text-center",
+               !isCurrentMonth && "text-gray-300",
+               isPastDate(day) && "text-gray-300 bg-gray-50",
+               !isPastDate(day) && !isDisabled && "cursor-pointer hover:bg-gray-50",
+               isSelected && "bg-green-50 font-bold",
+               "border rounded-lg"
+             )}
+           >
+             <span>{format(day, 'd')}</span>
+           </div>
+         );
        })}
      </div>
 
@@ -140,22 +138,22 @@ export default function Calendar({
              );
              
              return (
-                <button
-                  key={time}
-                  onClick={() => isAvailable && !isSelected && handleTimeClick(time)}
-                  className={cn(
-                    "px-4 py-3 rounded text-lg w-full",
-                    isSelected ? "bg-green-500 text-white" : 
-                      !isAvailable ? "bg-gray-200 text-gray-400" :
-                      "bg-white hover:bg-green-50 border",
-                    !isAvailable && "cursor-not-allowed"
-                  )}
-                  disabled={!isAvailable || isSelected}
-                >
-                  {time.split(':')[0]}시
-                </button>
-              );
-             })}
+               <button
+                 key={time}
+                 onClick={() => isAvailable && !isSelected && handleTimeClick(time)}
+                 className={cn(
+                   "px-4 py-3 rounded text-lg w-full",
+                   isSelected && "bg-green-500 text-white",
+                   !isAvailable && !isSelected && "bg-gray-200 text-gray-400",
+                   isAvailable && !isSelected && "bg-white hover:bg-green-50 border",
+                   (!isAvailable || isSelected) && "cursor-not-allowed"
+                 )}
+                 disabled={!isAvailable || (selectedSlots.length >= maxSelections && !isSelected)}
+               >
+                 {time.split(':')[0]}시
+               </button>
+             );
+           })}
          </div>
        </div>
      )}

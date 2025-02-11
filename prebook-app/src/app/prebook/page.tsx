@@ -12,6 +12,7 @@ import Calendar from '@/components/calendar/Calendar';
 import { supabase } from '@/lib/supabase';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
+import { isSameDay } from 'date-fns';
 
 interface TimeSlot {
  date: Date;
@@ -208,19 +209,26 @@ const CustomerReservationPage = () => {
                   />
                 </div>
 
-                {/* 여기가 캘린더로 교체된 부분 */}
+                {/* 캘린더 교체 부분 */}
                 <div className="space-y-4">
                   <Label htmlFor="desiredDates">희망 시술일정 (1~3개 선택)</Label>
                   <Calendar
                     bookedSlots={reservedSlots}
                     selectedSlots={formData.desired_slots}
                     onSelectSlot={(slot) => {
+                      if (formData.desired_slots.length < 3) {
+                        setFormData(prev => ({
+                          ...prev,
+                          desired_slots: [...prev.desired_slots, slot]
+                        }));
+                      }
+                    }}
+                    onRemoveSlot={(slotToRemove) => {
                       setFormData(prev => ({
                         ...prev,
-                        desired_slots: [
-                          ...(prev.desired_slots || []).slice(0, 2),
-                          slot
-                        ].slice(0, 3)
+                        desired_slots: prev.desired_slots.filter(slot => 
+                          !(isSameDay(slot.date, slotToRemove.date) && slot.time === slotToRemove.time)
+                        )
                       }));
                     }}
                     maxSelections={3}
