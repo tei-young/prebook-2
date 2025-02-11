@@ -48,16 +48,18 @@ export default function Calendar({
  }, [currentMonth]);
 
  const isTimeSlotAvailable = (date: Date, time: string) => {
-  return bookedSlots?.some(slot => {
-    if (slot.status === 'deposit_wait' || slot.status === 'confirmed') {
-      // selected_slot이 있는지 먼저 확인
-      if (slot.selected_slot?.date) {
-        return isSameDay(new Date(slot.selected_slot.date), date) && 
-               slot.selected_slot.time === time;
-      }
+  const isBooked = bookedSlots?.some(slot => {
+    if (
+      (slot.status === 'deposit_wait' || slot.status === 'confirmed') && 
+      slot.selected_slot?.date
+    ) {
+      return isSameDay(new Date(slot.selected_slot.date), date) && 
+             slot.selected_slot.time === time;
     }
     return false;
-  }) || false;
+  });
+
+  return !isBooked;
 };
 
  const handleDateClick = (date: Date) => {
