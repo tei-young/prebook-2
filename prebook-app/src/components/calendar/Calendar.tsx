@@ -6,12 +6,12 @@ import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, addMont
 import { ko } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 
-interface TimeSlot {
+export interface TimeSlot {
   date: string;
   time: string;
 }
 
-interface BookedSlot {
+export interface BookedSlot {
   date: string;
   time: string;
   status: 'pending' | 'deposit_wait' | 'deposit_confirmed' | 'confirmed' | 'rejected';
@@ -50,8 +50,11 @@ export default function Calendar({
  const isTimeSlotAvailable = (date: Date, time: string) => {
   return bookedSlots?.some(slot => {
     if (slot.status === 'deposit_wait' || slot.status === 'confirmed') {
-      return isSameDay(new Date(slot.selected_slot?.date), date) && 
-             slot.selected_slot?.time === time;
+      // selected_slot이 있는지 먼저 확인
+      if (slot.selected_slot?.date) {
+        return isSameDay(new Date(slot.selected_slot.date), date) && 
+               slot.selected_slot.time === time;
+      }
     }
     return false;
   }) || false;
@@ -62,16 +65,15 @@ export default function Calendar({
  };
 
  const handleTimeClick = (time: string) => {
-   if (!selectedDate || !onSelectSlot) return;
+  if (!selectedDate || !onSelectSlot) return;
 
-   const newSlot: TimeSlot = {
-     date: selectedDate,
-     time,
-     status: 'available'
-   };
+  const newSlot: TimeSlot = {
+    date: format(selectedDate, 'yyyy-MM-dd'), // Date를 string으로 변환
+    time,
+  };
 
-   onSelectSlot(newSlot);
- };
+  onSelectSlot(newSlot);
+};
 
  const isPastDate = (date: Date) => {
    const today = new Date();

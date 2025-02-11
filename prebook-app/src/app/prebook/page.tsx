@@ -15,18 +15,12 @@ import { ko } from 'date-fns/locale';
 import { isSameDay } from 'date-fns';
 import type { TimeSlot, BookedSlot } from '@/components/calendar/Calendar';
 
-interface TimeSlot {
- date: Date;
- time: string;
- status: 'available' | 'pending' | 'deposit_wait' | 'deposit_confirmed' | 'confirmed' | 'rejected';
-}
-
 interface DesiredSlot {
   date: string;
   time: string;
  }
 
-interface FormData {
+ interface FormData {
   termsAgreed: boolean;
   name: string;
   gender: string;
@@ -34,10 +28,7 @@ interface FormData {
   phone: string;
   desiredService: string;
   referralSource: string;
-  desired_slots: Array<{
-    date: string;
-    time: string;
-  }>;
+  desired_slots: TimeSlot[];  // Calendar의 TimeSlot 타입 사용
   priorExperience: string;
   frontPhoto: File | null;
   closedPhoto: File | null;
@@ -275,7 +266,7 @@ const CustomerReservationPage = () => {
                 <div className="space-y-4">
                   <Label htmlFor="desiredDates">희망 시술일정 (1~3개 선택)</Label>
                   <Calendar
-                    bookedSlots={reservedSlots}  // BookedSlot[] 타입으로 가져와야 함
+                    BookedSlots={reservedSlots}  // BookedSlot[] 타입으로 가져와야 함
                     selectedSlots={formData.desired_slots}  // TimeSlot[] 타입
                     onSelectSlot={(slot) => {
                       setFormData(prev => ({
