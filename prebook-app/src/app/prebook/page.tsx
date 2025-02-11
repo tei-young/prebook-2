@@ -70,20 +70,64 @@ const CustomerReservationPage = () => {
  }, []);
 
  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-   e.preventDefault();
-   if (!formData.termsAgreed) {
-     alert('예약 전 숙지사항 확인이 필요합니다.');
-     return;
-   }
-   
-   try {
-     // API 호출 및 파일 업로드 처리
-     console.log('예약 요청:', formData);
-     setSubmitted(true);
-   } catch (error) {
-     console.error('예약 요청 중 오류 발생:', error);
-   }
- };
+  e.preventDefault();
+  if (!formData.termsAgreed) {
+    alert('예약 전 숙지사항 확인이 필요합니다.');
+    return;
+  }
+  
+  try {
+    // 1. 이미지 업로드
+    let frontPhotoUrl = null;
+    let closedPhotoUrl = null;
+
+    if (formData.frontPhoto) {
+      const frontPhotoPath = `reservation-photos/${Date.now()}_front`;
+      const { data: frontData, error: frontError } = await supabase.storage
+        .from('photos')
+        .upload(frontPhotoPath, formData.frontPhoto);
+      
+      if (frontError) throw frontError;
+      frontPhotoUrl = frontData.path;
+    }
+
+    if (formData.closedPhoto) {
+      const closedPhotoPath = `reservation-photos/${Date.now()}_closed`;
+      const { data: closedData, error: closedError } = await supabase.storage
+        .from('photos')
+        .upload(closedPhotoPath, formData.closedPhoto);
+      
+      if (closedError) throw closedError;
+      closedPhotoUrl = closedData.path;
+    }
+
+    // 2. 예약 데이터 저장
+    const { data, error } = await supabase
+      .from('reservations')
+      .insert([{
+        customer_name: formData.name,
+        gender: formData.gender,
+        age: parseInt(formData.age),
+        phone: formData.phone,
+        desired_service: formData.desiredService,
+        referral_source: formData.referralSource,
+        desired_slots: formData.desired_slots,  // 새로 추가된 필드
+        prior_experience: formData.priorExperience,
+        front_photo_url: frontPhotoUrl,
+        closed_photo_url: closedPhotoUrl,
+        status: 'pending'
+      }])
+      .select();
+
+    if (error) throw error;
+
+    console.log('예약 요청 성공:', data);
+    setSubmitted(true);
+  } catch (error) {
+    console.error('예약 요청 중 오류 발생:', error);
+    alert('예약 요청 중 오류가 발생했습니다.');
+  }
+};
 
  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
    const { name, value, type } = e.target;
