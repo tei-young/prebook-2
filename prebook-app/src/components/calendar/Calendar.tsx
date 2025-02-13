@@ -9,7 +9,22 @@ import { cn } from '@/lib/utils';
 export interface TimeSlot {
   date: string;
   time: string;
+  serviceType?: string;
 }
+
+export interface ServiceInfo {
+  name: string;
+  duration: 1 | 2;
+}
+
+export const SERVICE_MAP: Record<string, ServiceInfo> = {
+  natural: { name: '자연눈썹', duration: 2 },
+  combo: { name: '콤보눈썹', duration: 2 },
+  shadow: { name: '섀도우눈썹', duration: 2 },
+  retouch: { name: '리터치', duration: 1 },
+  brownline: { name: '브라운아이라인', duration: 1 },
+  removal: { name: '잔흔제거', duration: 1 }
+} as const;
 
 export interface BookedSlot {
   date: string;
@@ -24,9 +39,15 @@ interface CalendarProps {
   onSelectSlot?: (slot: TimeSlot) => void;
   onRemoveSlot?: (slot: TimeSlot) => void;
   maxSelections?: number;
+  serviceType?: string;
 }
 
-const AVAILABLE_TIMES = ['10:00', '13:00', '15:00', '17:00', '19:00'];
+// AVAILABLE_TIMES 수정
+const AVAILABLE_TIMES = [
+  '10:00', '11:00',                         // 오전
+  '13:00', '14:00', '15:00', '16:00',      // 오후
+  '17:00', '18:00', '19:00'                // 저녁
+];
 
 export default function Calendar({ 
  bookedSlots = [], 
