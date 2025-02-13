@@ -224,7 +224,7 @@ export default function AdminDashboard() {
             setSelectedReservation(null);
             setSelectedSlot(null);
           }}
-        >
+          >
           {selectedReservation && (
             <div className="space-y-4">
               <h2 className="text-xl font-semibold mb-4">예약 상세 정보</h2>
@@ -302,58 +302,79 @@ export default function AdminDashboard() {
                 </div>
               )}
 
-              {/* 승인/거절 버튼 */}
-              <div className="mt-6 flex justify-end space-x-3">
-                {selectedReservation.status === 'pending' ? (
-                  <>
-                    <button
-                      onClick={() => handleStatusChange(selectedReservation.id, 'rejected')}
-                      className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-                    >
-                      예약 거절
-                    </button>
-                    <button
-                      onClick={() => handleApproveWithSlot(selectedReservation.id)}
-                      className={cn(
-                        "px-4 py-2 rounded",
-                        selectedSlot
-                          ? "bg-green-500 text-white hover:bg-green-600"
-                          : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                      )}
-                      disabled={!selectedSlot}
-                    >
-                      예약 승인
-                    </button>
-                  </>
-                ) : selectedReservation.status === 'deposit_wait' ? (
-                  <>
-                    <button
-                      onClick={() => handleStatusChange(selectedReservation.id, 'rejected')}
-                      className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-                    >
-                      예약 거절
-                    </button>
-                    <button
-                      onClick={() => handleStatusChange(selectedReservation.id, 'confirmed')}
-                      className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-                    >
-                      예약 확정
-                    </button>
-                  </>
-                ) : (
-                  <div className={cn(
-                    "px-4 py-2 rounded",
-                    selectedReservation.status === 'confirmed'
-                      ? 'bg-green-100 text-green-800'
-                      : 'bg-red-100 text-red-800'
-                  )}>
-                    {selectedReservation.status === 'confirmed' ? '예약 확정' : '거절됨'}
-                  </div>
-                )}
+              {/* 상태 표시 및 승인/거절 버튼 */}
+              <div className="mt-6 space-y-3">
+                {/* 현재 상태 표시 */}
+                <div className={cn(
+                  "w-full p-2 rounded text-center",
+                  {
+                    'bg-yellow-100 text-yellow-800': selectedReservation.status === 'pending',
+                    'bg-blue-100 text-blue-800': selectedReservation.status === 'deposit_wait',
+                    'bg-green-100 text-green-800': selectedReservation.status === 'confirmed',
+                    'bg-red-100 text-red-800': selectedReservation.status === 'rejected'
+                  }
+                )}>
+                  현재 상태: {
+                    selectedReservation.status === 'pending' ? '대기중' :
+                    selectedReservation.status === 'deposit_wait' ? '예약금 대기중' :
+                    selectedReservation.status === 'confirmed' ? '예약 확정' :
+                    '거절됨'
+                  }
+                </div>
+
+                {/* 승인/거절 버튼 */}
+                <div className="flex justify-end space-x-3">
+                  {selectedReservation.status === 'pending' ? (
+                    <>
+                      <button
+                        onClick={() => handleStatusChange(selectedReservation.id, 'rejected')}
+                        className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                      >
+                        예약 거절
+                      </button>
+                      <button
+                        onClick={() => handleApproveWithSlot(selectedReservation.id)}
+                        className={cn(
+                          "px-4 py-2 rounded",
+                          selectedSlot
+                            ? "bg-green-500 text-white hover:bg-green-600"
+                            : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                        )}
+                        disabled={!selectedSlot}
+                      >
+                        예약 승인
+                      </button>
+                    </>
+                  ) : selectedReservation.status === 'deposit_wait' ? (
+                    <>
+                      <button
+                        onClick={() => handleStatusChange(selectedReservation.id, 'rejected')}
+                        className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                      >
+                        예약 거절
+                      </button>
+                      <button
+                        onClick={() => handleStatusChange(selectedReservation.id, 'confirmed')}
+                        className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+                      >
+                        예약 확정
+                      </button>
+                    </>
+                  ) : (
+                    <div className={cn(
+                      "px-4 py-2 rounded",
+                      selectedReservation.status === 'confirmed'
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-red-100 text-red-800'
+                    )}>
+                      {selectedReservation.status === 'confirmed' ? '예약 확정' : '거절됨'}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           )}
-        </Dialog>
+          </Dialog>
       </div>
     </div>
   );
