@@ -14,6 +14,7 @@ import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { isSameDay } from 'date-fns';
 import type { TimeSlot, BookedSlot } from '@/components/calendar/Calendar';
+import { serviceTypes } from '@/components/calendar/Calendar';
 
 interface DesiredSlot {
   date: string;
@@ -26,7 +27,7 @@ interface DesiredSlot {
   gender: string;
   age: string;
   phone: string;
-  desiredService: string;
+  desiredService: keyof typeof serviceTypes;
   referralSource: string;
   desired_slots: TimeSlot[];  // Calendar의 TimeSlot 타입 사용
   priorExperience: string;
@@ -41,7 +42,7 @@ const CustomerReservationPage = () => {
     gender: '',
     age: '',
     phone: '',
-    desiredService: '',
+    desiredService: '' as keyof typeof serviceTypes, 
     referralSource: '',
     desired_slots: [],
     priorExperience: '',
@@ -53,31 +54,31 @@ const CustomerReservationPage = () => {
  const [submitted, setSubmitted] = useState(false);
 
  useEffect(() => {
-   async function fetchReservedSlots() {
-     const { data, error } = await supabase
-       .from('reservations')
-       .select('desired_slots, status, selected_slot')
-       .not('status', 'eq', 'rejected');
+  async function fetchReservedSlots() {
+    const { data, error } = await supabase
+      .from('reservations')
+      .select('desired_slots, status, selected_slot, desired_service');  // desired_service 추가
 
-     if (error) {
-       console.error('예약 데이터 조회 실패:', error);
-       return;
-     }
+    if (error) {
+      console.error('예약 데이터 조회 실패:', error);
+      return;
+    }
 
-     const slots: BookedSlot[] = data.flatMap(reservation => 
+    const slots: BookedSlot[] = data.flatMap(reservation => 
       reservation.desired_slots.map((slot: TimeSlot) => ({
         date: slot.date,
         time: slot.time,
         status: reservation.status,
-        selected_slot: reservation.selected_slot
+        selected_slot: reservation.selected_slot,
+        serviceType: reservation.desired_service  // serviceType 추가
       }))
     );
 
-     setReservedSlots(slots);
-   }
+    setReservedSlots(slots);
+  }
 
-   fetchReservedSlots();
- }, []);
+  fetchReservedSlots();
+}, []);
 
  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
   e.preventDefault();
@@ -284,6 +285,7 @@ const CustomerReservationPage = () => {
                     }));
                   }}
                   maxSelections={3}
+                  serviceType={formData.desiredService}
                 />
                 
                 {formData.desired_slots.length > 0 && (
