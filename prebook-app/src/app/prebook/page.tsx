@@ -14,7 +14,7 @@ import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { isSameDay } from 'date-fns';
 import type { TimeSlot, BookedSlot } from '@/components/calendar/Calendar';
-import { serviceTypes } from '@/components/calendar/Calendar';
+import { serviceTypes, SERVICE_MAP } from '@/components/calendar/Calendar';
 
 interface DesiredSlot {
   date: string;
@@ -243,14 +243,22 @@ const CustomerReservationPage = () => {
                 {/* 시술 정보 */}
                 <div className="space-y-2">
                   <Label htmlFor="desiredService">희망시술</Label>
-                  <Textarea
+                  <select
                     id="desiredService"
                     name="desiredService"
-                    placeholder="ex) 자연눈썹/콤보/섀도우/원장님 추천/잔흔제거"
+                    className="w-full h-10 px-3 border rounded-md"
                     required
                     value={formData.desiredService}
                     onChange={handleChange}
-                  />
+                  >
+                    <option value="">시술을 선택해주세요</option>
+                    <option value="natural">{SERVICE_MAP.natural.name}</option>
+                    <option value="combo">{SERVICE_MAP.combo.name}</option>
+                    <option value="shadow">{SERVICE_MAP.shadow.name}</option>
+                    <option value="retouch">{SERVICE_MAP.retouch.name}</option>
+                    <option value="brownline">{SERVICE_MAP.brownline.name}</option>
+                    <option value="removal">{SERVICE_MAP.removal.name}</option>
+                  </select>
                 </div>
 
                 <div className="space-y-2">
