@@ -8,6 +8,7 @@ import { isSameDay } from 'date-fns';
 import Dialog from '@/components/ui/dialog';
 import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
+import { SERVICE_MAP, serviceTypes } from '@/components/calendar/Calendar';
 
 type ReservationStatus = 'pending' | 'deposit_wait' | 'deposit_confirmed' | 'confirmed' | 'rejected';
 
@@ -189,7 +190,7 @@ export default function AdminDashboard() {
                         <p className="text-sm text-gray-500">
                           {new Date(reservation.created_at).toLocaleDateString()}
                         </p>
-                        <p>희망 시술: {reservation.desired_service}</p>
+                        <p>희망 시술: {SERVICE_MAP[reservation.desired_service as keyof typeof serviceTypes].name}</p>
                       </div>
                       <div className="text-right">
                         <span 
@@ -242,7 +243,7 @@ export default function AdminDashboard() {
                 <div>
                   <h3 className="font-medium text-gray-700">예약 정보</h3>
                   <div className="mt-2 space-y-2">
-                    <p>희망 시술: {selectedReservation.desired_service}</p>
+                    <p>희망 시술: {SERVICE_MAP[selectedReservation.desired_service as keyof typeof serviceTypes].name}</p>
                     <div className="space-y-2">
                       <h4 className="font-medium text-gray-700">희망 시간대</h4>
                       {selectedReservation.desired_slots.map((slot, index) => (

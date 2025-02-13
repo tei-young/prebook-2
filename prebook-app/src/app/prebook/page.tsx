@@ -261,11 +261,11 @@ const CustomerReservationPage = () => {
                       <h3 className="font-medium mb-2">눈썹문신</h3>
                       <div className="grid grid-cols-2 gap-2">
                         {[
-                          { id: 'natural', name: '자연눈썹', desc: '맞춤 상담을 통한 디자인컷' },
-                          { id: 'combo', name: '콤보눈썹', desc: '맞춤 상담을 통한 디자인컷+웨더링 다운펌' },
-                          { id: 'shadow', name: '섀도우눈썹', desc: '맞춤 상담을 통한 두상성형 다운펌' },
-                          { id: 'retouch', name: '리터치', desc: '맞춤 상담을 통한 눈썹 리터치' },
-                          { id: 'recommend', name: '키뮤원장 추천시술', desc: '원장님과 상담 후 맞춤 시술 진행' },
+                          { id: 'natural', name: '자연눈썹', desc: '키뮤원장과 상담 후 자연눈썹 디자인으로 시술 진행해드려요!' },
+                          { id: 'combo', name: '콤보눈썹', desc: '키뮤원장과 상담 후 콤보눈썹 디자인으로 시술 진행해드려요!' },
+                          { id: 'shadow', name: '섀도우눈썹', desc: '키뮤원장과 상담 후 섀도우눈썹 디자인으로 시술 진행해드려요!' },
+                          { id: 'retouch', name: '리터치', desc: '눈썹문신 시술 후 n회 무료 리터치' },
+                          { id: 'recommend', name: '키뮤원장 추천시술', desc: '키뮤원장과 상담 후 맞춤시술 진행해드려요!' },
                         ].map((service) => (
                           <button
                             key={service.id}
@@ -290,8 +290,8 @@ const CustomerReservationPage = () => {
                       <h3 className="font-medium mb-2">기타 시술</h3>
                       <div className="grid grid-cols-2 gap-2">
                         {[
-                          { id: 'brownline', name: '브라운아이라인', desc: '맞춤 상담을 통한 아이라인 시술' },
-                          { id: 'removal', name: '잔흔제거', desc: '기존 눈썹 잔흔 제거 시술' },
+                          { id: 'brownline', name: '브라운아이라인', desc: '아이라인을 브라운 이쁘게' },
+                          { id: 'removal', name: '잔흔제거', desc: '키뮤디자인을 완벽하게 하기 위한 잔흔 시술!' },
                         ].map((service) => (
                           <button
                             key={service.id}
