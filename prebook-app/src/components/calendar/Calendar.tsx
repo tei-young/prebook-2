@@ -1,52 +1,64 @@
-// src/components/calendar/Calendar.tsx
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, addMonths, subMonths, startOfWeek, endOfWeek, isSameMonth } from 'date-fns';
+import { 
+ format, startOfMonth, endOfMonth, eachDayOfInterval, 
+ isSameDay, addMonths, subMonths, startOfWeek, 
+ endOfWeek, isSameMonth, isSameHour 
+} from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 
 export interface TimeSlot {
-  date: string;
-  time: string;
-  serviceType?: string;
+ date: string;
+ time: string;
+ serviceType?: string;
 }
 
 export interface ServiceInfo {
-  name: string;
-  duration: 1 | 2;
+ name: string;
+ duration: 1 | 2;
 }
 
-export const SERVICE_MAP: Record<string, ServiceInfo> = {
-  natural: { name: '자연눈썹', duration: 2 },
-  combo: { name: '콤보눈썹', duration: 2 },
-  shadow: { name: '섀도우눈썹', duration: 2 },
-  retouch: { name: '리터치', duration: 1 },
-  brownline: { name: '브라운아이라인', duration: 1 },
-  removal: { name: '잔흔제거', duration: 1 }
+export enum serviceTypes {
+ natural = 'natural',
+ combo = 'combo',
+ shadow = 'shadow',
+ retouch = 'retouch',
+ brownline = 'brownline',
+ removal = 'removal'
+}
+
+export const SERVICE_MAP: Record<keyof typeof serviceTypes, ServiceInfo> = {
+ natural: { name: '자연눈썹', duration: 2 },
+ combo: { name: '콤보눈썹', duration: 2 },
+ shadow: { name: '섀도우눈썹', duration: 2 },
+ retouch: { name: '리터치', duration: 1 },
+ brownline: { name: '브라운아이라인', duration: 1 },
+ removal: { name: '잔흔제거', duration: 1 }
 } as const;
 
 export interface BookedSlot {
-  date: string;
-  time: string;
-  status: 'pending' | 'deposit_wait' | 'deposit_confirmed' | 'confirmed' | 'rejected';
-  selected_slot?: TimeSlot;
+ date: string;
+ time: string;
+ status: 'pending' | 'deposit_wait' | 'deposit_confirmed' | 'confirmed' | 'rejected';
+ selected_slot?: TimeSlot;
+ serviceType: string;
 }
 
 interface CalendarProps {
-  bookedSlots?: BookedSlot[];
-  selectedSlots: TimeSlot[];
-  onSelectSlot?: (slot: TimeSlot) => void;
-  onRemoveSlot?: (slot: TimeSlot) => void;
-  maxSelections?: number;
-  serviceType?: string;
+ bookedSlots?: BookedSlot[];
+ selectedSlots: TimeSlot[];
+ onSelectSlot?: (slot: TimeSlot) => void;
+ onRemoveSlot?: (slot: TimeSlot) => void;
+ maxSelections?: number;
+ serviceType?: string;
 }
 
-// AVAILABLE_TIMES 수정
 const AVAILABLE_TIMES = [
-  '10:00', '11:00',                         // 오전
-  '13:00', '14:00', '15:00', '16:00',      // 오후
-  '17:00', '18:00', '19:00'                // 저녁
+ '10:00', '11:00',                         // 오전
+ '13:00', '14:00', '15:00', '16:00',      // 오후
+ '17:00', '18:00', '19:00'                // 저녁
 ];
 
 export default function Calendar({ 
@@ -54,7 +66,8 @@ export default function Calendar({
  selectedSlots,
  onSelectSlot,
  onRemoveSlot,
- maxSelections = 3 
+ maxSelections = 3,
+ serviceType 
 }: CalendarProps) {
  const [currentMonth, setCurrentMonth] = useState(new Date());
  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -69,34 +82,52 @@ export default function Calendar({
  }, [currentMonth]);
 
  const isTimeSlotAvailable = (date: Date, time: string) => {
-  const isBooked = bookedSlots?.some(slot => {
-    if (
-      (slot.status === 'deposit_wait' || slot.status === 'confirmed') && 
-      slot.selected_slot?.date
-    ) {
-      return isSameDay(new Date(slot.selected_slot.date), date) && 
-             slot.selected_slot.time === time;
-    }
-    return false;
-  });
+   if (!bookedSlots) return true;
 
-  return !isBooked;
-};
+   // 선택된 시간의 Date 객체 생성
+   const targetDateTime = new Date(`${format(date, 'yyyy-MM-dd')}T${time}`);
+   
+   // 각 예약된 슬롯 확인
+   return !bookedSlots.some(slot => {
+     // deposit_wait나 confirmed 상태의 예약만 체크
+     if (
+       (slot.status === 'deposit_wait' || slot.status === 'confirmed') && 
+       slot.selected_slot?.date
+     ) {
+       const bookedDateTime = new Date(`${slot.selected_slot.date}T${slot.selected_slot.time}`);
+       const bookedService = slot.serviceType;
+       const bookedDuration = SERVICE_MAP[bookedService as keyof typeof serviceTypes]?.duration || 1;
+
+       // 예약된 시간부터 시술 소요시간 동안의 시간대 체크
+       for (let i = 0; i < bookedDuration; i++) {
+         const checkTime = new Date(bookedDateTime);
+         checkTime.setHours(checkTime.getHours() + i);
+         
+         // 선택하려는 시간이 예약된 시간대와 겹치는지 확인
+         if (isSameHour(checkTime, targetDateTime)) {
+           return true; // 겹치면 사용 불가
+         }
+       }
+     }
+     return false;
+   });
+ };
 
  const handleDateClick = (date: Date) => {
    setSelectedDate(date);
  };
 
  const handleTimeClick = (time: string) => {
-  if (!selectedDate || !onSelectSlot) return;
+   if (!selectedDate || !onSelectSlot || !serviceType) return;
 
-  const newSlot: TimeSlot = {
-    date: format(selectedDate, 'yyyy-MM-dd'), // Date를 string으로 변환
-    time,
-  };
+   const newSlot: TimeSlot = {
+     date: format(selectedDate, 'yyyy-MM-dd'),
+     time,
+     serviceType
+   };
 
-  onSelectSlot(newSlot);
-};
+   onSelectSlot(newSlot);
+ };
 
  const isPastDate = (date: Date) => {
    const today = new Date();
@@ -160,30 +191,66 @@ export default function Calendar({
          <h3 className="text-lg font-medium mb-4">
            {format(selectedDate, 'M월 d일', { locale: ko })} 시술 시간 선택
          </h3>
-         <div className="grid grid-cols-1 gap-2">
-           {AVAILABLE_TIMES.map(time => {
-             const isAvailable = isTimeSlotAvailable(selectedDate, time);
-             const isSelected = selectedSlots.some(slot => 
-               isSameDay(slot.date, selectedDate) && slot.time === time
-             );
-             
-             return (
-               <button
-                 key={time}
-                 onClick={() => isAvailable && !isSelected && handleTimeClick(time)}
-                 className={cn(
-                   "px-4 py-3 rounded text-lg w-full",
-                   isSelected && "bg-green-500 text-white",
-                   !isAvailable && !isSelected && "bg-gray-200 text-gray-400",
-                   isAvailable && !isSelected && "bg-white hover:bg-green-50 border",
-                   (!isAvailable || isSelected) && "cursor-not-allowed"
-                 )}
-                 disabled={!isAvailable || (selectedSlots.length >= maxSelections && !isSelected)}
-               >
-                 {time.split(':')[0]}시
-               </button>
-             );
-           })}
+         <div className="space-y-4">
+           {/* 오전 시간대 */}
+           <div>
+             <h4 className="font-medium mb-2">오전</h4>
+             <div className="grid grid-cols-2 gap-2">
+               {AVAILABLE_TIMES.filter(time => parseInt(time) < 12).map(time => {
+                 const isAvailable = isTimeSlotAvailable(selectedDate, time);
+                 const isSelected = selectedSlots.some(slot => 
+                   isSameDay(new Date(slot.date), selectedDate) && slot.time === time
+                 );
+                 
+                 return (
+                   <button
+                     key={time}
+                     onClick={() => isAvailable && !isSelected && handleTimeClick(time)}
+                     className={cn(
+                       "px-4 py-3 rounded text-lg",
+                       isSelected && "bg-green-500 text-white",
+                       !isAvailable && !isSelected && "bg-gray-200 text-gray-400",
+                       isAvailable && !isSelected && "bg-white hover:bg-green-50 border",
+                       (!isAvailable || isSelected) && "cursor-not-allowed"
+                     )}
+                     disabled={!isAvailable || (selectedSlots.length >= maxSelections && !isSelected)}
+                   >
+                     {time}
+                   </button>
+                 );
+               })}
+             </div>
+           </div>
+
+           {/* 오후 시간대 */}
+           <div>
+             <h4 className="font-medium mb-2">오후</h4>
+             <div className="grid grid-cols-4 gap-2">
+               {AVAILABLE_TIMES.filter(time => parseInt(time) >= 12).map(time => {
+                 const isAvailable = isTimeSlotAvailable(selectedDate, time);
+                 const isSelected = selectedSlots.some(slot => 
+                   isSameDay(new Date(slot.date), selectedDate) && slot.time === time
+                 );
+                 
+                 return (
+                   <button
+                     key={time}
+                     onClick={() => isAvailable && !isSelected && handleTimeClick(time)}
+                     className={cn(
+                       "px-4 py-3 rounded text-lg",
+                       isSelected && "bg-green-500 text-white",
+                       !isAvailable && !isSelected && "bg-gray-200 text-gray-400",
+                       isAvailable && !isSelected && "bg-white hover:bg-green-50 border",
+                       (!isAvailable || isSelected) && "cursor-not-allowed"
+                     )}
+                     disabled={!isAvailable || (selectedSlots.length >= maxSelections && !isSelected)}
+                   >
+                     {parseInt(time) > 12 ? `${parseInt(time) - 12}:${time.split(':')[1]}` : time}
+                   </button>
+                 );
+               })}
+             </div>
+           </div>
          </div>
        </div>
      )}
