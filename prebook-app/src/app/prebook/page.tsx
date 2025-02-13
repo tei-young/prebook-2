@@ -258,6 +258,7 @@ const CustomerReservationPage = () => {
                     <option value="retouch">{SERVICE_MAP.retouch.name}</option>
                     <option value="brownline">{SERVICE_MAP.brownline.name}</option>
                     <option value="removal">{SERVICE_MAP.removal.name}</option>
+                    <option value="recommend">{SERVICE_MAP.recommend.name}</option>
                   </select>
                 </div>
 

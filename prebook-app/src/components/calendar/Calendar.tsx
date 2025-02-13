@@ -26,17 +26,19 @@ export enum serviceTypes {
  shadow = 'shadow',
  retouch = 'retouch',
  brownline = 'brownline',
- removal = 'removal'
+ removal = 'removal',
+ recommend = 'recommend'
 }
 
 export const SERVICE_MAP: Record<keyof typeof serviceTypes, ServiceInfo> = {
- natural: { name: '자연눈썹', duration: 2 },
- combo: { name: '콤보눈썹', duration: 2 },
- shadow: { name: '섀도우눈썹', duration: 2 },
- retouch: { name: '리터치', duration: 1 },
- brownline: { name: '브라운아이라인', duration: 1 },
- removal: { name: '잔흔제거', duration: 1 }
-} as const;
+  natural: { name: '자연눈썹', duration: 2 },
+  combo: { name: '콤보눈썹', duration: 2 },
+  shadow: { name: '섀도우눈썹', duration: 2 },
+  retouch: { name: '리터치', duration: 1 },
+  brownline: { name: '브라운아이라인', duration: 1 },
+  removal: { name: '잔흔제거', duration: 1 },
+  recommend: { name: '키뮤원장 추천시술', duration: 2 }  // 추가
+};
 
 export interface BookedSlot {
  date: string;
