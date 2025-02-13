@@ -15,6 +15,7 @@ import { ko } from 'date-fns/locale';
 import { isSameDay } from 'date-fns';
 import type { TimeSlot, BookedSlot } from '@/components/calendar/Calendar';
 import { serviceTypes, SERVICE_MAP } from '@/components/calendar/Calendar';
+import { cn } from '@/lib/utils';
 
 interface DesiredSlot {
   date: string;
@@ -52,6 +53,14 @@ const CustomerReservationPage = () => {
  
  const [reservedSlots, setReservedSlots] = useState<BookedSlot[]>([]);
  const [submitted, setSubmitted] = useState(false);
+
+ const handleServiceSelect = (serviceType: keyof typeof serviceTypes) => {
+  setFormData(prev => ({
+    ...prev,
+    desiredService: serviceType,
+    desired_slots: []  // 시술 변경시 선택된 시간 초기화
+  }));
+};
 
  useEffect(() => {
   async function fetchReservedSlots() {
@@ -241,25 +250,67 @@ const CustomerReservationPage = () => {
                 </div>
 
                 {/* 시술 정보 */}
+                {/* 시술 선택 섹션 */}
                 <div className="space-y-2">
                   <Label htmlFor="desiredService">희망시술</Label>
-                  <select
-                    id="desiredService"
-                    name="desiredService"
-                    className="w-full h-10 px-3 border rounded-md"
-                    required
-                    value={formData.desiredService}
-                    onChange={handleChange}
-                  >
-                    <option value="">시술을 선택해주세요</option>
-                    <option value="natural">{SERVICE_MAP.natural.name}</option>
-                    <option value="combo">{SERVICE_MAP.combo.name}</option>
-                    <option value="shadow">{SERVICE_MAP.shadow.name}</option>
-                    <option value="retouch">{SERVICE_MAP.retouch.name}</option>
-                    <option value="brownline">{SERVICE_MAP.brownline.name}</option>
-                    <option value="removal">{SERVICE_MAP.removal.name}</option>
-                    <option value="recommend">{SERVICE_MAP.recommend.name}</option>
-                  </select>
+                  
+                  {/* 시술 선택 버튼 그룹 */}
+                  <div className="space-y-4">
+                    {/* 눈썹문신 그룹 */}
+                    <div>
+                      <h3 className="font-medium mb-2">눈썹문신</h3>
+                      <div className="grid grid-cols-2 gap-2">
+                        {[
+                          { id: 'natural', name: '자연눈썹', desc: '맞춤 상담을 통한 디자인컷' },
+                          { id: 'combo', name: '콤보눈썹', desc: '맞춤 상담을 통한 디자인컷+웨더링 다운펌' },
+                          { id: 'shadow', name: '섀도우눈썹', desc: '맞춤 상담을 통한 두상성형 다운펌' },
+                          { id: 'retouch', name: '리터치', desc: '맞춤 상담을 통한 눈썹 리터치' },
+                          { id: 'recommend', name: '키뮤원장 추천시술', desc: '원장님과 상담 후 맞춤 시술 진행' },
+                        ].map((service) => (
+                          <button
+                            key={service.id}
+                            type="button"
+                            onClick={() => handleServiceSelect(service.id as keyof typeof serviceTypes)}
+                            className={cn(
+                              "p-4 border rounded-lg text-left",
+                              formData.desiredService === service.id 
+                                ? "border-blue-500 bg-blue-50" 
+                                : "hover:border-gray-400"
+                            )}
+                          >
+                            <div className="font-medium">{service.name}</div>
+                            <div className="text-sm text-gray-500 mt-1">{service.desc}</div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* 기타 시술 그룹 */}
+                    <div>
+                      <h3 className="font-medium mb-2">기타 시술</h3>
+                      <div className="grid grid-cols-2 gap-2">
+                        {[
+                          { id: 'brownline', name: '브라운아이라인', desc: '맞춤 상담을 통한 아이라인 시술' },
+                          { id: 'removal', name: '잔흔제거', desc: '기존 눈썹 잔흔 제거 시술' },
+                        ].map((service) => (
+                          <button
+                            key={service.id}
+                            type="button"
+                            onClick={() => handleServiceSelect(service.id as keyof typeof serviceTypes)}
+                            className={cn(
+                              "p-4 border rounded-lg text-left",
+                              formData.desiredService === service.id 
+                                ? "border-blue-500 bg-blue-50" 
+                                : "hover:border-gray-400"
+                            )}
+                          >
+                            <div className="font-medium">{service.name}</div>
+                            <div className="text-sm text-gray-500 mt-1">{service.desc}</div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="space-y-2">

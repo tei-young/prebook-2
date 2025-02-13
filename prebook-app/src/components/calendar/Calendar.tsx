@@ -194,35 +194,35 @@ export default function Calendar({
            {format(selectedDate, 'M월 d일', { locale: ko })} 시술 시간 선택
          </h3>
          <div className="space-y-4">
-           {/* 오전 시간대 */}
-           <div>
-             <h4 className="font-medium mb-2">오전</h4>
-             <div className="grid grid-cols-2 gap-2">
-               {AVAILABLE_TIMES.filter(time => parseInt(time) < 12).map(time => {
-                 const isAvailable = isTimeSlotAvailable(selectedDate, time);
-                 const isSelected = selectedSlots.some(slot => 
-                   isSameDay(new Date(slot.date), selectedDate) && slot.time === time
-                 );
-                 
-                 return (
-                   <button
-                     key={time}
-                     onClick={() => isAvailable && !isSelected && handleTimeClick(time)}
-                     className={cn(
-                       "px-4 py-3 rounded text-lg",
-                       isSelected && "bg-green-500 text-white",
-                       !isAvailable && !isSelected && "bg-gray-200 text-gray-400",
-                       isAvailable && !isSelected && "bg-white hover:bg-green-50 border",
-                       (!isAvailable || isSelected) && "cursor-not-allowed"
-                     )}
-                     disabled={!isAvailable || (selectedSlots.length >= maxSelections && !isSelected)}
-                   >
-                     {time}
-                   </button>
-                 );
-               })}
-             </div>
-           </div>
+          {/* 오전 시간대 */}
+          <div>
+            <h4 className="font-medium mb-2">오전</h4>
+            <div className="grid grid-cols-4 gap-2">  {/* grid-cols-2에서 grid-cols-4로 변경 */}
+              {AVAILABLE_TIMES.filter(time => parseInt(time) < 12).map(time => {
+                const isAvailable = isTimeSlotAvailable(selectedDate, time);
+                const isSelected = selectedSlots.some(slot => 
+                  isSameDay(new Date(slot.date), selectedDate) && slot.time === time
+                );
+                
+                return (
+                  <button
+                    key={time}
+                    onClick={() => isAvailable && !isSelected && handleTimeClick(time)}
+                    className={cn(
+                      "px-4 py-3 rounded text-sm",  // text-lg에서 text-sm으로 변경
+                      isSelected && "bg-green-500 text-white",
+                      !isAvailable && !isSelected && "bg-gray-200 text-gray-400",
+                      isAvailable && !isSelected && "bg-white hover:bg-green-50 border",
+                      (!isAvailable || isSelected) && "cursor-not-allowed"
+                    )}
+                    disabled={!isAvailable || (selectedSlots.length >= maxSelections && !isSelected)}
+                  >
+                    {time}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
 
            {/* 오후 시간대 */}
            <div>
