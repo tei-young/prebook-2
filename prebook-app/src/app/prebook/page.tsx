@@ -97,6 +97,18 @@ const CustomerReservationPage = () => {
   }
   
   try {
+    // 0. 중복 예약 방지로, 먼저 동일 예약 있는지 확인
+    const { data: existingReservations } = await supabase
+    .from('reservations')
+    .select('*')
+    .eq('phone', formData.phone)
+    .eq('status', 'pending');
+
+  if (existingReservations && existingReservations.length > 0) {
+    alert('이미 처리 중인 예약이 있습니다.');
+    return;
+  }
+
     // 1. 이미지 업로드
     let frontPhotoUrl = null;
     let closedPhotoUrl = null;
