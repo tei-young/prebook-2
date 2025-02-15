@@ -15,29 +15,36 @@ interface KakaoMessage {
 }
 
 export const sendKakaoMessage = async (
- phoneNumber: string, 
- templateKey: keyof typeof MESSAGE_TEMPLATES,
- variables?: { [key: string]: string }
-) => {
- const template = MESSAGE_TEMPLATES[templateKey];
- const messageContent = customizeMessage(template, variables || {});
- 
- try {
-   // TODO: 실제 카카오톡 API 연동 시 이 부분 수정
-   // 현재는 콘솔에 메시지 출력으로 대체
-   console.log('=== 카카오톡 메시지 발송 ===');
-   console.log(`수신자: ${phoneNumber}`);
-   console.log(`템플릿: ${template.title}`);
-   console.log('메시지 내용:');
-   console.log(messageContent);
-   console.log('========================');
-   
-   return true;
- } catch (error) {
-   console.error('메시지 전송 실패:', error);
-   throw error;
- }
-};
+    phoneNumber: string, 
+    templateKey: keyof typeof MESSAGE_TEMPLATES,
+    variables?: { [key: string]: string }
+  ) => {
+    const template = MESSAGE_TEMPLATES[templateKey];
+    const messageContent = customizeMessage(template, variables || {});
+    
+    try {
+      const response = await fetch('https://kapi.kakao.com/v1/api/talk/message/send', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.NEXT_PUBLIC_KAKAO_ACCESS_TOKEN}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          phone_number: phoneNumber,
+          message: messageContent
+        })
+      });
+  
+      if (!response.ok) {
+        throw new KakaoMessageError('메시지 전송 실패');
+      }
+  
+      return await response.json();
+    } catch (error) {
+      console.error('메시지 전송 실패:', error);
+      throw error;
+    }
+  };
 
 // 예약금 안내 메시지 발송
 export const sendDepositGuideMessage = (phoneNumber: string) => {

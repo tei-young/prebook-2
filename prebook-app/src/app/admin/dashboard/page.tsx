@@ -72,7 +72,7 @@ export default function AdminDashboard() {
   };
 
   const handleApproveWithSlot = async (reservationId: string) => {
-    if (!selectedSlot) return;
+    if (!selectedSlot || !selectedReservation) return;
     
     try {
       const { error } = await supabase
@@ -125,6 +125,8 @@ export default function AdminDashboard() {
   };
 
   const handleStatusChange = async (reservationId: string, newStatus: ReservationStatus) => {
+    if (!selectedReservation) return;
+    
     try {
       const { error } = await supabase
         .from('reservations')
