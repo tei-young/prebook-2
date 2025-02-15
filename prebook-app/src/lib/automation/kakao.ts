@@ -1,6 +1,7 @@
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import { MESSAGE_TEMPLATES, customizeMessage } from '@/constants/messageTemplates';
+import path from 'path';
 
 const execAsync = promisify(exec);
 
@@ -75,7 +76,7 @@ export class KakaoAutomation {
 
   private async sendMessage(phoneNumber: string, message: string) {
     try {
-      const scriptPath = 'F:\\Desktop\\prebook\\prebook-app\\scripts\\kakao_send.ahk';
+      const scriptPath = path.join(process.cwd(), 'scripts', 'kakao_send.ahk');
       const { stdout, stderr } = await execAsync(
         `"C:\\Program Files\\AutoHotkey\\AutoHotkey.exe" "${scriptPath}" "${phoneNumber}" "${message}"`
       );
@@ -90,7 +91,7 @@ export class KakaoAutomation {
       console.error('메시지 전송 실패:', error);
       throw error;
     }
-  }
+}
 }
 
 // 싱글톤 인스턴스 export
