@@ -1,9 +1,5 @@
-import { exec } from 'child_process';
-import { promisify } from 'util';
+// src/lib/automation/kakao.ts
 import { MESSAGE_TEMPLATES, customizeMessage } from '@/constants/messageTemplates';
-import path from 'path';
-
-const execAsync = promisify(exec);
 
 export class KakaoAutomation {
   private static instance: KakaoAutomation;
@@ -14,7 +10,6 @@ export class KakaoAutomation {
     retries: number;
   }> = [];
 
-  // 싱글톤 패턴
   public static getInstance(): KakaoAutomation {
     if (!KakaoAutomation.instance) {
       KakaoAutomation.instance = new KakaoAutomation();
@@ -52,15 +47,13 @@ export class KakaoAutomation {
       const { phoneNumber, message, retries } = this.messageQueue[0];
       
       await this.sendMessage(phoneNumber, message);
-      this.messageQueue.shift(); // 성공한 메시지 제거
+      this.messageQueue.shift();
       
     } catch (error) {
       const currentMessage = this.messageQueue[0];
       if (currentMessage.retries < 3) {
         currentMessage.retries++;
-        // 실패한 메시지를 큐의 끝으로 이동
         this.messageQueue.push(this.messageQueue.shift()!);
-        console.log(`메시지 재시도 (${currentMessage.retries}/3)`);
       } else {
         console.error('메시지 전송 최대 재시도 횟수 초과:', currentMessage);
         this.messageQueue.shift();
@@ -68,7 +61,6 @@ export class KakaoAutomation {
     } finally {
       this.isProcessing = false;
       if (this.messageQueue.length > 0) {
-        // 다음 메시지 처리 전 1초 대기
         setTimeout(() => this.processQueue(), 1000);
       }
     }
@@ -76,23 +68,29 @@ export class KakaoAutomation {
 
   private async sendMessage(phoneNumber: string, message: string) {
     try {
-      const scriptPath = path.join(process.cwd(), 'scripts', 'kakao_send.ahk');
-      const { stdout, stderr } = await execAsync(
-        `"C:\\Program Files\\AutoHotkey\\AutoHotkey.exe" "${scriptPath}" "${phoneNumber}" "${message}"`
-      );
+      const response = await fetch('/api/kakao', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ phoneNumber, message }),
+      });
 
-      if (stderr) {
-        throw new Error(`AutoHotkey 실행 오류: ${stderr}`);
+      if (!response.ok) {
+        throw new Error('메시지 전송 실패');
       }
 
-      console.log('메시지 전송 성공:', stdout);
+      const result = await response.json();
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+
       return true;
     } catch (error) {
       console.error('메시지 전송 실패:', error);
       throw error;
     }
-}
+  }
 }
 
-// 싱글톤 인스턴스 export
 export const kakaoAutomation = KakaoAutomation.getInstance();
