@@ -9,6 +9,7 @@ import Dialog from '@/components/ui/dialog';
 import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 import { SERVICE_MAP, serviceTypes } from '@/components/calendar/Calendar';
+import { sendDepositGuideMessage, sendConfirmationMessage } from '@/lib/kakao';
 
 type ReservationStatus = 'pending' | 'deposit_wait' | 'deposit_confirmed' | 'confirmed' | 'rejected';
 
@@ -85,6 +86,14 @@ export default function AdminDashboard() {
 
       if (error) throw error;
 
+      // 예약금 안내 메시지 발송
+      try {
+        await sendDepositGuideMessage(selectedReservation.phone);
+      } catch (messageError) {
+        console.error('예약금 안내 메시지 발송 실패:', messageError);
+        // 메시지 발송 실패해도 예약 프로세스는 계속 진행
+      }
+
       setReservations(prev =>
         prev.map(reservation =>
           reservation.id === reservationId
@@ -109,8 +118,6 @@ export default function AdminDashboard() {
         );
       }
 
-      // TODO: 예약금 안내 메시지 발송
-
     } catch (error) {
       console.error('예약 승인 중 오류 발생:', error);
       alert('예약 승인 중 오류가 발생했습니다.');
@@ -130,10 +137,19 @@ export default function AdminDashboard() {
       if (error) throw error;
 
       // 상태별 자동화 처리
-      switch (newStatus) {
-        case 'confirmed':
-          // TODO: 예약 확정 메시지 발송 + 타임블록 등록
-          break;
+      if (newStatus === 'confirmed' && selectedReservation?.selected_slot) {
+        try {
+          await sendConfirmationMessage(
+            selectedReservation.phone,
+            selectedReservation.customer_name,
+            format(new Date(selectedReservation.selected_slot.date), 'M월 d일'),
+            selectedReservation.selected_slot.time
+          );
+          // TODO: 타임블록 등록
+        } catch (messageError) {
+          console.error('예약 확정 메시지 발송 실패:', messageError);
+          // 메시지 발송 실패해도 예약 프로세스는 계속 진행
+        }
       }
 
       setReservations(prev =>
