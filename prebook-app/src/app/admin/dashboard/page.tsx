@@ -88,10 +88,12 @@ export default function AdminDashboard() {
 
       // 예약금 안내 메시지 발송
       try {
-        await sendDepositGuideMessage(selectedReservation.phone);
+        await kakaoAutomation.addToQueue(
+          selectedReservation.phone,
+          'DEPOSIT_GUIDE'
+        );
       } catch (messageError) {
-        console.error('예약금 안내 메시지 발송 실패:', messageError);
-        // 메시지 발송 실패해도 예약 프로세스는 계속 진행
+        console.error('예약금 안내 메시지 큐 추가 실패:', messageError);
       }
 
       setReservations(prev =>
@@ -139,18 +141,19 @@ export default function AdminDashboard() {
       if (error) throw error;
 
       // 상태별 자동화 처리
-      if (newStatus === 'confirmed' && selectedReservation?.selected_slot) {
+      if (newStatus === 'confirmed' && selectedReservation.selected_slot) {
         try {
-          await sendConfirmationMessage(
+          await kakaoAutomation.addToQueue(
             selectedReservation.phone,
-            selectedReservation.customer_name,
-            format(new Date(selectedReservation.selected_slot.date), 'M월 d일'),
-            selectedReservation.selected_slot.time
+            'CONFIRMATION',
+            {
+              customerName: selectedReservation.customer_name,
+              appointmentDate: format(new Date(selectedReservation.selected_slot.date), 'M월 d일'),
+              appointmentTime: selectedReservation.selected_slot.time
+            }
           );
-          // TODO: 타임블록 등록
         } catch (messageError) {
-          console.error('예약 확정 메시지 발송 실패:', messageError);
-          // 메시지 발송 실패해도 예약 프로세스는 계속 진행
+          console.error('예약 확정 메시지 큐 추가 실패:', messageError);
         }
       }
 
