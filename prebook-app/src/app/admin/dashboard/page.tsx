@@ -9,7 +9,7 @@ import Dialog from '@/components/ui/dialog';
 import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 import { SERVICE_MAP, serviceTypes } from '@/components/calendar/Calendar';
-import { sendDepositGuideMessage, sendConfirmationMessage } from '@/lib/kakao';
+import { kakaoAutomation } from '@/lib/automation/kakao';
 
 type ReservationStatus = 'pending' | 'deposit_wait' | 'deposit_confirmed' | 'confirmed' | 'rejected';
 
@@ -126,7 +126,7 @@ export default function AdminDashboard() {
 
   const handleStatusChange = async (reservationId: string, newStatus: ReservationStatus) => {
     if (!selectedReservation) return;
-    
+
     try {
       const { error } = await supabase
         .from('reservations')
