@@ -276,8 +276,8 @@ const CustomerReservationPage = () => {
                           { id: 'natural', name: '자연눈썹', desc: '키뮤원장과 상담 후 자연눈썹 디자인으로 시술 진행해드려요!' },
                           { id: 'combo', name: '콤보눈썹', desc: '키뮤원장과 상담 후 콤보눈썹 디자인으로 시술 진행해드려요!' },
                           { id: 'shadow', name: '섀도우눈썹', desc: '키뮤원장과 상담 후 섀도우눈썹 디자인으로 시술 진행해드려요!' },
-                          { id: 'retouch', name: '리터치', desc: '눈썹문신 시술 후 n회 무료 리터치' },
                           { id: 'recommend', name: '키뮤원장 추천시술', desc: '키뮤원장과 상담 후 맞춤시술 진행해드려요!' },
+                          { id: 'retouch', name: '리터치', desc: '눈썹문신 시술 후 n회 무료 리터치' }
                         ].map((service) => (
                           <button
                             key={service.id}
