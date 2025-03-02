@@ -1,6 +1,6 @@
 // src/lib/automation/timeblock.ts
 import { Builder, By, until, WebDriver } from 'selenium-webdriver';
-import * as chrome from 'selenium-webdriver/chrome';
+import { Options, ServiceBuilder } from 'selenium-webdriver/chrome';
 
 interface TimeblockEvent {
   customerName: string;
