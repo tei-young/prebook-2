@@ -209,7 +209,7 @@ export default function Calendar({
                     key={time}
                     onClick={() => isAvailable && !isSelected && handleTimeClick(time)}
                     className={cn(
-                      "px-4 py-3 rounded text-sm",  // text-lg에서 text-sm으로 변경
+                      "px-4 py-3 rounded text-lg",
                       isSelected && "bg-green-500 text-white",
                       !isAvailable && !isSelected && "bg-gray-200 text-gray-400",
                       isAvailable && !isSelected && "bg-white hover:bg-green-50 border",
