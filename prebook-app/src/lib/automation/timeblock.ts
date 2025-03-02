@@ -1,6 +1,6 @@
 // src/lib/automation/timeblock.ts
 import { Builder, By, until, WebDriver } from 'selenium-webdriver';
-import { Options, ServiceBuilder } from 'selenium-webdriver/chrome';
+import { Options } from 'selenium-webdriver/chrome';
 
 interface TimeblockEvent {
   customerName: string;
@@ -13,13 +13,15 @@ export class TimeblockAutomation {
   private driver: WebDriver;
 
   constructor() {
-    // 이미 실행 중인 Chrome 창을 연결
-    const options = new Options()
-      chromeOptions.debuggerAddress('localhost:9222');  // Chrome이 이 디버그 포트로 실행되어야 함
+    // Chrome 옵션 설정
+    const options = new Options();
+    
+    // 디버깅 설정
+    options.addArguments('--remote-debugging-port=9222');
     
     this.driver = new Builder()
       .forBrowser('chrome')
-      .setChromeOptions(chromeOptions)
+      .setChromeOptions(options)
       .build();
   }
 
