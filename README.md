@@ -1,8 +1,8 @@
 # PreBook - 뷰티샵 예약 자동화 시스템
 
-# TODO(25/03/02)
+# TODO(25/03/03)
 - 현재 현생 이직 이슈... 때문에 개발 중단됨 + 카카오 비즈를 받아야 카카오dev랑 연결이 가능해서, 비즈 받기전에는 채널 자동응답메시지 구현 불가
-- Timeblocks 연동 진행중 -> // src/lib/automation/timeblock.ts, // src/app/api/timeblock/route.ts 까지 제작했으며 admin/dashboard/page.tsx에서 호출하게 추가 제작 필요
+- Timeblocks 연동 진행중 -> 첫번째 push한 상태로 테스트 필요
 - 또한 kimuu의 selling point 중 하나인 '정성스러운 상담'이 시장에 얼마나 영향을 끼칠지 계속 논의해봐야함. '정성스러운 상담'이 체계적인 예약과 함께 병행될수도 있다는 점은 기억할것. 흑백논리로 생각하진 말자
 
 ## 1. 프로젝트 개요
