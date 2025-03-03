@@ -140,8 +140,10 @@ export default function AdminDashboard() {
 
       if (error) throw error;
 
-      // 상태별 자동화 처리
-      if (newStatus === 'confirmed' && selectedReservation.selected_slot) {
+    // 상태별 자동화 처리
+    if (newStatus === 'confirmed' && selectedReservation.selected_slot) {
+      try {
+        // 카카오톡 메시지 발송
         try {
           await kakaoAutomation.addToQueue(
             selectedReservation.phone,
@@ -155,7 +157,30 @@ export default function AdminDashboard() {
         } catch (messageError) {
           console.error('예약 확정 메시지 큐 추가 실패:', messageError);
         }
+
+        // 타임블록 일정 등록
+        const response = await fetch('/api/timeblock', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            customerName: selectedReservation.customer_name,
+            date: selectedReservation.selected_slot.date,
+            time: selectedReservation.selected_slot.time,
+            isRetouching: selectedReservation.desired_service === 'retouch'
+          }),
+        });
+        
+        if (!response.ok) {
+          throw new Error('타임블록 등록 실패');
+        }
+        
+        console.log('타임블록 일정 등록 성공');
+      } catch (error) {
+        console.error('자동화 처리 중 오류 발생:', error);
       }
+    }
 
       setReservations(prev =>
         prev.map(reservation =>
