@@ -36,15 +36,24 @@ export class TimeblockAutomation {
       // 날짜 찾기 및 클릭
       const date = new Date(event.date);
       const day = date.getDate().toString();
-      
+
       // 날짜 셀 찾기
+      console.log('날짜 검색 시작:', day);
       const dateElements = await page.$$('.css-10sf0gr-DateCellLayer__Layer > div');
+      let dateFound = false;
       for (const element of dateElements) {
-        const text = await page.evaluate(el => el.textContent?.trim() || '', element);
+        const text = await page.evaluate(el => el?.textContent?.trim() || '', element);
+        console.log('검색된 텍스트:', text);
         if (text === day) {
           await element.click();
+          dateFound = true;
+          console.log('날짜 발견 및 클릭:', day);
           break;
         }
+      }
+
+      if (!dateFound) {
+        throw new Error(`날짜를 찾을 수 없습니다: ${event.date}`);
       }
       
       // '일정' 버튼 클릭
