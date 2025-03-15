@@ -8,6 +8,9 @@ interface TimeblockEvent {
   isRetouching: boolean;
 }
 
+// 대기를 위한 delay 함수
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
 export class TimeblockAutomation {
   private email: string = "tsi04037@naver.com"; // 실제 이메일로 변경
   private password: string = "akjy1191"; // 실제 비밀번호로 변경
@@ -33,28 +36,40 @@ export class TimeblockAutomation {
       await page.waitForSelector('.css-1gc45ry-Calendar__Container');
       console.log('로그인 성공');
       
+      // 대기를 추가
+      await delay(1000);
+      
       // 날짜 찾기 및 클릭
       const date = new Date(event.date);
       const day = date.getDate().toString();
 
       // 날짜 셀 찾기
       console.log('날짜 검색 시작:', day);
-      const dateElements = await page.$$('.css-10sf0gr-DateCellLayer__Layer > div');
-      let dateFound = false;
-      for (const element of dateElements) {
-        const text = await page.evaluate(el => el?.textContent?.trim() || '', element);
-        console.log('검색된 텍스트:', text);
-        if (text === day) {
-          await element.click();
-          dateFound = true;
-          console.log('날짜 발견 및 클릭:', day);
-          break;
+      await page.waitForSelector('.css-10sf0gr-DateCellLayer__Layer > div');
+      await delay(500);
+
+      // 페이지 컨텍스트 내에서 직접 날짜 요소를 찾고 클릭
+      const dateFound = await page.evaluate((targetDay) => {
+        const elements = document.querySelectorAll('.css-10sf0gr-DateCellLayer__Layer > div');
+        for (let i = 0; i < elements.length; i++) {
+          const element = elements[i];
+          const text = element.textContent ? element.textContent.trim() : '';
+          console.log('브라우저 내부 검색된 텍스트:', text);
+          
+          if (text === targetDay || text.includes(targetDay)) {
+            (element as HTMLElement).click();
+            return true;
+          }
         }
-      }
+        return false;
+      }, day);
 
       if (!dateFound) {
         throw new Error(`날짜를 찾을 수 없습니다: ${event.date}`);
       }
+
+      console.log('날짜 클릭 완료');
+      await delay(1000);
       
       // '일정' 버튼 클릭
       await page.waitForSelector('#portal > div.css-1u7rnp7-BlockTypeSelector__Container > li:nth-child(1) > em');
@@ -78,6 +93,9 @@ export class TimeblockAutomation {
       
       // 저장 버튼 클릭
       await page.click('#root > div:nth-child(4) > div.Modal_panel__KkNFT.Modal_medium__\\+Q98k > div > div.Modal_footer__X9QpH > button.Button_container__Uamgo.Button_primary__xUIw7.Button_large__pOZct');
+      
+      // 저장 완료 대기
+      await delay(1000);
       
       console.log('이벤트 추가 완료');
       return true;
