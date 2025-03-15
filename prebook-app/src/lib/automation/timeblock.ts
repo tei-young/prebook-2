@@ -36,8 +36,8 @@ export class TimeblockAutomation {
         const passwordField = await this.driver.findElement(By.css('#signInForm > div:nth-child(2) > div > div > input[type=password]'));
         const loginButton = await this.driver.findElement(By.css('#signInForm > button'));
         
-        await emailField.sendKeys(email);
-        await passwordField.sendKeys(password);
+        await emailField.sendKeys('tsi04037@naver.com');
+        await passwordField.sendKeys('akjy1191');
         await loginButton.click();
         
         // 로그인 후 페이지 로드 대기
