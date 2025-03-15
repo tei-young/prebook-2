@@ -167,37 +167,27 @@ export default function AdminDashboard() {
             isRetouching: selectedReservation.desired_service === 'retouch'
           });
   
-          // 이메일과 비밀번호를 입력받는 프롬프트
-          const email = prompt('타임블록 이메일을 입력하세요');
-          const password = prompt('타임블록 비밀번호를 입력하세요');
+          const response = await fetch('/api/timeblock', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              customerName: selectedReservation.customer_name,
+              date: selectedReservation.selected_slot.date,
+              time: selectedReservation.selected_slot.time,
+              isRetouching: selectedReservation.desired_service === 'retouch'
+            }),
+          });
   
-          if (!email || !password) {
-            console.error('타임블록 로그인 정보가 제공되지 않았습니다');
-          } else {
-            const response = await fetch('/api/timeblock', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                customerName: selectedReservation.customer_name,
-                date: selectedReservation.selected_slot.date,
-                time: selectedReservation.selected_slot.time,
-                isRetouching: selectedReservation.desired_service === 'retouch',
-                email,
-                password
-              }),
-            });
-            
-            const responseData = await response.json();
-            console.log('타임블록 API 응답:', responseData);
-            
-            if (!response.ok) {
-              throw new Error(responseData.error || '타임블록 등록 실패');
-            }
-            
-            console.log('타임블록 일정 등록 성공');
+          const responseData = await response.json();
+          console.log('타임블록 API 응답:', responseData);
+          
+          if (!response.ok) {
+            throw new Error(responseData.error || '타임블록 등록 실패');
           }
+          
+          console.log('타임블록 일정 등록 성공');
         } catch (error) {
           console.error('자동화 처리 중 오류 발생:', error);
         }

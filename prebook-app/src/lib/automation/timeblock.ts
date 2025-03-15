@@ -11,42 +11,37 @@ interface TimeblockEvent {
 
 export class TimeblockAutomation {
   private driver: WebDriver;
+  private email: string = "your-email@example.com"; // 실제 이메일로 변경
+  private password: string = "your-password"; // 실제 비밀번호로 변경
 
   constructor() {
-    // 새 브라우저 세션 생성
     const options = new Options();
-    
     this.driver = new Builder()
       .forBrowser('chrome')
       .setChromeOptions(options)
       .build();
   }
 
-  async addEvent(event: TimeblockEvent, email: string, password: string) {
+  async addEvent(event: TimeblockEvent) {
     try {
-      // 타임블록 사이트 직접 열기
+      // 타임블록 사이트 접속
       console.log('타임블록 사이트 접속 시도');
       await this.driver.get('https://app.timeblocks.com/');
       console.log('타임블록 사이트 접속 성공');
       
-      // 로그인 코드 추가
+      // 로그인
       console.log('로그인 시도');
-      try {
-        const emailField = await this.driver.findElement(By.css('#signInForm > div:nth-child(1) > div > div > input[type=text]'));
-        const passwordField = await this.driver.findElement(By.css('#signInForm > div:nth-child(2) > div > div > input[type=password]'));
-        const loginButton = await this.driver.findElement(By.css('#signInForm > button'));
-        
-        await emailField.sendKeys('tsi04037@naver.com');
-        await passwordField.sendKeys('akjy1191');
-        await loginButton.click();
-        
-        // 로그인 후 페이지 로드 대기
-        await this.driver.wait(until.elementLocated(By.css('.css-1gc45ry-Calendar__Container')), 10000);
-        console.log('로그인 성공');
-      } catch (loginError) {
-        console.error('로그인 실패:', loginError);
-        throw new Error('타임블록 로그인 실패');
-      }
+      const emailField = await this.driver.findElement(By.css('#signInForm > div:nth-child(1) > div > div > input[type=text]'));
+      const passwordField = await this.driver.findElement(By.css('#signInForm > div:nth-child(2) > div > div > input[type=password]'));
+      const loginButton = await this.driver.findElement(By.css('#signInForm > button'));
+      
+      await emailField.sendKeys(this.email);
+      await passwordField.sendKeys(this.password);
+      await loginButton.click();
+      
+      // 로그인 후 페이지 로드 대기
+      await this.driver.wait(until.elementLocated(By.css('.css-1gc45ry-Calendar__Container')), 10000);
+      console.log('로그인 성공');
       
       // 날짜 이동 및 선택
       const dateElement = await this.findDateElement(event.date);
