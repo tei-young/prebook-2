@@ -55,6 +55,7 @@ type ReservationStatus =
 
 ### 3.2 데이터베이스 구조
 ```typescript
+// 시술 타입 정의
 enum serviceTypes {
   natural = 'natural',      // 자연눈썹
   combo = 'combo',          // 콤보눈썹
@@ -148,10 +149,11 @@ interface Reservation {
 
 ### 4.3 자동화 기능
 
-- 승인 시 예약금 안내 메시지 자동 발송
+- (1차)예약 승인 시:
+   - 카카오톡 예약금 안내 메시지 발송 (개발 중)
 - 예약 확정 시:
-    - 선택된 시간대로 타임블록 자동 등록
-    - 카카오톡 확정 메시지 자동 발송
+   - 선택된 시간대로 타임블록 자동 등록
+   - 카카오톡 예약 확정 메시지 발송 (개발 중)
 
 <br>
 
@@ -166,22 +168,68 @@ interface Reservation {
 ✅ 통합 예약 캘린더 구현<br>
 ✅ 시술 선택 UI 개선<br>
 ✅ 예약 상태 관리 확장<br>
+✅ 시술 소요시간 기반 예약 시스템 구현<br>
+✅ 예약 상태 표시 시인성 개선<br>
+✅ 타임블록 자동화 구현<br>
 ### 5.2 진행 중인 기능
-⬜ 시술 소요시간 기반 예약 시스템 구현<br>
-⬜ 예약 상태 표시 시인성 개선<br>
-### 5.3 예정된 기능
 ⬜ 카카오톡 메시지 자동화<br>
-⬜ 타임블록 연동<br>
-⬜ 관리자 인증<br>
+⬜ 관리자 인증 구현<br>
+### 5.3 예정된 기능
+⬜ 카카오톡 API 연동 (대체 방안 모색 중)<br>
+⬜ 입금 확인 자동화<br>
+## 6. 자동화 기능 사용 방법
+### 6.1 타임블록 자동화 설정
 
-<br>
+- Chrome을 디버그 모드로 실행
 
-## 6. 향후 개선 사항
+```bash
+chrome.exe --remote-debugging-port=9222
+```
 
+- Chrome에서 타임블록 웹페이지 로그인 상태로 열기
+
+```bash
+https://app.timeblocks.com/
+```
+
+- 필요한 패키지 설치
+
+```bash
+npm install selenium-webdriver
+npm install @types/selenium-webdriver --save-dev
+```
+
+### 6.2 API 라우트
+
+- 타임블록 자동화: /api/timeblock
+
+- POST 요청으로 호출
+- 고객명, 날짜, 시간, 시술 정보를 전달
+
+
+
+## 7. 향후 개선 사항
+
+- 입금 확인 자동화 (은행 API 연동)
 - 예약 통계 및 분석 기능
 - 고객 관리 시스템 통합
 - 매출 관리 연동
 
+## 8. 코드 구조 및 주요 파일
+
+- src/app/prebook/page.tsx: 예약 신청 페이지
+- src/app/admin/dashboard/page.tsx: 관리자 대시보드
+- src/components/calendar/Calendar.tsx: 예약 캘린더 컴포넌트
+- src/lib/automation/timeblock.ts: 타임블록 자동화 로직
+- src/app/api/timeblock/route.ts: 타임블록 API 라우트
+- src/constants/messageTemplates.ts: 메시지 템플릿
+
+## 9. 주의사항
+
+- 타임블록 자동화 사용 시 Chrome을 디버그 모드로 실행해야 함
+- 예약 확정 기능 사용 시 타임블록 웹페이지가 열려있어야 함
+- 타임블록 웹사이트 UI가 변경될 경우 셀렉터 업데이트 필요
+- 메시지 템플릿 변경 시 messageTemplates.ts 파일 수정 필요
 <br>
 
 이 프로젝트는 단순한 예약 시스템을 넘어, 뷰티샵 운영의 효율성을 높이는 것을 목표로 합니다. 현재는 예약 프로세스 자동화에 집중하고 있으며, 추후 더 많은 운영 관리 기능을 추가할 수 있습니다.
