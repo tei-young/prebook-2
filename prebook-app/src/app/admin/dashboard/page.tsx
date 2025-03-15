@@ -128,7 +128,7 @@ export default function AdminDashboard() {
 
   const handleStatusChange = async (reservationId: string, newStatus: ReservationStatus) => {
     if (!selectedReservation) return;
-
+  
     try {
       const { error } = await supabase
         .from('reservations')
@@ -137,62 +137,72 @@ export default function AdminDashboard() {
           status_updated_at: new Date().toISOString()
         })
         .eq('id', reservationId);
-
+  
       if (error) throw error;
-
-    // 상태별 자동화 처리
-    if (newStatus === 'confirmed' && selectedReservation.selected_slot) {
-      try {
-        // 카카오톡 메시지 발송
+  
+      // 상태별 자동화 처리
+      if (newStatus === 'confirmed' && selectedReservation.selected_slot) {
         try {
-          await kakaoAutomation.addToQueue(
-            selectedReservation.phone,
-            'CONFIRMATION',
-            {
-              customerName: selectedReservation.customer_name,
-              appointmentDate: format(new Date(selectedReservation.selected_slot.date), 'M월 d일'),
-              appointmentTime: selectedReservation.selected_slot.time
-            }
-          );
-        } catch (messageError) {
-          console.error('예약 확정 메시지 큐 추가 실패:', messageError);
-        }
-
-        // 타임블록 일정 등록
-        console.log('타임블록 API 호출 시작');
-        console.log('전송 데이터:', {
-          customerName: selectedReservation.customer_name,
-          date: selectedReservation.selected_slot.date,
-          time: selectedReservation.selected_slot.time,
-          isRetouching: selectedReservation.desired_service === 'retouch'
-        });
-    
-        const response = await fetch('/api/timeblock', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
+          // 카카오톡 메시지 발송
+          try {
+            await kakaoAutomation.addToQueue(
+              selectedReservation.phone,
+              'CONFIRMATION',
+              {
+                customerName: selectedReservation.customer_name,
+                appointmentDate: format(new Date(selectedReservation.selected_slot.date), 'M월 d일'),
+                appointmentTime: selectedReservation.selected_slot.time
+              }
+            );
+          } catch (messageError) {
+            console.error('예약 확정 메시지 큐 추가 실패:', messageError);
+          }
+  
+          // 타임블록 일정 등록
+          console.log('타임블록 API 호출 시작');
+          console.log('전송 데이터:', {
             customerName: selectedReservation.customer_name,
             date: selectedReservation.selected_slot.date,
             time: selectedReservation.selected_slot.time,
             isRetouching: selectedReservation.desired_service === 'retouch'
-          }),
-        });
-        
-        const responseData = await response.json();
-        console.log('타임블록 API 응답:', responseData);
-        
-        if (!response.ok) {
-          throw new Error(responseData.error || '타임블록 등록 실패');
+          });
+  
+          // 이메일과 비밀번호를 입력받는 프롬프트
+          const email = prompt('타임블록 이메일을 입력하세요');
+          const password = prompt('타임블록 비밀번호를 입력하세요');
+  
+          if (!email || !password) {
+            console.error('타임블록 로그인 정보가 제공되지 않았습니다');
+          } else {
+            const response = await fetch('/api/timeblock', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                customerName: selectedReservation.customer_name,
+                date: selectedReservation.selected_slot.date,
+                time: selectedReservation.selected_slot.time,
+                isRetouching: selectedReservation.desired_service === 'retouch',
+                email,
+                password
+              }),
+            });
+            
+            const responseData = await response.json();
+            console.log('타임블록 API 응답:', responseData);
+            
+            if (!response.ok) {
+              throw new Error(responseData.error || '타임블록 등록 실패');
+            }
+            
+            console.log('타임블록 일정 등록 성공');
+          }
+        } catch (error) {
+          console.error('자동화 처리 중 오류 발생:', error);
         }
-        
-        console.log('타임블록 일정 등록 성공');
-      } catch (error) {
-        console.error('자동화 처리 중 오류 발생:', error);
       }
-    }
-
+  
       setReservations(prev =>
         prev.map(reservation =>
           reservation.id === reservationId
@@ -204,7 +214,7 @@ export default function AdminDashboard() {
             : reservation
         )
       );
-
+  
       if (selectedReservation?.id === reservationId) {
         setSelectedReservation(prev => 
           prev ? { 
@@ -214,7 +224,7 @@ export default function AdminDashboard() {
           } : null
         );
       }
-
+  
     } catch (error) {
       console.error('상태 변경 중 오류 발생:', error);
       alert('상태 변경 중 오류가 발생했습니다.');
