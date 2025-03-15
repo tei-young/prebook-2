@@ -159,6 +159,14 @@ export default function AdminDashboard() {
         }
 
         // 타임블록 일정 등록
+        console.log('타임블록 API 호출 시작');
+        console.log('전송 데이터:', {
+          customerName: selectedReservation.customer_name,
+          date: selectedReservation.selected_slot.date,
+          time: selectedReservation.selected_slot.time,
+          isRetouching: selectedReservation.desired_service === 'retouch'
+        });
+    
         const response = await fetch('/api/timeblock', {
           method: 'POST',
           headers: {
@@ -172,8 +180,11 @@ export default function AdminDashboard() {
           }),
         });
         
+        const responseData = await response.json();
+        console.log('타임블록 API 응답:', responseData);
+        
         if (!response.ok) {
-          throw new Error('타임블록 등록 실패');
+          throw new Error(responseData.error || '타임블록 등록 실패');
         }
         
         console.log('타임블록 일정 등록 성공');
