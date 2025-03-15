@@ -13,16 +13,20 @@ export class TimeblockAutomation {
   private driver: WebDriver;
 
   constructor() {
-    // Chrome 옵션 설정
-    const options = new Options();
-    
-    // 디버깅 설정
-    options.addArguments('--remote-debugging-port=9222');
-    
-    this.driver = new Builder()
-      .forBrowser('chrome')
-      .setChromeOptions(options)
-      .build();
+    try {
+      console.log('Selenium 드라이버 초기화 시작');
+      const options = new Options();
+      options.addArguments('--remote-debugging-port=9222');
+      
+      this.driver = new Builder()
+        .forBrowser('chrome')
+        .setChromeOptions(options)
+        .build();
+      console.log('Selenium 드라이버 초기화 성공');
+    } catch (error) {
+      console.error('Selenium 드라이버 초기화 실패:', error);
+      throw error;
+    }
   }
 
   async addEvent(event: TimeblockEvent) {
