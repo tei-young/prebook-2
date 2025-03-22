@@ -56,21 +56,19 @@ export class TimeblockAutomation {
       // 로그인
       console.log('로그인 시도');
       try {
-        await page.waitForSelector('#signInForm', { timeout: 10000 });
+        await page.waitForSelector('#signInForm > div:nth-child(1) > div > div > input[type=text]', { timeout: 10000 });
+        await delay(1000); // 추가 대기
         await page.type('#signInForm > div:nth-child(1) > div > div > input[type=text]', this.email);
         await page.type('#signInForm > div:nth-child(2) > div > div > input[type=password]', this.password);
         
-        // 양식 제출 방식으로 변경
-        await page.evaluate(() => {
-          const form = document.querySelector('#signInForm') as HTMLFormElement;
-          if (form) form.submit();
-        });
-        console.log('로그인 양식 제출 완료 (양식 제출 방식)');
+        // 원래 버튼 클릭 방식으로 로그인
+        await page.click('#signInForm > button');
+        console.log('로그인 양식 제출 완료');
         
-        // 충분한 대기 시간 추가
-        await delay(10000);
+        // 추가 대기 시간 (필요시)
+        await delay(5000);
       } catch (error: unknown) {
-        // 오류 처리 코드
+        // 오류 처리 코드 유지
       }
       
       // 리디렉션 및 메인 페이지 로드 대기
