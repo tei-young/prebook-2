@@ -84,36 +84,48 @@ export default function Calendar({
  }, [currentMonth]);
 
  const isTimeSlotAvailable = (date: Date, time: string) => {
-   if (!bookedSlots) return true;
+  if (!bookedSlots || !serviceType) return true;
 
-   // 선택된 시간의 Date 객체 생성
-   const targetDateTime = new Date(`${format(date, 'yyyy-MM-dd')}T${time}`);
-   
-   // 각 예약된 슬롯 확인
-   return !bookedSlots.some(slot => {
-     // deposit_wait나 confirmed 상태의 예약만 체크
-     if (
-       (slot.status === 'deposit_wait' || slot.status === 'confirmed') && 
-       slot.selected_slot?.date
-     ) {
-       const bookedDateTime = new Date(`${slot.selected_slot.date}T${slot.selected_slot.time}`);
-       const bookedService = slot.serviceType;
-       const bookedDuration = SERVICE_MAP[bookedService as keyof typeof serviceTypes]?.duration || 1;
+  // 선택된 시간의 Date 객체 생성
+  const targetDateTime = new Date(`${format(date, 'yyyy-MM-dd')}T${time}`);
+  
+  // 현재 선택한 시술의 소요시간 (1시간 또는 2시간)
+  const selectedServiceDuration = SERVICE_MAP[serviceType as keyof typeof serviceTypes]?.duration || 1;
+  
+  // 각 예약된 슬롯 확인
+  return !bookedSlots.some(slot => {
+    // deposit_wait나 confirmed 상태의 예약만 체크
+    if (
+      (slot.status === 'deposit_wait' || slot.status === 'confirmed') && 
+      slot.selected_slot?.date
+    ) {
+      const bookedDateTime = new Date(`${slot.selected_slot.date}T${slot.selected_slot.time}`);
+      const bookedService = slot.serviceType;
+      const bookedDuration = SERVICE_MAP[bookedService as keyof typeof serviceTypes]?.duration || 1;
 
-       // 예약된 시간부터 시술 소요시간 동안의 시간대 체크
-       for (let i = 0; i < bookedDuration; i++) {
-         const checkTime = new Date(bookedDateTime);
-         checkTime.setHours(checkTime.getHours() + i);
-         
-         // 선택하려는 시간이 예약된 시간대와 겹치는지 확인
-         if (isSameHour(checkTime, targetDateTime)) {
-           return true; // 겹치면 사용 불가
-         }
-       }
-     }
-     return false;
-   });
- };
+      // 두 가지 충돌 상황 검사:
+      
+      // 1. 기존 예약시간과 새 예약시간이 겹치는 경우
+      // 예약된 시간부터 시술 소요시간 동안의 시간대 체크
+      for (let i = 0; i < bookedDuration; i++) {
+        const checkBookedTime = new Date(bookedDateTime);
+        checkBookedTime.setHours(checkBookedTime.getHours() + i);
+        
+        // 새로 선택하는 시술이 기존 예약과 겹치는지 확인
+        for (let j = 0; j < selectedServiceDuration; j++) {
+          const checkTargetTime = new Date(targetDateTime);
+          checkTargetTime.setHours(checkTargetTime.getHours() + j);
+          
+          if (isSameDay(checkBookedTime, checkTargetTime) && 
+              checkBookedTime.getHours() === checkTargetTime.getHours()) {
+            return true; // 겹치면 사용 불가
+          }
+        }
+      }
+    }
+    return false;
+  });
+};
 
  const handleDateClick = (date: Date) => {
    setSelectedDate(date);

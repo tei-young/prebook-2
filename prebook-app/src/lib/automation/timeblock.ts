@@ -19,17 +19,28 @@ export class TimeblockAutomation {
     // 브라우저 시작 시 알림 권한을 차단하도록 설정
     const browser = await puppeteer.launch({ 
       headless: false,
-      devtools: true,  // 개발자 도구 열기
+      devtools: true,
       args: [
         '--disable-notifications',
         '--disable-extensions',
         '--disable-popup-blocking',
         '--start-maximized',
         '--no-sandbox',
-        '--disable-web-security'
+        '--disable-web-security',
+        '--allow-running-insecure-content',
+        '--enable-features=NetworkService',
+        '--allow-third-party-cookies',  // 서드파티 쿠키 허용
+        '--enable-automation',
+        '--disable-backgrounding-occluded-windows',
+        '--disable-background-timer-throttling',
+        '--disable-renderer-backgrounding',
+        '--window-size=1920,1080'
       ],
       defaultViewport: null
     });
+    
+    // 필요한 경우 브라우저 컨텍스트에서 HTTPS 오류 무시
+    const context = browser.defaultBrowserContext();
 
     try {
       const context = browser.defaultBrowserContext();
