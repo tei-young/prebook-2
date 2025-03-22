@@ -39,10 +39,10 @@ export class TimeblockAutomation {
       page.setDefaultNavigationTimeout(60000);
       page.setDefaultTimeout(60000);
       
-      // 타임블록 사이트 접속
-      console.log('타임블록 사이트 접속 시도');
-      await page.goto('https://app.timeblocks.com/', { waitUntil: 'networkidle2' });
-      console.log('타임블록 사이트 접속 성공');
+      // 타임블록 사이트 접속 (signin 페이지로 직접 접근)
+      console.log('타임블록 로그인 페이지 접속 시도');
+      await page.goto('https://app.timeblocks.com/signin', { waitUntil: 'networkidle2' });
+      console.log('타임블록 로그인 페이지 접속 성공');
       
       // 스크린샷 디버깅 (문제 확인용)
       await page.screenshot({ path: 'timeblock-initial.png' });
@@ -63,29 +63,70 @@ export class TimeblockAutomation {
         throw new Error('로그인 양식 작성 실패: ' + errorMessage);
       }
       
-      // 로그인 후 페이지 로드 대기 (셀렉터가 변경되었을 수 있으므로 여러 셀렉터 시도)
-      console.log('로그인 후 페이지 로드 대기 중...');
-      
+      // 리디렉션 및 메인 페이지 로드 대기
+      console.log('리디렉션 및 메인 페이지 로드 대기 중...');
+
+      // 리디렉션 감지를 위한 대기
+      await Promise.race([
+        page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 20000 }),
+        delay(10000)  // 최대 10초 대기
+      ]);
+
+      // 현재 URL 확인
+      const currentUrl = page.url();
+      console.log('현재 URL:', currentUrl);
+
+      // 메인 페이지 로드 확인
+      if (currentUrl === 'https://app.timeblocks.com/' || currentUrl === 'https://app.timeblocks.com') {
+        console.log('메인 페이지로 리디렉션 성공');
+      } else {
+        console.log('예상과 다른 URL로 리디렉션됨, 메인 페이지로 이동 시도');
+        await page.goto('https://app.timeblocks.com/', { waitUntil: 'networkidle2' });
+        await delay(5000);
+      }
+
+      // 페이지 스크린샷
+      await page.screenshot({ path: 'main-page.png' });
+
+      // 캘린더 컨테이너 대기
       try {
-        // 여러 가능한 셀렉터 중 하나라도 나타나면 로그인 성공으로 간주
+        // 여러 가능한 캘린더 셀렉터 시도
         await Promise.race([
-          page.waitForSelector('.css-1gc45ry-Calendar__Container', { timeout: 20000 }),
-          page.waitForSelector('.Calendar__Container', { timeout: 20000 }),
-          page.waitForSelector('.calendarContainer', { timeout: 20000 }),
-          page.waitForSelector('[data-testid="calendar-container"]', { timeout: 20000 }),
-          page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 20000 })
+          page.waitForSelector('.css-1gc45ry-Calendar__Container', { timeout: 15000 }),
+          page.waitForSelector('.Calendar__Container', { timeout: 15000 }),
+          page.waitForSelector('.calendarContainer', { timeout: 15000 })
         ]);
-        console.log('로그인 성공');
-        await page.screenshot({ path: 'after-login.png' });
+        console.log('캘린더 컨테이너 로드 성공');
+        await page.screenshot({ path: 'calendar-loaded.png' });
       } catch (error: unknown) {
-        console.error('로그인 후 페이지 로드 실패:', error);
-        // 현재 페이지 HTML 내용 확인
+        console.error('캘린더 컨테이너 로드 실패:', error);
+        
+        // 페이지 내용 분석 디버깅
         const pageContent = await page.content();
         console.log('현재 페이지 내용 일부:', pageContent.substring(0, 500));
-        await page.screenshot({ path: 'login-timeout.png' });
+        
+        const domInfo = await page.evaluate(() => {
+          return {
+            bodyHTML: document.body.innerHTML.substring(0, 1000),
+            visibleElements: Array.from(document.querySelectorAll('*'))
+              .filter(el => {
+                // HTMLElement로 타입 단언
+                const htmlEl = el as HTMLElement;
+                return htmlEl.offsetWidth > 0 && htmlEl.offsetHeight > 0;
+              })
+              .slice(0, 20)
+              .map(el => ({
+                tag: el.tagName,
+                id: el.id,
+                class: el.className
+              }))
+          };
+        });
+        
+        console.log('DOM 정보:', JSON.stringify(domInfo, null, 2));
         
         const errorMessage = error instanceof Error ? error.message : String(error);
-        throw new Error('로그인 후 달력 화면 로드 실패: ' + errorMessage);
+        throw new Error('캘린더 컨테이너 로드 실패: ' + errorMessage);
       }
       
       // 대기를 추가
