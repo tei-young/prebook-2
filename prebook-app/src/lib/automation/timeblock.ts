@@ -19,11 +19,14 @@ export class TimeblockAutomation {
     // 브라우저 시작 시 알림 권한을 차단하도록 설정
     const browser = await puppeteer.launch({ 
       headless: false,
+      devtools: true,  // 개발자 도구 열기
       args: [
         '--disable-notifications',
         '--disable-extensions',
         '--disable-popup-blocking',
-        '--start-maximized'
+        '--start-maximized',
+        '--no-sandbox',
+        '--disable-web-security'
       ],
       defaultViewport: null
     });
@@ -34,6 +37,9 @@ export class TimeblockAutomation {
       await context.overridePermissions('https://app.timeblocks.com', []);
       
       const page = await browser.newPage();
+
+      //signup에서 캘린더 페이지로 넘어가지 않는 이슈_userAgent 설정 추가
+      await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
       
       // 페이지 로드 타임아웃 설정 증가
       page.setDefaultNavigationTimeout(60000);
@@ -50,17 +56,21 @@ export class TimeblockAutomation {
       // 로그인
       console.log('로그인 시도');
       try {
-        await page.waitForSelector('#signInForm > div:nth-child(1) > div > div > input[type=text]', { timeout: 10000 });
-        await delay(1000); // 추가 대기
+        await page.waitForSelector('#signInForm', { timeout: 10000 });
         await page.type('#signInForm > div:nth-child(1) > div > div > input[type=text]', this.email);
         await page.type('#signInForm > div:nth-child(2) > div > div > input[type=password]', this.password);
-        await page.click('#signInForm > button');
-        console.log('로그인 양식 제출 완료');
+        
+        // 양식 제출 방식으로 변경
+        await page.evaluate(() => {
+          const form = document.querySelector('#signInForm') as HTMLFormElement;
+          if (form) form.submit();
+        });
+        console.log('로그인 양식 제출 완료 (양식 제출 방식)');
+        
+        // 충분한 대기 시간 추가
+        await delay(10000);
       } catch (error: unknown) {
-        console.error('로그인 양식 작성 오류:', error);
-        await page.screenshot({ path: 'login-error.png' });
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        throw new Error('로그인 양식 작성 실패: ' + errorMessage);
+        // 오류 처리 코드
       }
       
       // 리디렉션 및 메인 페이지 로드 대기
@@ -75,6 +85,17 @@ export class TimeblockAutomation {
       // 현재 URL 확인
       const currentUrl = page.url();
       console.log('현재 URL:', currentUrl);
+      
+      // 자바스크립트 실행 상태 확인 추가
+      const jsStatus = await page.evaluate(() => {
+        return {
+          readyState: document.readyState,
+          scripts: Array.from(document.querySelectorAll('script')).map(s => s.src).filter(Boolean),
+          errors: (window as any).errors || 'No errors tracked',
+          hasReactRoot: !!document.querySelector('#root')?.childElementCount
+        };
+      });
+      console.log('JavaScript 실행 상태:', jsStatus);
 
       // 메인 페이지 로드 확인
       if (currentUrl === 'https://app.timeblocks.com/' || currentUrl === 'https://app.timeblocks.com') {
