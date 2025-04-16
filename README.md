@@ -1,325 +1,135 @@
-# PreBook - 뷰티샵 예약 자동화 시스템
+# prebook-2
+# 예약 시간 페이지만 공유할 수 있는 라이트한 prebook
+## 프로젝트 개요
+- prebook-2는 원장님의 업무 효율성을 높이고 휴먼 에러를 줄이기 위한 예약 시간 관리 시스템입니다. 기존 prebook과 달리 고객이 직접 예약을 신청하는 방식이 아닌, 원장님이 예약 가능/불가능 시간을 관리하고 고객은 이를 확인만 할 수 있는 간소화된 시스템입니다.
 
-# TODO(25/03/24)
-- 카카오 비즈를 받아야 카카오dev랑 연결이 가능해서, 비즈 받기전에는 채널 자동응답메시지 구현 불가
-- Timeblocks 연동 진행중 -> 추가 테스트 필요 -> 타임블록 자동화: Puppeteer 사용 시 웹 기술적 제한으로 인한 자동화 어려움 발생
-   - Firebase와 Notification API 지원 문제로 로그인 후 메인 페이지 로드 불가
-   - 대안 모색 중: 1) Selenium 재검토 2) 자동화 범위 수정 3) 수동 예약 + 알림 방식 고려
-<br>
-- kimuu의 selling point 중 하나인 '정성스러운 상담'이 시장에 얼마나 영향을 끼칠지 계속 논의해봐야함. '정성스러운 상담'이 체계적인 예약과 함께 병행될수도 있다는 점은 기억할것. 흑백논리로 생각하진 말자
+## 핵심 목표
 
-## 1. 프로젝트 개요
-### 1.1 개발 배경
-- 원장님께서 카카오톡으로 예약 상담 후 수기로 타임블록 캘린더에 일정을 입력하는 프로세스
-- 수동 입력 과정에서 발생하는 human error와 반복 작업의 비효율 존재
-- 자동화를 통한 업무 효율 개선 필요
+- 원장님의 작업량 최소화: 예약 불가능한 시간만 명시적으로 차단
+- 중복 예약 방지: 예약된 시간 자동 관리
+- 고객에게 실시간 예약 가능 시간 제공
+- 기존 예약 관리 시스템과의 통합
 
-### 1.2 목표
-- 예약 프로세스 자동화를 통한 업무 효율성 향상
-- 예약 정보의 정확성 확보
+## 시스템 구성
+
+1. 원장 어드민 페이지
+
+  - 기본적으로 모든 시간은 '예약 가능'으로 간주
+  - 원장님이 시술 날짜와 시간을 입력하여 예약 불가능 시간으로 전환 가능
+  - 예약 상태 관리: deposit_wait(예약금 대기), confirmed(예약 확정), cancelled(취소)
+  - 고객 정보는 선택적으로 입력 가능
+
+
+2. 고객용 시술 시간 공유 페이지
+
+  - 예약 가능한 시간만 표시
+  - 시술 날짜와 시간만 보여줌
+  - 예약 버튼 없음, 대신 카카오톡 또는 DM으로 문의 유도
+
+
+
+- 데이터베이스 구조
+```sql-- 예약 불가능한 시간 관리 테이블
+CREATE TABLE public.unavailable_slots (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  date TEXT NOT NULL,
+  time TEXT NOT NULL,
+  reason TEXT, -- 예약 불가 사유 (휴무일, 개인 일정 등)
+  status TEXT NOT NULL DEFAULT 'blocked',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 예약 테이블 (간소화)
+CREATE TABLE public.bookings (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  date TEXT NOT NULL,
+  time TEXT NOT NULL,
+  service_type TEXT NOT NULL,
+  customer_name TEXT,
+  customer_phone TEXT, 
+  status TEXT NOT NULL DEFAULT 'deposit_wait',
+  notes TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  CONSTRAINT check_status CHECK (status IN ('deposit_wait', 'confirmed', 'cancelled'))
+);
+
+-- 인덱스 생성
+CREATE INDEX idx_unavailable_slots_date ON unavailable_slots(date);
+CREATE INDEX idx_bookings_date ON bookings(date);
+CREATE INDEX idx_bookings_status ON bookings(status);
+```
+
+## 예약 프로세스
+
+1. 기본 상태: 모든 시간은 기본적으로 '예약 가능'
+2. 원장 예약 관리:
+
+- 휴무일, 개인 일정: unavailable_slots 테이블에 등록
+- 고객 예약 시: bookings 테이블에 등록 (상태: deposit_wait)
+
+
+3. 예약금 확인 후: 상태를 confirmed로 변경
+4. 필요시 취소: 상태를 cancelled로 변경
+
+## 개발 범위
+
+1. 관리자 대시보드 수정
+
+- 기존 예약 관리 기능 유지
+- 예약 불가능 시간 관리 기능 추가
+- 날짜와 시간만으로 빠르게 예약 불가 처리 가능
+- 예약 상태 관리 기능
+
+
+2. 예약 가능 시간 조회 페이지 구현
+
+- 모바일 최적화 웹뷰 디자인
+- 예약 가능 시간만 표시
+- 간결하고 직관적인 UI
+- 문의 유도 버튼/텍스트 제공
+
+
+3. 기존 시스템 연동
+
+- 기존 관리자 대시보드와 통합
+- 예약 상태 관리 시스템 유지
+
+
+
+## 개발 단계
+
+1. 단계 1: 관리자 대시보드 수정
+
+- 예약 불가능 시간 관리 기능 추가
+- 날짜/시간 이외 정보는 선택 입력 필드로 구현
+- 기존 예약 관리 시스템과 통합
+
+
+2. 단계 2: 예약 가능 시간 조회 페이지 구현
+
+- 모바일 최적화 디자인
+- 예약 가능 시간만 표시하는 직관적 UI
+- 문의 버튼/링크 추가
+
+
+3. 단계 3: 기존 기능 연결
+
+- 관리자가 예약 확정 시 해당 슬롯 상태 변경
+
+
+4. 단계 4: 자동화 기능 연결
+
+- 기존 타임블록 자동화 기능 연결 유지
+
+
+
+## 기대 효과
+
 - 원장님의 수동 작업 최소화
-- 고객 편의성 향상을 위한 통합 예약 시스템 제공
+- 중복 예약 방지를 통한 휴먼 에러 감소
+- 고객에게 실시간 예약 가능 정보 제공
+- 카카오톡/DM을 통한 개인화된 상담 프로세스 유지
 
-## 2. 예약 프로세스
-### 2.1 전체 Flow
-```mermaid
-graph TD
-   A[카카오톡 상담] --> B[예약 페이지 URL 전달]
-   B --> C[고객 예약 신청]
-   C --> D[관리자 승인]
-   D --> E[예약금 안내 메시지 자동 발송]
-   E --> F[예약금 입금 대기]
-   F --> G[관리자 입금 확인]
-   G --> H[최종 시간대 선택 및 예약 확정]
-   H --> I1[타임블록 일정 자동 등록]
-   H --> I2[카카오톡 확정 메시지 자동 발송]
-```
-
-### 2.2 예약 상태
-```typescript
-type ReservationStatus = 
-  | 'pending'           // 신청됨
-  | 'deposit_wait'      // 승인됨 & 예약금 대기중
-  | 'deposit_confirmed' // 예약금 확인됨
-  | 'confirmed'         // 예약 확정
-  | 'rejected'          // 거절됨
-```
-
-<br>
-
-## 3. 시스템 아키텍처
-### 3.1 기술 스택
-
-- Frontend: Next.js, TypeScript, Tailwind CSS, shadcn/ui
-- Database: Supabase
-- Storage: Supabase Storage
-- 자동화: Puppeteer (타임블록 웹 자동화)
-- API: 카카오톡 비즈니스 채널 API (개발 중단 상태)
-
-### 3.2 데이터베이스 구조
-```typescript
-// 시술 타입 정의
-enum serviceTypes {
-  natural = 'natural',      // 자연눈썹
-  combo = 'combo',          // 콤보눈썹
-  shadow = 'shadow',        // 섀도우눈썹
-  retouch = 'retouch',      // 리터치
-  brownline = 'brownline',  // 브라운아이라인
-  removal = 'removal',      // 잔흔제거
-  recommend = 'recommend'   // 키뮤원장 추천시술
-}
-
-interface ServiceInfo {
-  name: string;
-  duration: 1 | 2;  // 시술 소요시간 (시간 단위)
-}
-
-interface DesiredTimeSlot {
-  date: string;
-  time: string;
-  priority: 1 | 2 | 3;  // 우선순위
-}
-
-interface Reservation {
-    id: string;
-    customer_name: string;
-    gender: string;
-    age: number;
-    phone: string;
-    desired_service: keyof typeof serviceTypes;
-    referral_source: string | null;
-    desired_slots: DesiredTimeSlot[];    // 희망 시간대
-    confirmed_slot?: {                   // 확정된 시간대
-      date: string;
-      time: string;
-    };
-    prior_experience: string | null;
-    front_photo_url: string | null;
-    closed_photo_url: string | null;
-    status: ReservationStatus;
-    deposit_confirmed_at?: Date;
-    status_updated_at: Date;
-    created_at: Date;
-    updated_at: Date;
-}
-```
-
-<br>
-
-## 4. 주요 기능
-### 4.1 예약 신청 페이지 (/prebook)
-
-- 고객 정보 입력
-
-    - 기본 정보 (이름, 성별, 나이, 연락처)
-    - 시술 정보 (희망 시술 선택, 시술 경험)
-    - 사진 첨부 (눈썹 사진 2장)
-
-
-- 시술 선택 기능
-
-    - 카테고리별 시술 분류 (눈썹문신/기타시술)
-    - 시술별 상세 설명 제공
-    - 버튼 형식의 직관적인 UI
-
-
-- 통합 예약 캘린더
-    
-    - 예약 가능한 날짜/시간대 표시
-    - 시술 소요시간에 따른 예약 가능 시간 자동 조정
-    - 1~3순위 시간대 선택 기능
-    - 오전/오후 시간대 구분 표시
-
-
-
-### 4.2 관리자 대시보드 (/admin/dashboard)
-
-- 예약 목록 조회 및 필터링
-- 예약 상세 정보 확인
-- 예약 상태 관리
-    - 승인/거절
-    - 예약금 확인
-    - 최종 시간대 선택
-- 예약 확정
-
-
-- 자동화 기능 연동
-    - 카카오톡 메시지 발송
-    - 타임블록 일정 등록
-
-- 시인성 개선된 상태 표시 시스템
-
-
-### 4.3 자동화 기능
-
-- (1차)승인 -> 예약 승인 시:
-   - 카카오톡 예약금 안내 메시지 발송 (비즈채널 전환 필요로 잠정 중단)
-- (2차)승인 -> 예약 확정 시:
-   - 선택된 시간대로 타임블록 자동 등록
-   - 카카오톡 예약 확정 메시지 발송 (비즈채널 전환 필요로 잠정 중단)
-
-<br>
-
-## 5. 구현 현황
-### 5.1 완료된 기능
-✅ 프로젝트 초기 설정<br>
-✅ 기본 예약 신청 페이지 구현<br>
-✅ 관리자 대시보드 기본 구현<br>
-✅ Supabase 연동<br>
-✅ 파일 업로드 기능<br>
-✅ 예약 승인/거절 기능<br>
-✅ 통합 예약 캘린더 구현<br>
-✅ 시술 선택 UI 개선<br>
-✅ 예약 상태 관리 확장<br>
-✅ 시술 소요시간 기반 예약 시스템 구현<br>
-✅ 예약 상태 표시 시인성 개선<br>
-✅ 타임블록 자동화 구현<br>
-✅ 시간대 충돌 검사 로직 개선 (2시간 소요 시술 시 다음 시간대 충돌 검사)<br>
-### 5.2 진행 중인 기능
-⬜ 카카오톡 메시지 자동화(비즈니스 채널 전환 필요로 보류 중)<br>
-⬜ 관리자 인증 구현<br>
-⬜ 타임블록 자동화 대안 검토<br>
-### 5.3 예정된 기능
-⬜ 카카오톡 API 연동 (대체 방안 모색 중)<br>
-⬜ 입금 확인 자동화<br>
-## 6. 자동화 기능 사용 방법
-### 6.0 타임블록 자동화 관련 이슈
-Puppeteer를 이용한 타임블록 자동화 시 다음과 같은 기술적 제한 사항이 발견됨:
-
-- Third-party cookie 차단 문제
-- 타임블록 사이트의 Firebase Messaging API 호환성 문제
-- Notification API 지원 문제
-
-이러한 제한으로 로그인 후 메인 페이지가 제대로 로드되지 않는 문제가 있음. 다음과 같은 대안을 검토 중:
-
-- Selenium WebDriver 재검토
-- 자동화 범위 수정 (타임블록 일정 등록 제외)
-- 수동 예약 + 알림 방식으로 변경
-
-### 6.1 타임블록 자동화 설정
-
-- 필요한 패키지 설치
-
-```bash
-npm install puppeteer
-```
-
-- API 라우트 구현
-```typescript
-// src/app/api/timeblock/route.ts
-import { NextResponse } from 'next/server';
-import { timeblockAutomation } from '@/lib/automation/timeblock';
-
-export async function POST(request: Request) {
-  try {
-    const body = await request.json();
-    const { customerName, date, time, isRetouching } = body;
-    
-    await timeblockAutomation.addEvent({
-      customerName,
-      date,
-      time,
-      isRetouching
-    });
-    
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    return NextResponse.json(
-      { success: false, error: (error as Error).message },
-      { status: 500 }
-    );
-  }
-}
-```
-
-- 자동화 클래스 구현
-
-```typescript
-// lib/automation/timeblock.ts
-import puppeteer from 'puppeteer';
-
-interface TimeblockEvent {
-  customerName: string;
-  date: string;
-  time: string;
-  isRetouching: boolean;
-}
-
-// 대기를 위한 delay 함수
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
-export class TimeblockAutomation {
-  private email: string = "email@example.com"; // 실제 이메일로 변경
-  private password: string = "password"; // 실제 비밀번호로 변경
-
-  async addEvent(event: TimeblockEvent) {
-    const browser = await puppeteer.launch({ headless: false });
-    try {
-      const page = await browser.newPage();
-      
-      // 타임블록 사이트 접속 및 로그인 로직
-      // ...
-      
-      // 페이지 컨텍스트 내에서 직접 날짜 요소를 찾고 클릭
-      const dateFound = await page.evaluate((targetDay) => {
-        const elements = document.querySelectorAll('.css-10sf0gr-DateCellLayer__Layer > div');
-        for (let i = 0; i < elements.length; i++) {
-          const element = elements[i];
-          const text = element.textContent ? element.textContent.trim() : '';
-          if (text === targetDay || text.includes(targetDay)) {
-            (element as HTMLElement).click();
-            return true;
-          }
-        }
-        return false;
-      }, day);
-      
-      // 일정 입력 및 저장 로직
-      // ...
-      
-      return true;
-    } catch (error) {
-      throw error;
-    } finally {
-      await browser.close();
-    }
-  }
-}
-
-export const timeblockAutomation = new TimeblockAutomation();
-```
-
-### 6.2 API 라우트
-
-- 타임블록 자동화: /api/timeblock
-
-- POST 요청으로 호출
-- 고객명, 날짜, 시간, 시술 정보를 전달
-
-## 7. 향후 개선 사항
-
-- 입금 확인 자동화 (은행 API 연동)
-- 예약 통계 및 분석 기능
-- 고객 관리 시스템 통합
-- 매출 관리 연동
-- 카카오톡 API 연동 (비즈니스 채널 문제 해결 후)
-- 타임블록 자동화 대안 구현
-
-## 8. 코드 구조 및 주요 파일
-
-- src/app/prebook/page.tsx: 예약 신청 페이지
-- src/app/admin/dashboard/page.tsx: 관리자 대시보드
-- src/components/calendar/Calendar.tsx: 예약 캘린더 컴포넌트
-- src/lib/automation/timeblock.ts: 타임블록 자동화 로직
-- src/app/api/timeblock/route.ts: 타임블록 API 라우트
-- src/constants/messageTemplates.ts: 메시지 템플릿
-
-## 9. 주의사항
-
-- 타임블록 자동화 사용 시 로직에 변경이 필요할 수 있음
-- 타임블록 웹사이트 UI가 변경될 경우 셀렉터 업데이트 필요
-- 카카오톡 메시지 관련 코드는 비즈니스 채널 연동 전까지 주석 처리 권장
-- 메시지 템플릿 변경 시 messageTemplates.ts 파일 수정 필요
-<br>
-
-이 프로젝트는 단순한 예약 시스템을 넘어, 뷰티샵 운영의 효율성을 높이는 것을 목표로 합니다. 현재는 예약 프로세스 자동화에 집중하고 있으며, 추후 더 많은 운영 관리 기능을 추가할 수 있습니다.
+이 시스템은 원장님이 최소한의 입력(날짜와 시간)만으로 예약 가능 시간을 관리할 수 있게 하여, 업무 효율성을 높이고 중복 예약과 같은 실수를 방지하는 것이 핵심입니다.
