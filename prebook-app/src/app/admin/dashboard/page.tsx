@@ -10,6 +10,7 @@ import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 import { SERVICE_MAP, serviceTypes } from '@/components/calendar/Calendar';
 import { kakaoAutomation } from '@/lib/automation/kakao';
+import SlotManagementList from '@/components/admin/SlotManagementList';
 
 type ReservationStatus = 'pending' | 'deposit_wait' | 'deposit_confirmed' | 'confirmed' | 'rejected';
 
@@ -36,31 +37,38 @@ interface Reservation {
   created_at: string;
 }
 
+type AdminTab = 'reservations' | 'slots';
+
 export default function AdminDashboard() {
+  // 탭 상태 추가
+  const [activeTab, setActiveTab] = useState<AdminTab>('reservations');
+  
+  // 기존 상태들
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [selectedReservation, setSelectedReservation] = useState<Reservation | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchReservations() {
-      try {
-        const { data, error } = await supabase
-          .from('reservations')
-          .select('*')
-          .order('created_at', { ascending: false });
-
-        if (error) throw error;
-        setReservations(data || []);
-      } catch (error) {
-        console.error('예약 목록 조회 중 오류 발생:', error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
     fetchReservations();
   }, []);
+
+  async function fetchReservations() {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('reservations')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setReservations(data || []);
+    } catch (error) {
+      console.error('예약 목록 조회 중 오류 발생:', error);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   const handleReservationClick = (reservation: Reservation) => {
     setSelectedReservation(reservation);
@@ -227,56 +235,89 @@ export default function AdminDashboard() {
         <Card>
           <CardHeader>
             <CardTitle className="text-2xl">예약 관리 대시보드</CardTitle>
+            {/* 탭 메뉴 추가 */}
+            <div className="flex border-b mt-4">
+              <button
+                className={cn(
+                  "py-2 px-4 font-medium text-sm",
+                  activeTab === 'reservations' 
+                    ? "border-b-2 border-blue-500 text-blue-600" 
+                    : "text-gray-500 hover:text-gray-700"
+                )}
+                onClick={() => setActiveTab('reservations')}
+              >
+                예약 관리
+              </button>
+              <button
+                className={cn(
+                  "py-2 px-4 font-medium text-sm",
+                  activeTab === 'slots' 
+                    ? "border-b-2 border-blue-500 text-blue-600" 
+                    : "text-gray-500 hover:text-gray-700"
+                )}
+                onClick={() => setActiveTab('slots')}
+              >
+                예약 시간 관리
+              </button>
+            </div>
           </CardHeader>
           <CardContent>
-            {loading ? (
-              <div>로딩 중...</div>
-            ) : reservations.length === 0 ? (
-              <div>예약 요청이 없습니다.</div>
+            {/* 탭 내용 */}
+            {activeTab === 'reservations' ? (
+              // 기존 예약 관리 UI
+              loading ? (
+                <div>로딩 중...</div>
+              ) : reservations.length === 0 ? (
+                <div>예약 요청이 없습니다.</div>
+              ) : (
+                <div className="space-y-4">
+                  {reservations.map((reservation) => (
+                    <Card 
+                      key={reservation.id} 
+                      className="p-4 cursor-pointer hover:shadow-lg transition-shadow"
+                      onClick={() => handleReservationClick(reservation)}
+                    >
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="font-medium">{reservation.customer_name}</h3>
+                          <p className="text-sm text-gray-500">
+                            {new Date(reservation.created_at).toLocaleDateString()}
+                          </p>
+                          <p>희망 시술: {SERVICE_MAP[reservation.desired_service as keyof typeof serviceTypes].name}</p>
+                        </div>
+                        <div className="text-right">
+                          <span 
+                            className={cn(
+                              "px-2 py-1 rounded text-sm",
+                              {
+                                'bg-yellow-100 text-yellow-800': reservation.status === 'pending',
+                                'bg-blue-100 text-blue-800': reservation.status === 'deposit_wait',
+                                'bg-green-100 text-green-800': reservation.status === 'confirmed',
+                                'bg-red-100 text-red-800': reservation.status === 'rejected'
+                              }
+                            )}
+                          >
+                            {reservation.status === 'pending' ? '대기중' :
+                             reservation.status === 'deposit_wait' ? '예약금 대기중' :
+                             reservation.status === 'confirmed' ? '예약 확정' :
+                             '거절됨'}
+                          </span>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              )
             ) : (
-              <div className="space-y-4">
-                {reservations.map((reservation) => (
-                  <Card 
-                    key={reservation.id} 
-                    className="p-4 cursor-pointer hover:shadow-lg transition-shadow"
-                    onClick={() => handleReservationClick(reservation)}
-                  >
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="font-medium">{reservation.customer_name}</h3>
-                        <p className="text-sm text-gray-500">
-                          {new Date(reservation.created_at).toLocaleDateString()}
-                        </p>
-                        <p>희망 시술: {SERVICE_MAP[reservation.desired_service as keyof typeof serviceTypes].name}</p>
-                      </div>
-                      <div className="text-right">
-                        <span 
-                          className={cn(
-                            "px-2 py-1 rounded text-sm",
-                            {
-                              'bg-yellow-100 text-yellow-800': reservation.status === 'pending',
-                              'bg-blue-100 text-blue-800': reservation.status === 'deposit_wait',
-                              'bg-green-100 text-green-800': reservation.status === 'confirmed',
-                              'bg-red-100 text-red-800': reservation.status === 'rejected'
-                            }
-                          )}
-                        >
-                          {reservation.status === 'pending' ? '대기중' :
-                           reservation.status === 'deposit_wait' ? '예약금 대기중' :
-                           reservation.status === 'confirmed' ? '예약 확정' :
-                           '거절됨'}
-                        </span>
-                      </div>
-                    </div>
-                  </Card>
-                ))}
-              </div>
+              // 새로운 예약 시간 관리 UI
+              <SlotManagementList onRefresh={fetchReservations} />
             )}
           </CardContent>
         </Card>
 
+        {/* 예약 상세 다이얼로그 (기존 코드) */}
         <Dialog 
-          isOpen={!!selectedReservation} 
+          isOpen={!!selectedReservation && activeTab === 'reservations'} 
           onClose={() => {
             setSelectedReservation(null);
             setSelectedSlot(null);
