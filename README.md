@@ -156,16 +156,104 @@ CREATE INDEX idx_bookings_status ON bookings(status);
 <br>
 
 ### 개발 완료 내용
-1. Supabase API 함수 (src/lib/supabaseApi.ts): 새로운 테이블 구조에 맞는 CRUD 및 관리 함수들을 구현했습니다.
+
+1. 데이터 API 함수 (src/lib/supabaseApi.ts)
+
+- 새로운 테이블 구조(unavailable_slots, bookings)에 맞는 CRUD 함수 구현
+- 예약 가능/불가능 시간 조회 및 관리 함수 구현
+- 월별 예약 가능 날짜 조회 기능
+
+
 2. 고객용 예약 가능 시간 조회 페이지
 
-- AvailableSlotsCalendar 컴포넌트: 예약 가능 시간을 표시하는 달력
-- slots/page.tsx: 고객이 접근하는 실제 페이지
+- 캘린더 기반 가용 시간 표시 컴포넌트 (src/components/calendar/AvailableSlotsCalendar.tsx)
+- 모바일 최적화 UI 제공
+- 예약 가능/불가능 정보 직관적 표시
+- 카카오톡/전화 문의 기능 (src/app/slots/page.tsx)
 
-3. 관리자 시간 관리 기능
 
-- SlotManagementList 컴포넌트: 원장님이 예약 시간을 관리하는 인터페이스
-- 기존 대시보드에 탭 형태로 통합
+3. 관리자 예약 시간 관리 기능
+
+- 시간 차단/해제 기능 (블록 모드)
+- 예약 생성 및 관리 기능 (예약 모드)
+- 휴무일 일괄 차단 기능
+- 기존 관리자 대시보드와 탭 방식으로 통합 (src/app/admin/dashboard/page.tsx)
+
+
+
+### 기술 스택
+
+- 프론트엔드: Next.js 15, React 19, Tailwind CSS
+- 백엔드: Supabase (Auth, Database, Storage)
+- 배포: Vercel 권장
+
+### 배포 가이드
+- Vercel 배포 방법
+
+  - Vercel 계정 생성 및 로그인
+  - 새 프로젝트 생성 및 GitHub 저장소 연결
+  - 환경 변수 설정:
+  
+```
+    NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
+    NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+```
+
+  - 배포 설정 확인 후 '배포' 버튼 클릭
+
+### 보안 설정
+
+- 관리자 페이지 보호: 적절한 인증 메커니즘 구현 필요
+- 보안 헤더 설정: next.config.js 파일에 보안 헤더 추가
+
+```javascriptconst
+securityHeaders = [
+  { key: 'X-XSS-Protection', value: '1; mode=block' },
+  { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+  { key: 'X-Content-Type-Options', value: 'nosniff' },
+  { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+  { key: 'Content-Security-Policy', value: "default-src 'self'; script-src 'self' 'unsafe-inline';" }
+];
+
+module.exports = {
+  async headers() {
+    return [{ source: '/(.*)', headers: securityHeaders }];
+  }
+};
+```
+
+### 리소스 고려사항
+- Vercel 무료 티어는 다음 사양으로 충분히 서비스 운영 가능:
+
+  - 대역폭: 월 100GB (예상 사용량: 약 4GB/월)
+  - 서버리스 함수: 월 100시간 (일반 예약 관리에 충분)
+  - 무료 티어 제한: 비활성 시 슬립 모드 전환, 24시간 분석 데이터 보관
+
+### 사용 가이드
+- 관리자 (원장님)
+
+  - /admin/dashboard 페이지 접속
+  - "예약 관리" 탭: 기존 고객 요청 예약 관리
+  - "예약 시간 관리" 탭:
+
+    - "시간 차단 모드": 예약 불가능 시간 설정
+    - "예약 생성 모드": 새 예약 직접 생성
+    - "휴무일 일괄 설정": 여러 날짜/시간 한 번에 차단
+
+
+
+- 고객
+
+  - /slots 페이지 접속
+  - 예약 가능한 날짜/시간 확인
+  - 예약을 원할 경우 카카오톡/전화로 문의
+
+## 향후 개선 사항
+
+- 인증 시스템 강화: 관리자 로그인 페이지 구현
+- 실시간 데이터 동기화: Supabase Realtime 기능 활용
+- 알림 시스템: 예약 변경 시 자동 알림 기능
+- 통계 대시보드: 예약 데이터 분석 및 시각화
 
 
 ## 기대 효과
