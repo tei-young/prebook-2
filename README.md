@@ -153,6 +153,19 @@ CREATE INDEX idx_bookings_status ON bookings(status);
 - 예약 생성 및 상태 관리 기능 구현 (관리자만 가능) -> (src/app/admin/dashboard/page.tsx)에 예약 상태 관리 기능이 이미 일부 구현되어 있음. 특히 handleStatusChange 함수를 통해 예약 상태를 pending, deposit_wait, confirmed, rejected 등으로 변경할 수 있는 기능이 존재하기 때문에, 현재 구현된 상태 관리 기능을 새로운 요구사항에 맞게 수정하면 됨. rejected 상태를 cancelled로 변경하고, 취소 시 다시 available 상태로 되돌아가는 로직을 추가하면 될 것
 - 고객용 예약 가능 시간 조회 페이지 개발 (Calendar 기반, 디자인 개선)
 - 두 페이지 간의 데이터 연동 구현 (실시간 또는 주기적 업데이트-최소한 대시보드 상태 변경 시에는 업데이트 되어야 함)
+<br>
+
+### 개발 완료 내용
+1. Supabase API 함수 (src/lib/supabaseApi.ts): 새로운 테이블 구조에 맞는 CRUD 및 관리 함수들을 구현했습니다.
+2. 고객용 예약 가능 시간 조회 페이지
+
+- AvailableSlotsCalendar 컴포넌트: 예약 가능 시간을 표시하는 달력
+- slots/page.tsx: 고객이 접근하는 실제 페이지
+
+3. 관리자 시간 관리 기능
+
+- SlotManagementList 컴포넌트: 원장님이 예약 시간을 관리하는 인터페이스
+- 기존 대시보드에 탭 형태로 통합
 
 
 ## 기대 효과
