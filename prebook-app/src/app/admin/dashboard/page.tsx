@@ -372,64 +372,89 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
 
-        {/* 예약 상세 다이얼로그 (기존 코드) */}
+        {/* 예약 상세 다이얼로그 */}
         <Dialog 
           isOpen={!!selectedReservation && activeTab === 'reservations'} 
           onClose={() => {
             setSelectedReservation(null);
             setSelectedSlot(null);
           }}
-          >
+        >
           {selectedReservation && (
             <div className="space-y-4">
-              <h2 className="text-xl font-semibold mb-4">예약 상세 정보</h2>
+              <h2 className="text-xl font-semibold mb-4">
+                예약 상세 정보
+                {(selectedReservation as any).source === 'owner' && (
+                  <span className="ml-2 text-sm bg-blue-100 text-blue-700 px-2 py-1 rounded">
+                    원장 생성
+                  </span>
+                )}
+              </h2>
               
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <h3 className="font-medium text-gray-700">고객 정보</h3>
                   <div className="mt-2 space-y-2">
                     <p>이름: {selectedReservation.customer_name}</p>
-                    <p>성별: {selectedReservation.gender === 'female' ? '여성' : '남성'}</p>
-                    <p>나이: {selectedReservation.age}세</p>
-                    <p>연락처: {selectedReservation.phone}</p>
+                    {/* 원장 생성 예약에는 성별, 나이 정보가 없을 수 있음 */}
+                    {!(selectedReservation as any).source && (
+                      <>
+                        <p>성별: {selectedReservation.gender === 'female' ? '여성' : '남성'}</p>
+                        <p>나이: {selectedReservation.age}세</p>
+                      </>
+                    )}
+                    <p>연락처: {selectedReservation.phone || '-'}</p>
                   </div>
                 </div>
                 
                 <div>
                   <h3 className="font-medium text-gray-700">예약 정보</h3>
                   <div className="mt-2 space-y-2">
-                    <p>희망 시술: {SERVICE_MAP[selectedReservation.desired_service as keyof typeof serviceTypes].name}</p>
-                    <div className="space-y-2">
-                      <h4 className="font-medium text-gray-700">희망 시간대</h4>
-                      {selectedReservation.desired_slots.map((slot, index) => (
-                        <button
-                          key={index}
-                          onClick={() => handleSlotSelect(slot)}
-                          disabled={selectedReservation.status !== 'pending'}
-                          className={cn(
-                            "w-full p-3 rounded border text-left",
-                            selectedSlot?.time === slot.time && selectedSlot?.date === slot.date
-                              ? "bg-green-100 border-green-500"
-                              : selectedReservation.status === 'pending'
-                                ? "hover:bg-gray-50"
-                                : "bg-gray-50 cursor-not-allowed",
-                            selectedReservation.selected_slot?.time === slot.time && 
-                            selectedReservation.selected_slot?.date === slot.date
-                              ? "ring-2 ring-green-500"
-                              : ""
-                          )}
-                        >
-                          {index + 1}순위: {format(new Date(slot.date), 'M월 d일', { locale: ko })} {slot.time}
-                        </button>
-                      ))}
-                    </div>
+                    <p>희망 시술: {SERVICE_MAP[selectedReservation.desired_service as keyof typeof serviceTypes]?.name || selectedReservation.desired_service}</p>
+                    
+                    {/* 원장 생성 예약은 선택된 시간만 있고 희망 시간대 목록은 없음 */}
+                    {(selectedReservation as any).source === 'owner' ? (
+                      <div>
+                        <h4 className="font-medium text-gray-700">예약 시간</h4>
+                        <div className="p-3 rounded border bg-green-100 border-green-500 mt-1">
+                          {selectedReservation.selected_slot && format(new Date(selectedReservation.selected_slot.date), 'M월 d일', { locale: ko })} {selectedReservation.selected_slot?.time}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        <h4 className="font-medium text-gray-700">희망 시간대</h4>
+                        {selectedReservation.desired_slots.map((slot, index) => (
+                          <button
+                            key={index}
+                            onClick={() => handleSlotSelect(slot)}
+                            disabled={selectedReservation.status !== 'pending'}
+                            className={cn(
+                              "w-full p-3 rounded border text-left",
+                              selectedSlot?.time === slot.time && selectedSlot?.date === slot.date
+                                ? "bg-green-100 border-green-500"
+                                : selectedReservation.status === 'pending'
+                                  ? "hover:bg-gray-50"
+                                  : "bg-gray-50 cursor-not-allowed",
+                              selectedReservation.selected_slot?.time === slot.time && 
+                              selectedReservation.selected_slot?.date === slot.date
+                                ? "ring-2 ring-green-500"
+                                : ""
+                            )}
+                          >
+                            {index + 1}순위: {format(new Date(slot.date), 'M월 d일', { locale: ko })} {slot.time}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                    
                     <p>방문 경로: {selectedReservation.referral_source || '-'}</p>
                     <p>시술 경험: {selectedReservation.prior_experience || '없음'}</p>
                   </div>
                 </div>
               </div>
 
-              {(selectedReservation.front_photo_url || selectedReservation.closed_photo_url) && (
+              {/* 사진 표시 부분 - 원장 생성 예약에는 사진이 없음 */}
+              {!(selectedReservation as any).source && (selectedReservation.front_photo_url || selectedReservation.closed_photo_url) && (
                 <div className="mt-4">
                   <h3 className="font-medium text-gray-700 mb-2">첨부 사진</h3>
                   <div className="grid grid-cols-2 gap-4">
@@ -479,7 +504,8 @@ export default function AdminDashboard() {
 
                 {/* 승인/거절 버튼 */}
                 <div className="flex justify-end space-x-3">
-                  {selectedReservation.status === 'pending' ? (
+                  {/* 고객 예약인 경우 */}
+                  {!(selectedReservation as any).source && selectedReservation.status === 'pending' ? (
                     <>
                       <button
                         onClick={() => handleStatusChange(selectedReservation.id, 'rejected')}
@@ -506,7 +532,7 @@ export default function AdminDashboard() {
                         onClick={() => handleStatusChange(selectedReservation.id, 'rejected')}
                         className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
                       >
-                        예약 거절
+                        예약 {(selectedReservation as any).source === 'owner' ? '취소' : '거절'}
                       </button>
                       <button
                         onClick={() => handleStatusChange(selectedReservation.id, 'confirmed')}
@@ -529,7 +555,7 @@ export default function AdminDashboard() {
               </div>
             </div>
           )}
-          </Dialog>
+        </Dialog>
       </div>
     </div>
   );
