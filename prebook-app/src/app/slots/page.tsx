@@ -47,9 +47,17 @@ export default function AvailableSlotsPage() {
       const dateStr = format(date, 'yyyy-MM-dd');
       const slotsForDate = await getAvailableSlots(dateStr);
       
-      setAvailableSlots(slotsForDate);
+      // 로그 추가하여 데이터 확인
+      console.log('받아온 시간 슬롯:', slotsForDate);
+      
+      // 가능한 시간만 필터링
+      const availableOnlySlots = slotsForDate.filter(slot => slot.available);
+      
+      setAvailableSlots(availableOnlySlots);
     } catch (error) {
       console.error('날짜별 예약 가능 시간 조회 오류:', error);
+      // 오류 발생 시 빈 배열 설정
+      setAvailableSlots([]);
     } finally {
       setLoading(false);
     }
