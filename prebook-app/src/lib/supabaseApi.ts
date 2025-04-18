@@ -225,41 +225,47 @@ export const getAvailableSlots = async (date: string) => {
     '17:00', '18:00', '19:00'               // 저녁
   ];
   
-  // 전체 시간 슬롯 생성
+  // 전체 시간 슬롯 생성 - 기본적으로 모두 available: true로 설정
   const allSlots = AVAILABLE_TIMES.map(time => ({
     date,
     time,
     available: true
   }));
   
-  // 예약 불가능 시간 조회
-  const unavailableSlots = await getUnavailableSlots(date);
-  
-  // 예약된 시간 조회 (deposit_wait 또는 confirmed 상태만)
-  const bookings = await getBookings(date);
-  const bookedSlots = bookings.filter(
-    booking => booking.status === 'deposit_wait' || booking.status === 'confirmed'
-  );
-  
-  // 예약 가능한 시간 필터링
-  const availableSlots = allSlots.map(slot => {
-    // 예약 불가능 시간인지 확인
-    const isUnavailable = unavailableSlots.some(
-      unavailable => unavailable.date === slot.date && unavailable.time === slot.time
+  try {
+    // 예약 불가능 시간 조회
+    const unavailableSlots = await getUnavailableSlots(date);
+    
+    // 예약된 시간 조회 (deposit_wait 또는 confirmed 상태만)
+    const bookings = await getBookings(date);
+    const bookedSlots = bookings.filter(
+      booking => booking.status === 'deposit_wait' || booking.status === 'confirmed'
     );
     
-    // 이미 예약된 시간인지 확인
-    const isBooked = bookedSlots.some(
-      booking => booking.date === slot.date && booking.time === slot.time
-    );
+    // 예약 가능한 시간 필터링
+    const availableSlots = allSlots.map(slot => {
+      // 예약 불가능 시간인지 확인
+      const isUnavailable = unavailableSlots.some(
+        unavailable => unavailable.date === slot.date && unavailable.time === slot.time
+      );
+      
+      // 이미 예약된 시간인지 확인
+      const isBooked = bookedSlots.some(
+        booking => booking.date === slot.date && booking.time === slot.time
+      );
+      
+      return {
+        ...slot,
+        available: !isUnavailable && !isBooked
+      };
+    });
     
-    return {
-      ...slot,
-      available: !isUnavailable && !isBooked
-    };
-  });
-  
-  return availableSlots;
+    return availableSlots;
+  } catch (error) {
+    console.error('예약 가능 시간 조회 오류:', error);
+    // 오류 발생 시에도 기본 가용 슬롯 반환 (모두 available: true)
+    return allSlots;
+  }
 };
 
 // 여러 날짜에 대한 예약 가능 시간 조회 (캘린더 뷰용)
