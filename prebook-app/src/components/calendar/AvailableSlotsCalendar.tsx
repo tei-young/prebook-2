@@ -21,6 +21,7 @@ interface AvailableSlotsCalendarProps {
   onDateSelect?: (date: Date) => void;
   selectedDate?: Date | null;
   datesWithAvailableSlots?: string[]; // 예약 가능한 슬롯이 있는 날짜 목록
+  onMonthChange?: (month: Date) => void; // 월 변경 이벤트
 }
 
 const AVAILABLE_TIMES = [
@@ -33,7 +34,8 @@ export default function AvailableSlotsCalendar({
  availableSlots = [],
  onDateSelect,
  selectedDate,
- datesWithAvailableSlots = []
+ datesWithAvailableSlots = [],
+ onMonthChange
 }: AvailableSlotsCalendarProps) {
  const [currentMonth, setCurrentMonth] = useState(new Date());
  
@@ -47,13 +49,6 @@ export default function AvailableSlotsCalendar({
    return eachDayOfInterval({ start: startWeek, end: endWeek });
  }, [currentMonth]);
 
- // 날짜를 클릭했을 때 처리
- const handleDateClick = (date: Date) => {
-   if (onDateSelect) {
-     onDateSelect(date);
-   }
- };
-
  // 날짜가 과거인지 확인
  const isPastDate = (date: Date) => {
    const today = new Date();
@@ -66,20 +61,39 @@ export default function AvailableSlotsCalendar({
    const dateStr = format(date, 'yyyy-MM-dd');
    return datesWithAvailableSlots.includes(dateStr);
  };
+ 
+ // 날짜 클릭시 상위 컴포넌트에 전달
+ const handleDateClick = (date: Date) => {
+   if (!isPastDate(date) && hasAvailableSlot(date) && onDateSelect) {
+     onDateSelect(date);
+   }
+ };
 
  // 시간대 그룹화 함수
  const groupTimesByPeriod = (times: AvailableTimeSlot[]) => {
-   const morning = times.filter(slot => {
+   // 가용 슬롯만 필터링
+   const availableOnly = times.filter(slot => slot.available);
+   
+   // 오전/오후 구분
+   const morning = availableOnly.filter(slot => {
      const hour = parseInt(slot.time.split(':')[0]);
      return hour < 12;
    });
 
-   const afternoon = times.filter(slot => {
+   const afternoon = availableOnly.filter(slot => {
      const hour = parseInt(slot.time.split(':')[0]);
      return hour >= 12;
    });
 
-   return { morning, afternoon };
+   // 시간순 정렬
+   const sortByTime = (a: AvailableTimeSlot, b: AvailableTimeSlot) => {
+     return a.time.localeCompare(b.time);
+   };
+
+   return { 
+     morning: morning.sort(sortByTime), 
+     afternoon: afternoon.sort(sortByTime) 
+   };
  };
 
  // 선택된 날짜의 가능한 시간 슬롯 필터링
@@ -87,10 +101,9 @@ export default function AvailableSlotsCalendar({
    if (!selectedDate) return { morning: [], afternoon: [] };
    
    const dateStr = format(selectedDate, 'yyyy-MM-dd');
-   const slotsForDate = availableSlots.filter(
-     slot => slot.date === dateStr && slot.available
-   );
+   const slotsForDate = availableSlots.filter(slot => slot.date === dateStr);
    
+   console.log('선택된 날짜의 슬롯:', slotsForDate);
    return groupTimesByPeriod(slotsForDate);
  }, [selectedDate, availableSlots]);
 
@@ -99,7 +112,14 @@ export default function AvailableSlotsCalendar({
      {/* 월 네비게이션 */}
      <div className="flex justify-between items-center p-4 border-b">
        <button 
-         onClick={() => setCurrentMonth(prev => subMonths(prev, 1))}
+         onClick={() => {
+           const newMonth = subMonths(currentMonth, 1);
+           setCurrentMonth(newMonth);
+           // 월 변경 시 onMonthChange props가 있으면 호출
+           if (onMonthChange) {
+             onMonthChange(newMonth);
+           }
+         }}
          className="p-2 hover:bg-gray-100 rounded"
        >
          &lt;
@@ -108,7 +128,14 @@ export default function AvailableSlotsCalendar({
          {format(currentMonth, 'yyyy.M', { locale: ko })}
        </h2>
        <button 
-         onClick={() => setCurrentMonth(prev => addMonths(prev, 1))}
+         onClick={() => {
+           const newMonth = addMonths(currentMonth, 1);
+           setCurrentMonth(newMonth);
+           // 월 변경 시 onMonthChange props가 있으면 호출
+           if (onMonthChange) {
+             onMonthChange(newMonth);
+           }
+         }}
          className="p-2 hover:bg-gray-100 rounded"
        >
          &gt;
@@ -131,7 +158,7 @@ export default function AvailableSlotsCalendar({
          return (
            <div
              key={day.toString()}
-             onClick={() => !isDisabled && handleDateClick(day)}
+             onClick={() => handleDateClick(day)}
              className={cn(
                "p-4 text-center",
                !isCurrentMonth && "text-gray-300",
@@ -166,7 +193,7 @@ export default function AvailableSlotsCalendar({
                  {availableTimesForSelectedDate.morning.map(slot => (
                    <div
                      key={slot.time}
-                     className="px-4 py-3 rounded text-lg bg-white hover:bg-green-50 border text-center"
+                     className="px-4 py-3 rounded text-lg bg-green-50 border border-green-300 text-green-800 text-center"
                    >
                      {slot.time}
                    </div>
@@ -187,7 +214,7 @@ export default function AvailableSlotsCalendar({
                    return (
                      <div
                        key={slot.time}
-                       className="px-4 py-3 rounded text-lg bg-white hover:bg-green-50 border text-center"
+                       className="px-4 py-3 rounded text-lg bg-green-50 border border-green-300 text-green-800 text-center"
                      >
                        {displayTime}
                      </div>
