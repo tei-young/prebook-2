@@ -138,26 +138,33 @@ export const getBookings = async (date?: string, status?: BookingStatus) => {
 };
 
 export const createBooking = async (booking: Booking) => {
-  const { data, error } = await supabase
-    .from('bookings')
-    .insert([{
-      date: booking.date,
-      time: booking.time,
-      service_type: booking.service_type,
-      customer_name: booking.customer_name || null,
-      customer_phone: booking.customer_phone || null,
-      status: booking.status,
-      notes: booking.notes || null
-    }])
-    .select();
+    console.log('Creating booking with data:', booking);
   
-  if (error) {
-    console.error('예약 생성 오류:', error);
-    throw error;
-  }
-  
-  return data[0] as Booking;
-};
+    const { data, error } = await supabase
+      .from('bookings')
+      .insert([{
+        date: booking.date,
+        time: booking.time,
+        service_type: booking.service_type,
+        customer_name: booking.customer_name || null,
+        customer_phone: booking.customer_phone || null,
+        status: booking.status,
+        notes: booking.notes || null
+      }])
+      .select();
+    
+    if (error) {
+      console.error('예약 생성 오류:', error);
+      throw error;
+    }
+    
+    if (!data || data.length === 0) {
+      throw new Error('예약 데이터가 생성되지 않았습니다');
+    }
+    
+    console.log('Booking created successfully:', data[0]);
+    return data[0] as Booking;
+  };
 
 export const updateBookingStatus = async (id: string, status: BookingStatus) => {
   const { data, error } = await supabase
