@@ -389,19 +389,20 @@ export default function SlotManagementList({ onRefresh }: SlotManagementListProp
         </div>
 
         {selectedDate && (
-          <div>
-            <h3 className="text-lg font-medium mb-4">시간대 관리</h3>
-            <div className="border rounded-lg p-4">
-              <div className="mb-4">
-                <h4 className="font-medium">
-                  {format(selectedDate, 'yyyy년 M월 d일', { locale: ko })} 시간대
-                </h4>
-                <p className="text-sm text-gray-500 mt-1">
-                  {mode === 'block' 
-                    ? '시간을 클릭하여 차단/해제하세요' 
-                    : '시간을 클릭하여 예약을 생성하세요'}
-                </p>
-              </div>
+            <div>
+                <h3 className="text-lg font-medium mb-4">시간대 관리</h3>
+                {selectedDate ? (
+                    <div className="border rounded-lg p-4">
+                    <div className="mb-4">
+                        <h4 className="font-medium">
+                        {format(selectedDate, 'yyyy년 M월 d일', { locale: ko })} 시간대
+                        </h4>
+                        <p className="text-sm text-gray-500 mt-1">
+                        {mode === 'block' 
+                            ? '시간을 클릭하여 차단/해제하세요' 
+                            : '시간을 클릭하여 예약을 생성하세요'}
+                        </p>
+                    </div>
 
               {loading ? (
                 <div className="flex justify-center py-8">
@@ -471,10 +472,15 @@ export default function SlotManagementList({ onRefresh }: SlotManagementListProp
                         );
                       })}
                     </div>
-                  </div>
+                    </div>
                 </div>
-              )}
+                )}
             </div>
+            ) : (
+            <div className="border rounded-lg p-8 text-center text-gray-500">
+                날짜를 선택하면 시간대가 표시됩니다.
+            </div>
+            )}
 
             {/* 예약 목록 */}
             {bookings.length > 0 && (
