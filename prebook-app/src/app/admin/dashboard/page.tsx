@@ -35,6 +35,7 @@ interface Reservation {
   status: ReservationStatus;
   status_updated_at: string;
   created_at: string;
+  source?: 'owner' | 'customer';
 }
 
 type AdminTab = 'reservations' | 'slots';
@@ -320,16 +321,26 @@ export default function AdminDashboard() {
                   {reservations.map((reservation) => (
                     <Card 
                       key={reservation.id} 
-                      className="p-4 cursor-pointer hover:shadow-lg transition-shadow"
+                      className={cn(
+                        "p-4 cursor-pointer hover:shadow-lg transition-shadow",
+                        reservation.source === 'owner' && "border-blue-300" // 원장 생성 예약 강조
+                      )}
                       onClick={() => handleReservationClick(reservation)}
                     >
                       <div className="flex justify-between items-start">
                         <div>
-                          <h3 className="font-medium">{reservation.customer_name}</h3>
+                          <h3 className="font-medium">
+                            {reservation.customer_name}
+                            {reservation.source === 'owner' && (
+                              <span className="ml-2 text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
+                                원장 생성
+                              </span>
+                            )}
+                          </h3>
                           <p className="text-sm text-gray-500">
                             {new Date(reservation.created_at).toLocaleDateString()}
                           </p>
-                          <p>희망 시술: {SERVICE_MAP[reservation.desired_service as keyof typeof serviceTypes].name}</p>
+                          <p>희망 시술: {SERVICE_MAP[reservation.desired_service as keyof typeof serviceTypes]?.name || reservation.desired_service}</p>
                         </div>
                         <div className="text-right">
                           <span 
@@ -344,9 +355,9 @@ export default function AdminDashboard() {
                             )}
                           >
                             {reservation.status === 'pending' ? '대기중' :
-                             reservation.status === 'deposit_wait' ? '예약금 대기중' :
-                             reservation.status === 'confirmed' ? '예약 확정' :
-                             '거절됨'}
+                            reservation.status === 'deposit_wait' ? '예약금 대기중' :
+                            reservation.status === 'confirmed' ? '예약 확정' :
+                            '거절됨'}
                           </span>
                         </div>
                       </div>
