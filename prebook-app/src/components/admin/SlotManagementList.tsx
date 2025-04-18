@@ -163,7 +163,8 @@ export default function SlotManagementList({ onRefresh }: SlotManagementListProp
       setLoading(true);
       const date = format(selectedDate, 'yyyy-MM-dd');
       
-      await createBooking({
+      // 콘솔 로그 추가하여 디버깅
+      console.log('예약 생성 시도:', {
         date,
         time: selectedSlot,
         service_type: bookingForm.serviceType,
@@ -172,6 +173,18 @@ export default function SlotManagementList({ onRefresh }: SlotManagementListProp
         status: bookingForm.status,
         notes: bookingForm.notes || undefined
       });
+      
+      const result = await createBooking({
+        date,
+        time: selectedSlot,
+        service_type: bookingForm.serviceType,
+        customer_name: bookingForm.customerName || undefined,
+        customer_phone: bookingForm.customerPhone || undefined,
+        status: bookingForm.status,
+        notes: bookingForm.notes || undefined
+      });
+      
+      console.log('예약 생성 결과:', result);
       
       // 폼 초기화 및 닫기
       setIsFormOpen(false);
@@ -184,11 +197,15 @@ export default function SlotManagementList({ onRefresh }: SlotManagementListProp
       });
       setSelectedSlot(null);
       
-      // 데이터 새로고침
+      // 데이터 새로고침 - 두 번 호출하여 확실히 새로고침
       await loadSlotsData(date);
       if (onRefresh) onRefresh();
+      
+      // 성공 메시지 추가
+      alert('예약이 성공적으로 생성되었습니다.');
     } catch (error) {
       console.error('예약 생성 오류:', error);
+      alert('예약 생성 중 오류가 발생했습니다: ' + (error as Error).message);
     } finally {
       setLoading(false);
     }
