@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
  format, startOfMonth, endOfMonth, eachDayOfInterval, 
  isSameDay, addMonths, subMonths, startOfWeek, 
@@ -64,7 +64,9 @@ export default function AvailableSlotsCalendar({
  
  // 날짜 클릭시 상위 컴포넌트에 전달
  const handleDateClick = (date: Date) => {
-   if (!isPastDate(date) && hasAvailableSlot(date) && onDateSelect) {
+   // 현재 이후 날짜이고 현재 달에 속하는 날짜면 클릭 가능
+   const isCurrentMonth = isSameMonth(date, currentMonth);
+   if (!isPastDate(date) && isCurrentMonth && onDateSelect) {
      onDateSelect(date);
    }
  };
@@ -103,7 +105,6 @@ export default function AvailableSlotsCalendar({
    const dateStr = format(selectedDate, 'yyyy-MM-dd');
    const slotsForDate = availableSlots.filter(slot => slot.date === dateStr);
    
-   console.log('선택된 날짜의 슬롯:', slotsForDate);
    return groupTimesByPeriod(slotsForDate);
  }, [selectedDate, availableSlots]);
 
@@ -163,7 +164,7 @@ export default function AvailableSlotsCalendar({
                "p-4 text-center",
                !isCurrentMonth && "text-gray-300",
                isPastDate(day) && "text-gray-300 bg-gray-50",
-               !isPastDate(day) && !isDisabled && "cursor-pointer hover:bg-gray-50",
+               !isPastDate(day) && isCurrentMonth && "cursor-pointer hover:bg-gray-50",
                isSelected && "bg-green-50 font-bold",
                isAvailable && !isPastDate(day) && isCurrentMonth && "bg-green-50",
                "border rounded-lg"
