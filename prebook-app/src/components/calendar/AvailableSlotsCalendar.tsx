@@ -70,6 +70,11 @@ export default function AvailableSlotsCalendar({
           if (!isSameMonth(date, currentMonth)) {
             console.log('다른 달 날짜 선택:', format(date, 'yyyy-MM-dd'));
             setCurrentMonth(date); // 선택한 날짜의 달로 명확하게 변경
+            
+            // 상위 컴포넌트에 월 변경 알림
+            if (onMonthChange) {
+              onMonthChange(date);
+            }
           }
           onDateSelect(date);
         }
