@@ -64,12 +64,15 @@ export default function AvailableSlotsCalendar({
     
     // 날짜 클릭시 상위 컴포넌트에 전달
     const handleDateClick = (date: Date) => {
-      // 현재 이후 날짜이고 현재 달에 속하는 날짜면 클릭 가능
-      const isCurrentMonth = isSameMonth(date, currentMonth);
-      if (!isPastDate(date) && isCurrentMonth && onDateSelect) {
-        onDateSelect(date);
-      }
-    };
+        // 현재 달 조건 제거하고 과거 날짜만 체크
+        if (!isPastDate(date) && onDateSelect) {
+          // 다른 달 날짜 클릭 시 그 달로 이동
+          if (!isSameMonth(date, currentMonth)) {
+            setCurrentMonth(new Date(date)); // 선택한 날짜의 달로 변경
+          }
+          onDateSelect(date);
+        }
+      };
    
     // 시간대 그룹화 함수
     const groupTimesByPeriod = (times: AvailableTimeSlot[]) => {
@@ -121,7 +124,7 @@ export default function AvailableSlotsCalendar({
                 onMonthChange(newMonth);
               }
             }}
-            className="p-2 hover:bg-gray-100 rounded"
+            className="p-2 hover:bg-gray-100 rounded text-gray-900 text-xl font-medium"
           >
             &lt;
           </button>
@@ -137,7 +140,7 @@ export default function AvailableSlotsCalendar({
                 onMonthChange(newMonth);
               }
             }}
-            className="p-2 hover:bg-gray-100 rounded"
+            className="p-2 hover:bg-gray-100 rounded text-gray-900 text-xl font-medium"
           >
             &gt;
           </button>
