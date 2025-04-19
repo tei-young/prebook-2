@@ -84,7 +84,7 @@ export default function AvailableSlotsPage() {
       <div className="max-w-2xl mx-auto pt-8">
         <Card>
           <CardHeader>
-            <CardTitle className="text-center text-2xl">예약 가능 시간</CardTitle>
+          <CardTitle className="text-center text-2xl text-gray-900">예약 가능 시간</CardTitle>
           </CardHeader>
           <CardContent>
             {loading ? (
@@ -100,7 +100,7 @@ export default function AvailableSlotsPage() {
                   datesWithAvailableSlots={datesWithAvailableSlots}
                 />
                 
-                <div className="mt-8 text-center text-gray-500">
+                <div className="mt-8 text-center text-gray-800">
                   <p>예약을 원하시면 아래 연락처로 문의해주세요.</p>
                   <div className="flex justify-center gap-4 mt-4">
                     <a 
