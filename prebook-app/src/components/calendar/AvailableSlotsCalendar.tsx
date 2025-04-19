@@ -116,35 +116,35 @@ export default function AvailableSlotsCalendar({
       <div className="space-y-6">
         {/* 월 네비게이션 */}
         <div className="flex justify-between items-center p-4 border-b">
-          <button 
+        <button 
             onClick={() => {
-              const newMonth = subMonths(currentMonth, 1);
-              setCurrentMonth(newMonth);
-              // 월 변경 시 onMonthChange props가 있으면 호출
-              if (onMonthChange) {
+            const newMonth = subMonths(currentMonth, 1);
+            setCurrentMonth(newMonth);
+            // 상위 컴포넌트에 월 변경 알림
+            if (onMonthChange) {
                 onMonthChange(newMonth);
-              }
+            }
             }}
             className="p-2 hover:bg-gray-100 rounded text-gray-900 text-xl font-medium"
-          >
+        >
             &lt;
-          </button>
-          <h2 className="text-xl font-semibold text-gray-900">
+        </button>
+        <h2 className="text-xl font-semibold text-gray-900">
             {format(currentMonth, 'yyyy.M', { locale: ko })}
-          </h2>
-          <button 
+        </h2>
+        <button 
             onClick={() => {
-              const newMonth = addMonths(currentMonth, 1);
-              setCurrentMonth(newMonth);
-              // 월 변경 시 onMonthChange props가 있으면 호출
-              if (onMonthChange) {
+            const newMonth = addMonths(currentMonth, 1);
+            setCurrentMonth(newMonth);
+            // 상위 컴포넌트에 월 변경 알림
+            if (onMonthChange) {
                 onMonthChange(newMonth);
-              }
+            }
             }}
             className="p-2 hover:bg-gray-100 rounded text-gray-900 text-xl font-medium"
-          >
+        >
             &gt;
-          </button>
+        </button>
         </div>
    
         {/* 요일 헤더 */}
