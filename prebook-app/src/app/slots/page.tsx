@@ -55,7 +55,6 @@ export default function AvailableSlotsPage() {
       const dateStr = format(date, 'yyyy-MM-dd');
       const slotsForDate = await getAvailableSlots(dateStr);
       
-      // 로그 추가하여 데이터 확인
       console.log('받아온 시간 슬롯:', slotsForDate);
       
       // 가능한 시간만 필터링

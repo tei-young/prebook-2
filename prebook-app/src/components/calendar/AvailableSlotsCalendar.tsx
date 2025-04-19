@@ -64,11 +64,12 @@ export default function AvailableSlotsCalendar({
     
     // 날짜 클릭시 상위 컴포넌트에 전달
     const handleDateClick = (date: Date) => {
-        // 현재 달 조건 제거하고 과거 날짜만 체크
+        // 과거 날짜 제외
         if (!isPastDate(date) && onDateSelect) {
           // 다른 달 날짜 클릭 시 그 달로 이동
           if (!isSameMonth(date, currentMonth)) {
-            setCurrentMonth(new Date(date)); // 선택한 날짜의 달로 변경
+            console.log('다른 달 날짜 선택:', format(date, 'yyyy-MM-dd'));
+            setCurrentMonth(date); // 선택한 날짜의 달로 명확하게 변경
           }
           onDateSelect(date);
         }
