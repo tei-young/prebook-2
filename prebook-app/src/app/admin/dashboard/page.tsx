@@ -289,7 +289,7 @@ export default function AdminDashboard() {
                   "py-2 px-4 font-medium text-sm",
                   activeTab === 'reservations' 
                     ? "border-b-2 border-blue-500 text-blue-600" 
-                    : "text-gray-500 hover:text-gray-700"
+                    : "text-gray-800 hover:text-gray-800"
                 )}
                 onClick={() => setActiveTab('reservations')}
               >
@@ -300,7 +300,7 @@ export default function AdminDashboard() {
                   "py-2 px-4 font-medium text-sm",
                   activeTab === 'slots' 
                     ? "border-b-2 border-blue-500 text-blue-600" 
-                    : "text-gray-500 hover:text-gray-700"
+                    : "text-gray-800 hover:text-gray-700"
                 )}
                 onClick={() => setActiveTab('slots')}
               >
@@ -337,7 +337,7 @@ export default function AdminDashboard() {
                               </span>
                             )}
                           </h3>
-                          <p className="text-sm text-gray-500">
+                          <p className="text-sm text-gray-800">
                             {new Date(reservation.created_at).toLocaleDateString()}
                           </p>
                           <p>희망 시술: {SERVICE_MAP[reservation.desired_service as keyof typeof serviceTypes]?.name || reservation.desired_service}</p>
@@ -382,7 +382,7 @@ export default function AdminDashboard() {
         >
           {selectedReservation && (
             <div className="space-y-4">
-              <h2 className="text-xl font-semibold mb-4">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">
                 예약 상세 정보
                 {(selectedReservation as any).source === 'owner' && (
                   <span className="ml-2 text-sm bg-blue-100 text-blue-700 px-2 py-1 rounded">
@@ -393,7 +393,7 @@ export default function AdminDashboard() {
               
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <h3 className="font-medium text-gray-700">고객 정보</h3>
+                  <h3 className="font-medium text-gray-800">고객 정보</h3>
                   <div className="mt-2 space-y-2">
                     <p>이름: {selectedReservation.customer_name}</p>
                     {/* 원장 생성 예약에는 성별, 나이 정보가 없을 수 있음 */}
@@ -408,21 +408,21 @@ export default function AdminDashboard() {
                 </div>
                 
                 <div>
-                  <h3 className="font-medium text-gray-700">예약 정보</h3>
+                  <h3 className="font-medium text-gray-800">예약 정보</h3>
                   <div className="mt-2 space-y-2">
                     <p>희망 시술: {SERVICE_MAP[selectedReservation.desired_service as keyof typeof serviceTypes]?.name || selectedReservation.desired_service}</p>
                     
                     {/* 원장 생성 예약은 선택된 시간만 있고 희망 시간대 목록은 없음 */}
                     {(selectedReservation as any).source === 'owner' ? (
                       <div>
-                        <h4 className="font-medium text-gray-700">예약 시간</h4>
+                        <h4 className="font-medium text-gray-800">예약 시간</h4>
                         <div className="p-3 rounded border bg-green-100 border-green-500 mt-1">
                           {selectedReservation.selected_slot && format(new Date(selectedReservation.selected_slot.date), 'M월 d일', { locale: ko })} {selectedReservation.selected_slot?.time}
                         </div>
                       </div>
                     ) : (
                       <div className="space-y-2">
-                        <h4 className="font-medium text-gray-700">희망 시간대</h4>
+                        <h4 className="font-medium text-gray-800">희망 시간대</h4>
                         {selectedReservation.desired_slots.map((slot, index) => (
                           <button
                             key={index}
@@ -518,8 +518,8 @@ export default function AdminDashboard() {
                         className={cn(
                           "px-4 py-2 rounded",
                           selectedSlot
-                            ? "bg-green-500 text-white hover:bg-green-600"
-                            : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                            ? "bg-green-500 text-white hover:bg-green-700"
+                            : "bg-gray-300 text-gray-800 cursor-not-allowed"
                         )}
                         disabled={!selectedSlot}
                       >

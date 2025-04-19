@@ -125,7 +125,7 @@ export default function AvailableSlotsCalendar({
        >
          &lt;
        </button>
-       <h2 className="text-xl font-semibold">
+       <h2 className="text-xl font-semibold text-gray-900">
          {format(currentMonth, 'yyyy.M', { locale: ko })}
        </h2>
        <button 
@@ -162,8 +162,8 @@ export default function AvailableSlotsCalendar({
              onClick={() => handleDateClick(day)}
              className={cn(
                "p-4 text-center",
-               !isCurrentMonth && "text-gray-300",
-               isPastDate(day) && "text-gray-300 bg-gray-50",
+               !isCurrentMonth && "text-gray-800",
+               isPastDate(day) && "text-gray-800 bg-gray-50",
                !isPastDate(day) && isCurrentMonth && "cursor-pointer hover:bg-gray-50",
                isSelected && "bg-green-50 font-bold",
                isAvailable && !isPastDate(day) && isCurrentMonth && "bg-green-50",
@@ -228,7 +228,7 @@ export default function AvailableSlotsCalendar({
            {/* 예약 가능한 시간이 없는 경우 */}
            {availableTimesForSelectedDate.morning.length === 0 && 
             availableTimesForSelectedDate.afternoon.length === 0 && (
-             <div className="text-center py-4 text-gray-500">
+             <div className="text-center py-4 text-gray-800">
                예약 가능한 시간이 없습니다.
              </div>
            )}
