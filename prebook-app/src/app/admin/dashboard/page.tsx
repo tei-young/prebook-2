@@ -279,14 +279,14 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-gray-50 p-4">
       <div className="max-w-6xl mx-auto">
-        <Card>
+        <Card className="shadow-md">
           <CardHeader>
-            <CardTitle className="text-2xl">예약 관리 대시보드</CardTitle>
-            {/* 탭 메뉴 추가 */}
-            <div className="flex border-b mt-4">
+            <CardTitle className="text-2xl font-bold text-gray-900">예약 관리 대시보드</CardTitle>
+            {/* 탭 메뉴 개선 */}
+            <div className="flex border-b mt-4 overflow-x-auto">
               <button
                 className={cn(
-                  "py-2 px-4 font-medium text-sm",
+                  "py-3 px-4 font-medium text-base whitespace-nowrap",
                   activeTab === 'reservations' 
                     ? "border-b-2 border-blue-500 text-blue-600" 
                     : "text-gray-800 hover:text-gray-800"
@@ -297,7 +297,7 @@ export default function AdminDashboard() {
               </button>
               <button
                 className={cn(
-                  "py-2 px-4 font-medium text-sm",
+                  "py-3 px-4 font-medium text-base whitespace-nowrap",
                   activeTab === 'slots' 
                     ? "border-b-2 border-blue-500 text-blue-600" 
                     : "text-gray-800 hover:text-gray-700"
@@ -313,9 +313,11 @@ export default function AdminDashboard() {
             {activeTab === 'reservations' ? (
               // 기존 예약 관리 UI
               loading ? (
-                <div>로딩 중...</div>
+                <div className="flex justify-center p-8">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+                </div>
               ) : reservations.length === 0 ? (
-                <div>예약 요청이 없습니다.</div>
+                <div className="text-center p-8 text-gray-800 text-lg">예약 요청이 없습니다.</div>
               ) : (
                 <div className="space-y-4">
                   {reservations.map((reservation) => (
@@ -327,9 +329,9 @@ export default function AdminDashboard() {
                       )}
                       onClick={() => handleReservationClick(reservation)}
                     >
-                      <div className="flex justify-between items-start">
+                      <div className="flex flex-col sm:flex-row justify-between items-start">
                         <div>
-                          <h3 className="font-medium">
+                          <h3 className="font-medium text-lg text-gray-900">
                             {reservation.customer_name}
                             {reservation.source === 'owner' && (
                               <span className="ml-2 text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
@@ -337,15 +339,15 @@ export default function AdminDashboard() {
                               </span>
                             )}
                           </h3>
-                          <p className="text-sm text-gray-800">
+                          <p className="text-sm text-gray-800 mt-1">
                             {new Date(reservation.created_at).toLocaleDateString()}
                           </p>
-                          <p>희망 시술: {SERVICE_MAP[reservation.desired_service as keyof typeof serviceTypes]?.name || reservation.desired_service}</p>
+                          <p className="text-base text-gray-800 mt-1">희망 시술: {SERVICE_MAP[reservation.desired_service as keyof typeof serviceTypes]?.name || reservation.desired_service}</p>
                         </div>
-                        <div className="text-right">
+                        <div className="text-right mt-3 sm:mt-0">
                           <span 
                             className={cn(
-                              "px-2 py-1 rounded text-sm",
+                              "px-3 py-2 rounded text-base font-medium",
                               {
                                 'bg-yellow-100 text-yellow-800': reservation.status === 'pending',
                                 'bg-blue-100 text-blue-800': reservation.status === 'deposit_wait',
@@ -372,7 +374,7 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
 
-        {/* 예약 상세 다이얼로그 */}
+        {/* 예약 상세 다이얼로그 - 모바일 최적화 */}
         <Dialog 
           isOpen={!!selectedReservation && activeTab === 'reservations'} 
           onClose={() => {
@@ -391,50 +393,50 @@ export default function AdminDashboard() {
                 )}
               </h2>
               
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <h3 className="font-medium text-gray-800">고객 정보</h3>
+                  <h3 className="font-medium text-lg text-gray-900">고객 정보</h3>
                   <div className="mt-2 space-y-2">
-                    <p>이름: {selectedReservation.customer_name}</p>
+                    <p className="text-base text-gray-800">이름: {selectedReservation.customer_name}</p>
                     {/* 원장 생성 예약에는 성별, 나이 정보가 없을 수 있음 */}
                     {!(selectedReservation as any).source && (
                       <>
-                        <p>성별: {selectedReservation.gender === 'female' ? '여성' : '남성'}</p>
-                        <p>나이: {selectedReservation.age}세</p>
+                        <p className="text-base text-gray-800">성별: {selectedReservation.gender === 'female' ? '여성' : '남성'}</p>
+                        <p className="text-base text-gray-800">나이: {selectedReservation.age}세</p>
                       </>
                     )}
-                    <p>연락처: {selectedReservation.phone || '-'}</p>
+                    <p className="text-base text-gray-800">연락처: {selectedReservation.phone || '-'}</p>
                   </div>
                 </div>
                 
                 <div>
-                  <h3 className="font-medium text-gray-800">예약 정보</h3>
+                  <h3 className="font-medium text-lg text-gray-900">예약 정보</h3>
                   <div className="mt-2 space-y-2">
-                    <p>희망 시술: {SERVICE_MAP[selectedReservation.desired_service as keyof typeof serviceTypes]?.name || selectedReservation.desired_service}</p>
+                    <p className="text-base text-gray-800">희망 시술: {SERVICE_MAP[selectedReservation.desired_service as keyof typeof serviceTypes]?.name || selectedReservation.desired_service}</p>
                     
                     {/* 원장 생성 예약은 선택된 시간만 있고 희망 시간대 목록은 없음 */}
                     {(selectedReservation as any).source === 'owner' ? (
                       <div>
-                        <h4 className="font-medium text-gray-800">예약 시간</h4>
-                        <div className="p-3 rounded border bg-green-100 border-green-500 mt-1">
+                        <h4 className="font-medium text-gray-900">예약 시간</h4>
+                        <div className="p-3 rounded border bg-green-100 border-green-500 mt-1 text-base">
                           {selectedReservation.selected_slot && format(new Date(selectedReservation.selected_slot.date), 'M월 d일', { locale: ko })} {selectedReservation.selected_slot?.time}
                         </div>
                       </div>
                     ) : (
                       <div className="space-y-2">
-                        <h4 className="font-medium text-gray-800">희망 시간대</h4>
+                        <h4 className="font-medium text-gray-900">희망 시간대</h4>
                         {selectedReservation.desired_slots.map((slot, index) => (
                           <button
                             key={index}
                             onClick={() => handleSlotSelect(slot)}
                             disabled={selectedReservation.status !== 'pending'}
                             className={cn(
-                              "w-full p-3 rounded border text-left",
+                              "w-full p-3 rounded border text-left text-base",
                               selectedSlot?.time === slot.time && selectedSlot?.date === slot.date
-                                ? "bg-green-100 border-green-500"
+                                ? "bg-green-100 border-green-500 text-green-800"
                                 : selectedReservation.status === 'pending'
-                                  ? "hover:bg-gray-50"
-                                  : "bg-gray-50 cursor-not-allowed",
+                                  ? "hover:bg-gray-50 text-gray-800"
+                                  : "bg-gray-50 text-gray-800 cursor-not-allowed",
                               selectedReservation.selected_slot?.time === slot.time && 
                               selectedReservation.selected_slot?.date === slot.date
                                 ? "ring-2 ring-green-500"
@@ -447,8 +449,8 @@ export default function AdminDashboard() {
                       </div>
                     )}
                     
-                    <p>방문 경로: {selectedReservation.referral_source || '-'}</p>
-                    <p>시술 경험: {selectedReservation.prior_experience || '없음'}</p>
+                    <p className="text-base text-gray-800">방문 경로: {selectedReservation.referral_source || '-'}</p>
+                    <p className="text-base text-gray-800">시술 경험: {selectedReservation.prior_experience || '없음'}</p>
                   </div>
                 </div>
               </div>
@@ -456,11 +458,11 @@ export default function AdminDashboard() {
               {/* 사진 표시 부분 - 원장 생성 예약에는 사진이 없음 */}
               {!(selectedReservation as any).source && (selectedReservation.front_photo_url || selectedReservation.closed_photo_url) && (
                 <div className="mt-4">
-                  <h3 className="font-medium text-gray-700 mb-2">첨부 사진</h3>
-                  <div className="grid grid-cols-2 gap-4">
+                  <h3 className="font-medium text-lg text-gray-900 mb-2">첨부 사진</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {selectedReservation.front_photo_url && (
                       <div>
-                        <p className="text-sm text-gray-500 mb-1">정면 사진 (눈 뜬 상태)</p>
+                        <p className="text-base text-gray-800 mb-1">정면 사진 (눈 뜬 상태)</p>
                         <img 
                           src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/photos/${selectedReservation.front_photo_url}`}
                           alt="정면 사진"
@@ -470,7 +472,7 @@ export default function AdminDashboard() {
                     )}
                     {selectedReservation.closed_photo_url && (
                       <div>
-                        <p className="text-sm text-gray-500 mb-1">정면 사진 (눈 감은 상태)</p>
+                        <p className="text-base text-gray-800 mb-1">정면 사진 (눈 감은 상태)</p>
                         <img 
                           src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/photos/${selectedReservation.closed_photo_url}`}
                           alt="정면 사진 (눈 감은 상태)"
@@ -486,7 +488,7 @@ export default function AdminDashboard() {
               <div className="mt-6 space-y-3">
                 {/* 현재 상태 표시 */}
                 <div className={cn(
-                  "w-full p-2 rounded text-center",
+                  "w-full p-3 rounded text-center text-base font-medium",
                   {
                     'bg-yellow-100 text-yellow-800': selectedReservation.status === 'pending',
                     'bg-blue-100 text-blue-800': selectedReservation.status === 'deposit_wait',
@@ -503,20 +505,20 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* 승인/거절 버튼 */}
-                <div className="flex justify-end space-x-3">
+                <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3">
                   {/* 고객 예약인 경우 */}
                   {!(selectedReservation as any).source && selectedReservation.status === 'pending' ? (
                     <>
                       <button
                         onClick={() => handleStatusChange(selectedReservation.id, 'rejected')}
-                        className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                        className="px-4 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 text-base font-medium"
                       >
                         예약 거절
                       </button>
                       <button
                         onClick={() => handleApproveWithSlot(selectedReservation.id)}
                         className={cn(
-                          "px-4 py-2 rounded",
+                          "px-4 py-3 rounded-lg text-base font-medium",
                           selectedSlot
                             ? "bg-green-500 text-white hover:bg-green-700"
                             : "bg-gray-300 text-gray-800 cursor-not-allowed"
@@ -530,20 +532,20 @@ export default function AdminDashboard() {
                     <>
                       <button
                         onClick={() => handleStatusChange(selectedReservation.id, 'rejected')}
-                        className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                        className="px-4 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 text-base font-medium"
                       >
                         예약 {(selectedReservation as any).source === 'owner' ? '취소' : '거절'}
                       </button>
                       <button
                         onClick={() => handleStatusChange(selectedReservation.id, 'confirmed')}
-                        className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+                        className="px-4 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 text-base font-medium"
                       >
                         예약 확정
                       </button>
                     </>
                   ) : (
                     <div className={cn(
-                      "px-4 py-2 rounded",
+                      "px-4 py-3 rounded-lg text-base font-medium",
                       selectedReservation.status === 'confirmed'
                         ? 'bg-green-100 text-green-800'
                         : 'bg-red-100 text-red-800'
