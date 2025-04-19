@@ -346,25 +346,30 @@ export default function SlotManagementList({ onRefresh }: SlotManagementListProp
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div className="space-x-2">
-          <Button 
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
+        <div className="space-y-2 sm:space-y-0 sm:space-x-2 w-full sm:w-auto flex flex-col sm:flex-row">
+            <Button 
             variant={mode === 'block' ? 'default' : 'outline'} 
             onClick={() => setMode('block')}
-          >
+            className="text-base py-5 px-4 w-full sm:w-auto"
+            >
             시간 차단 모드
-          </Button>
-          <Button 
+            </Button>
+            <Button 
             variant={mode === 'book' ? 'default' : 'outline'} 
             onClick={() => setMode('book')}
-          >
+            className="text-base py-5 px-4 w-full sm:w-auto"
+            >
             예약 생성 모드
-          </Button>
+            </Button>
         </div>
-        <Button onClick={() => setIsBulkBlockDialogOpen(true)}>
-          휴무일 일괄 설정
+        <Button 
+            onClick={() => setIsBulkBlockDialogOpen(true)}
+            className="text-base py-5 px-4 w-full sm:w-auto"
+        >
+            휴무일 일괄 설정
         </Button>
-      </div>
+        </div>
   
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
@@ -412,67 +417,67 @@ export default function SlotManagementList({ onRefresh }: SlotManagementListProp
                   <div className="space-y-4">
                     {/* 오전 시간대 */}
                     <div>
-                      <h5 className="font-medium mb-2">오전</h5>
-                      <div className="grid grid-cols-3 gap-2">
-                        {AVAILABLE_TIMES.filter(time => parseInt(time) < 12).map(time => {
-                          const status = getSlotStatus(time);
-                          return (
-                            <button
-                              key={time}
-                              onClick={() => mode === 'block' 
-                                ? handleBlockSlot(time) 
-                                : status === 'available' && handleOpenBookingForm(time)
-                              }
-                              disabled={mode === 'book' && status !== 'available'}
-                              className={cn(
-                                "px-4 py-3 rounded text-lg",
-                                status === 'available' && mode === 'block' && "bg-white hover:bg-gray-100 border",
-                                status === 'available' && mode === 'book' && "bg-white hover:bg-green-50 border",
-                                status === 'blocked' && "bg-red-100 text-red-800 hover:bg-red-200",
-                                status === 'deposit_wait' && "bg-blue-100 text-blue-800",
-                                status === 'confirmed' && "bg-green-100 text-green-800",
-                                status === 'cancelled' && "bg-gray-100 text-gray-500",
-                                (mode === 'book' && status !== 'available') && "cursor-not-allowed opacity-70"
-                              )}
-                            >
-                              {time}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
+                        <h5 className="font-medium mb-2 text-lg">오전</h5>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                            {AVAILABLE_TIMES.filter(time => parseInt(time) < 12).map(time => {
+                            const status = getSlotStatus(time);
+                            return (
+                                <button
+                                key={time}
+                                onClick={() => mode === 'block' 
+                                    ? handleBlockSlot(time) 
+                                    : status === 'available' && handleOpenBookingForm(time)
+                                }
+                                disabled={mode === 'book' && status !== 'available'}
+                                className={cn(
+                                    "px-4 py-4 rounded-lg text-lg flex items-center justify-center",
+                                    status === 'available' && mode === 'block' && "bg-white hover:bg-gray-100 border",
+                                    status === 'available' && mode === 'book' && "bg-white hover:bg-green-50 border",
+                                    status === 'blocked' && "bg-red-100 text-red-800 hover:bg-red-200",
+                                    status === 'deposit_wait' && "bg-blue-100 text-blue-800",
+                                    status === 'confirmed' && "bg-green-100 text-green-800",
+                                    status === 'cancelled' && "bg-gray-100 text-gray-500",
+                                    (mode === 'book' && status !== 'available') && "cursor-not-allowed opacity-70"
+                                )}
+                                >
+                                {time}
+                                </button>
+                            );
+                            })}
+                        </div>
+                        </div>
   
                     {/* 오후 시간대 */}
                     <div>
-                      <h5 className="font-medium mb-2">오후</h5>
-                      <div className="grid grid-cols-3 gap-2">
-                        {AVAILABLE_TIMES.filter(time => parseInt(time) >= 12).map(time => {
-                          const status = getSlotStatus(time);
-                          return (
-                            <button
-                              key={time}
-                              onClick={() => mode === 'block' 
-                                ? handleBlockSlot(time) 
-                                : status === 'available' && handleOpenBookingForm(time)
-                              }
-                              disabled={mode === 'book' && status !== 'available'}
-                              className={cn(
-                                "px-4 py-3 rounded text-lg",
-                                status === 'available' && mode === 'block' && "bg-white hover:bg-gray-100 border",
-                                status === 'available' && mode === 'book' && "bg-white hover:bg-green-50 border",
-                                status === 'blocked' && "bg-red-100 text-red-800 hover:bg-red-200",
-                                status === 'deposit_wait' && "bg-blue-100 text-blue-800",
-                                status === 'confirmed' && "bg-green-100 text-green-800",
-                                status === 'cancelled' && "bg-gray-100 text-gray-500",
-                                (mode === 'book' && status !== 'available') && "cursor-not-allowed opacity-70"
-                              )}
-                            >
-                              {parseInt(time) > 12 ? `${parseInt(time) - 12}:${time.split(':')[1]}` : time}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
+                        <h5 className="font-medium mb-2 text-lg">오후</h5>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                            {AVAILABLE_TIMES.filter(time => parseInt(time) >= 12).map(time => {
+                            const status = getSlotStatus(time);
+                            return (
+                                <button
+                                key={time}
+                                onClick={() => mode === 'block' 
+                                    ? handleBlockSlot(time) 
+                                    : status === 'available' && handleOpenBookingForm(time)
+                                }
+                                disabled={mode === 'book' && status !== 'available'}
+                                className={cn(
+                                    "px-4 py-4 rounded-lg text-lg flex items-center justify-center",
+                                    status === 'available' && mode === 'block' && "bg-white hover:bg-gray-100 border",
+                                    status === 'available' && mode === 'book' && "bg-white hover:bg-green-50 border",
+                                    status === 'blocked' && "bg-red-100 text-red-800 hover:bg-red-200",
+                                    status === 'deposit_wait' && "bg-blue-100 text-blue-800",
+                                    status === 'confirmed' && "bg-green-100 text-green-800",
+                                    status === 'cancelled' && "bg-gray-100 text-gray-500",
+                                    (mode === 'book' && status !== 'available') && "cursor-not-allowed opacity-70"
+                                )}
+                                >
+                                {parseInt(time) > 12 ? `${parseInt(time) - 12}:${time.split(':')[1]}` : time}
+                                </button>
+                            );
+                            })}
+                        </div>
+                        </div>
                   </div>
                 )}
               </div>
@@ -484,77 +489,80 @@ export default function SlotManagementList({ onRefresh }: SlotManagementListProp
   
             {/* 예약 목록 섹션은 시간 UI 아래로 이동 */}
             {bookings.length > 0 && (
-              <div className="mt-6 border rounded-lg p-4">
-                <h3 className="font-medium mb-4">
-                  {format(selectedDate, 'yyyy년 M월 d일', { locale: ko })} 예약 목록
-                </h3>
-                
-                <div className="space-y-4">
-                  {bookings.map(booking => (
-                    <div 
-                      key={booking.id} 
-                      className={cn(
-                        "p-3 rounded border",
-                        booking.status === 'deposit_wait' && "border-blue-200 bg-blue-50",
-                        booking.status === 'confirmed' && "border-green-200 bg-green-50",
-                        booking.status === 'cancelled' && "border-gray-200 bg-gray-50"
-                      )}
-                    >
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <div className="font-medium">
-                            {booking.time} - {SERVICE_MAP[booking.service_type as keyof typeof serviceTypes]?.name || booking.service_type}
-                          </div>
-                          {booking.customer_name && (
-                            <div className="text-sm mt-1">고객명: {booking.customer_name}</div>
-                          )}
-                          {booking.customer_phone && (
-                            <div className="text-sm">연락처: {booking.customer_phone}</div>
-                          )}
-                          {booking.notes && (
-                            <div className="text-sm mt-2 text-gray-600">{booking.notes}</div>
-                          )}
-                        </div>
-                        <div className="flex space-x-2">
-                          {booking.status === 'deposit_wait' && (
-                            <>
-                              <Button 
-                                size="sm"
-                                onClick={() => handleUpdateBookingStatus(booking.id!, 'confirmed')}
-                              >
-                                확정
-                              </Button>
-                              <Button 
-                                size="sm"
-                                variant="destructive"
-                                onClick={() => handleUpdateBookingStatus(booking.id!, 'cancelled')}
-                              >
-                                취소
-                              </Button>
-                            </>
-                          )}
-                          {booking.status === 'confirmed' && (
-                            <Button 
-                              size="sm"
-                              variant="destructive"
-                              onClick={() => handleUpdateBookingStatus(booking.id!, 'cancelled')}
-                            >
-                              취소
-                            </Button>
-                          )}
-                          {booking.status === 'cancelled' && (
-                            <span className="text-sm text-gray-500 px-2 py-1 bg-gray-100 rounded">취소됨</span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+  <div className="mt-6 border rounded-lg p-4">
+    <h3 className="font-medium mb-4 text-lg">
+      {format(selectedDate, 'yyyy년 M월 d일', { locale: ko })} 예약 목록
+    </h3>
+    
+    <div className="space-y-4">
+      {bookings.map(booking => (
+        <div 
+          key={booking.id} 
+          className={cn(
+            "p-4 rounded-lg border",
+            booking.status === 'deposit_wait' && "border-blue-200 bg-blue-50",
+            booking.status === 'confirmed' && "border-green-200 bg-green-50",
+            booking.status === 'cancelled' && "border-gray-200 bg-gray-50"
+          )}
+        >
+          <div className="flex flex-col sm:flex-row justify-between items-start">
+            <div>
+              <div className="font-medium text-lg">
+                {booking.time} - {SERVICE_MAP[booking.service_type as keyof typeof serviceTypes]?.name || booking.service_type}
               </div>
-            )}
+              {booking.customer_name && (
+                <div className="text-base mt-1">고객명: {booking.customer_name}</div>
+              )}
+              {booking.customer_phone && (
+                <div className="text-base">연락처: {booking.customer_phone}</div>
+              )}
+              {booking.notes && (
+                <div className="text-base mt-2 text-gray-600">{booking.notes}</div>
+              )}
+            </div>
+            <div className="flex space-x-2 mt-3 sm:mt-0">
+              {booking.status === 'deposit_wait' && (
+                <>
+                  <Button 
+                    size="sm"
+                    className="text-base py-3 px-4"
+                    onClick={() => handleUpdateBookingStatus(booking.id!, 'confirmed')}
+                  >
+                    확정
+                  </Button>
+                  <Button 
+                    size="sm"
+                    variant="destructive"
+                    className="text-base py-3 px-4"
+                    onClick={() => handleUpdateBookingStatus(booking.id!, 'cancelled')}
+                  >
+                    취소
+                  </Button>
+                </>
+              )}
+              {booking.status === 'confirmed' && (
+                <Button 
+                  size="sm"
+                  variant="destructive"
+                  className="text-base py-3 px-4"
+                  onClick={() => handleUpdateBookingStatus(booking.id!, 'cancelled')}
+                >
+                  취소
+                </Button>
+              )}
+              {booking.status === 'cancelled' && (
+                <span className="text-base text-gray-500 px-3 py-2 bg-gray-100 rounded-lg">취소됨</span>
+              )}
+            </div>
           </div>
+        </div>
+      ))}
+    </div>
+  </div>
+)}
+</div>
         )}
-      </div>
+</div>
   
       {/* 예약 생성 폼 다이얼로그 */}
       <Dialog isOpen={isFormOpen} onClose={() => setIsFormOpen(false)}>
@@ -706,26 +714,26 @@ export default function SlotManagementList({ onRefresh }: SlotManagementListProp
               </div>
             </div>
             
-            <div className="grid grid-cols-3 gap-2 mt-2">
-              {AVAILABLE_TIMES.map(time => (
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-2">
+            {AVAILABLE_TIMES.map(time => (
                 <label 
-                  key={time}
-                  className={cn(
-                    "flex items-center p-2 border rounded cursor-pointer",
+                key={time}
+                className={cn(
+                    "flex items-center p-3 border rounded-lg cursor-pointer",
                     bulkBlockForm.times.includes(time) ? "bg-red-50 border-red-200" : "hover:bg-gray-50"
-                  )}
+                )}
                 >
-                  <input
+                <input
                     type="checkbox"
-                    className="mr-2"
+                    className="mr-2 h-5 w-5"
                     checked={bulkBlockForm.times.includes(time)}
                     onChange={() => toggleTimeSelection(time)}
-                  />
-                  <span>
+                />
+                <span className="text-base">
                     {parseInt(time) > 12 ? `${parseInt(time) - 12}:${time.split(':')[1]}` : time}
-                  </span>
+                </span>
                 </label>
-              ))}
+            ))}
             </div>
           </div>
   
