@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -60,12 +59,8 @@ export default function AvailableSlotsPage() {
         const dateStr = format(date, 'yyyy-MM-dd');
         const slotsForDate = await getAvailableSlots(dateStr);
         
-        console.log('받아온 시간 슬롯:', slotsForDate);
-        
         // 가능한 시간만 필터링
         const availableOnlySlots = slotsForDate.filter(slot => slot.available);
-        
-        console.log('가용 시간 슬롯:', availableOnlySlots);
         
         // 빈 배열이 아닌 실제 데이터 설정
         setAvailableSlots(availableOnlySlots.length > 0 ? availableOnlySlots : slotsForDate);
@@ -85,10 +80,10 @@ export default function AvailableSlotsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-4">
-      <div className="max-w-2xl mx-auto pt-8">
-        <Card>
-          <CardHeader>
-          <CardTitle className="text-center text-2xl text-gray-900">예약 가능 시간</CardTitle>
+      <div className="max-w-lg mx-auto">
+        <Card className="shadow-md">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-center text-2xl text-gray-900 font-bold">예약 가능 시간</CardTitle>
           </CardHeader>
           <CardContent>
             {loading ? (
@@ -102,22 +97,23 @@ export default function AvailableSlotsPage() {
                   onDateSelect={handleDateSelect}
                   selectedDate={selectedDate}
                   datesWithAvailableSlots={datesWithAvailableSlots}
+                  onMonthChange={handleMonthChange}
                 />
                 
                 <div className="mt-8 text-center text-gray-800">
-                  <p>예약을 원하시면 아래 연락처로 문의해주세요.</p>
-                  <div className="flex justify-center gap-4 mt-4">
+                  <p className="text-lg mb-2">예약을 원하시면 아래 연락처로 문의해주세요.</p>
+                  <div className="flex flex-col sm:flex-row justify-center gap-4 mt-4">
                     <a 
                       href="https://open.kakao.com/o/sXXXXXXX" 
                       target="_blank" 
                       rel="noopener noreferrer"
-                      className="px-4 py-2 bg-yellow-400 text-black rounded-md font-medium"
+                      className="px-6 py-3 bg-yellow-400 text-black rounded-full font-medium text-lg"
                     >
                       카카오톡 문의
                     </a>
                     <a 
                       href="tel:010-XXXX-XXXX" 
-                      className="px-4 py-2 bg-blue-500 text-white rounded-md font-medium"
+                      className="px-6 py-3 bg-blue-500 text-white rounded-full font-medium text-lg"
                     >
                       전화 문의
                     </a>
