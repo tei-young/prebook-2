@@ -118,44 +118,46 @@ export default function AvailableSlotsCalendar({
     }, [selectedDate, availableSlots]);
    
     return (
-      <div className="space-y-6">
+      <div className="space-y-4">
         {/* 월 네비게이션 */}
-        <div className="flex justify-between items-center p-4 border-b">
-        <button 
+        <div className="flex justify-between items-center p-3 border-b">
+          <button 
             onClick={() => {
-            const newMonth = subMonths(currentMonth, 1);
-            setCurrentMonth(newMonth);
-            // 상위 컴포넌트에 월 변경 알림
-            if (onMonthChange) {
+              const newMonth = subMonths(currentMonth, 1);
+              setCurrentMonth(newMonth);
+              // 상위 컴포넌트에 월 변경 알림
+              if (onMonthChange) {
                 onMonthChange(newMonth);
-            }
+              }
             }}
-            className="p-2 hover:bg-gray-100 rounded text-gray-900 text-xl font-medium"
-        >
+            className="p-3 hover:bg-gray-100 rounded text-gray-900 text-xl font-medium w-12 h-12 flex items-center justify-center"
+            aria-label="이전 달"
+          >
             &lt;
-        </button>
-        <h2 className="text-xl font-semibold text-gray-900">
+          </button>
+          <h2 className="text-xl font-semibold text-gray-900">
             {format(currentMonth, 'yyyy.M', { locale: ko })}
-        </h2>
-        <button 
+          </h2>
+          <button 
             onClick={() => {
-            const newMonth = addMonths(currentMonth, 1);
-            setCurrentMonth(newMonth);
-            // 상위 컴포넌트에 월 변경 알림
-            if (onMonthChange) {
+              const newMonth = addMonths(currentMonth, 1);
+              setCurrentMonth(newMonth);
+              // 상위 컴포넌트에 월 변경 알림
+              if (onMonthChange) {
                 onMonthChange(newMonth);
-            }
+              }
             }}
-            className="p-2 hover:bg-gray-100 rounded text-gray-900 text-xl font-medium"
-        >
+            className="p-3 hover:bg-gray-100 rounded text-gray-900 text-xl font-medium w-12 h-12 flex items-center justify-center"
+            aria-label="다음 달"
+          >
             &gt;
-        </button>
+          </button>
         </div>
    
         {/* 요일 헤더 */}
         <div className="grid grid-cols-7 gap-1">
           {['일', '월', '화', '수', '목', '금', '토'].map(day => (
-            <div key={day} className="text-center py-2 font-medium text-gray-900">{day}</div>
+            <div key={day} className="text-center py-3 font-medium text-gray-900 text-lg">{day}</div>
           ))}
           
           {/* 날짜 그리드 */}
@@ -170,7 +172,7 @@ export default function AvailableSlotsCalendar({
                 key={day.toString()}
                 onClick={() => handleDateClick(day)}
                 className={cn(
-                  "p-4 text-center",
+                  "flex items-center justify-center aspect-square text-lg",
                   !isCurrentMonth && "text-gray-400",
                   isPastDate(day) && "text-gray-400 bg-gray-50",
                   !isPastDate(day) && isCurrentMonth && "cursor-pointer hover:bg-gray-50 text-gray-900",
@@ -179,10 +181,12 @@ export default function AvailableSlotsCalendar({
                   "border rounded-lg"
                 )}
               >
-                <span>{format(day, 'd')}</span>
-                {isAvailable && !isPastDate(day) && isCurrentMonth && (
-                  <div className="w-2 h-2 bg-green-500 rounded-full mx-auto mt-1"></div>
-                )}
+                <div className="flex flex-col items-center justify-center w-full h-full py-2">
+                  <span className="text-lg font-medium">{format(day, 'd')}</span>
+                  {isAvailable && !isPastDate(day) && isCurrentMonth && (
+                    <div className="w-2 h-2 bg-green-500 rounded-full mx-auto mt-1"></div>
+                  )}
+                </div>
               </div>
             );
           })}
@@ -191,19 +195,19 @@ export default function AvailableSlotsCalendar({
         {/* 선택된 날짜의 가능한 시간 표시 */}
         {selectedDate && (
           <div className="mt-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">
+            <h3 className="text-xl font-medium text-gray-900 mb-4">
               {format(selectedDate, 'M월 d일', { locale: ko })} 예약 가능 시간
             </h3>
             <div className="space-y-4">
               {/* 오전 시간대 */}
               {availableTimesForSelectedDate.morning.length > 0 && (
                 <div>
-                  <h4 className="font-medium mb-2 text-gray-900">오전</h4>
-                  <div className="grid grid-cols-4 gap-2">
+                  <h4 className="font-medium mb-2 text-lg text-gray-900">오전</h4>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                     {availableTimesForSelectedDate.morning.map(slot => (
                       <div
                         key={slot.time}
-                        className="px-4 py-3 rounded text-lg bg-green-50 border border-green-300 text-green-800 text-center"
+                        className="px-4 py-4 rounded-lg text-lg bg-green-50 border border-green-300 text-green-800 text-center font-medium"
                       >
                         {slot.time}
                       </div>
@@ -215,8 +219,8 @@ export default function AvailableSlotsCalendar({
               {/* 오후 시간대 */}
               {availableTimesForSelectedDate.afternoon.length > 0 && (
                 <div>
-                  <h4 className="font-medium mb-2 text-gray-900">오후</h4>
-                  <div className="grid grid-cols-4 gap-2">
+                  <h4 className="font-medium mb-2 text-lg text-gray-900">오후</h4>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                     {availableTimesForSelectedDate.afternoon.map(slot => {
                       const hour = parseInt(slot.time.split(':')[0]);
                       const displayTime = hour > 12 ? `${hour - 12}:${slot.time.split(':')[1]}` : slot.time;
@@ -224,7 +228,7 @@ export default function AvailableSlotsCalendar({
                       return (
                         <div
                           key={slot.time}
-                          className="px-4 py-3 rounded text-lg bg-green-50 border border-green-300 text-green-800 text-center"
+                          className="px-4 py-4 rounded-lg text-lg bg-green-50 border border-green-300 text-green-800 text-center font-medium"
                         >
                           {displayTime}
                         </div>
@@ -237,7 +241,7 @@ export default function AvailableSlotsCalendar({
               {/* 예약 가능한 시간이 없는 경우 */}
               {availableTimesForSelectedDate.morning.length === 0 && 
                availableTimesForSelectedDate.afternoon.length === 0 && (
-                <div className="text-center py-4 text-gray-800">
+                <div className="text-center py-6 text-gray-800 text-lg">
                   예약 가능한 시간이 없습니다.
                 </div>
               )}
@@ -246,4 +250,4 @@ export default function AvailableSlotsCalendar({
         )}
       </div>
     );
-   }
+}
