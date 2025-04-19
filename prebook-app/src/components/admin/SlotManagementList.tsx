@@ -365,7 +365,7 @@ export default function SlotManagementList({ onRefresh }: SlotManagementListProp
           휴무일 일괄 설정
         </Button>
       </div>
-
+  
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <h3 className="text-lg font-medium mb-4">날짜 선택</h3>
@@ -387,102 +387,102 @@ export default function SlotManagementList({ onRefresh }: SlotManagementListProp
             />
           </div>
         </div>
-
+  
         {selectedDate && (
-            <div>
-                <h3 className="text-lg font-medium mb-4">시간대 관리</h3>
-                {selectedDate ? (
-                    <div className="border rounded-lg p-4">
-                    <div className="mb-4">
-                        <h4 className="font-medium">
-                        {format(selectedDate, 'yyyy년 M월 d일', { locale: ko })} 시간대
-                        </h4>
-                        <p className="text-sm text-gray-500 mt-1">
-                        {mode === 'block' 
-                            ? '시간을 클릭하여 차단/해제하세요' 
-                            : '시간을 클릭하여 예약을 생성하세요'}
-                        </p>
-                    </div>
-
-              {loading ? (
-                <div className="flex justify-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+          <div>
+            <h3 className="text-lg font-medium mb-4">시간대 관리</h3>
+            {selectedDate ? (
+              <div className="border rounded-lg p-4">
+                <div className="mb-4">
+                  <h4 className="font-medium">
+                    {format(selectedDate, 'yyyy년 M월 d일', { locale: ko })} 시간대
+                  </h4>
+                  <p className="text-sm text-gray-500 mt-1">
+                    {mode === 'block' 
+                      ? '시간을 클릭하여 차단/해제하세요' 
+                      : '시간을 클릭하여 예약을 생성하세요'}
+                  </p>
                 </div>
-              ) : (
-                <div className="space-y-4">
-                  {/* 오전 시간대 */}
-                  <div>
-                    <h5 className="font-medium mb-2">오전</h5>
-                    <div className="grid grid-cols-3 gap-2">
-                      {AVAILABLE_TIMES.filter(time => parseInt(time) < 12).map(time => {
-                        const status = getSlotStatus(time);
-                        return (
-                          <button
-                            key={time}
-                            onClick={() => mode === 'block' 
-                              ? handleBlockSlot(time) 
-                              : status === 'available' && handleOpenBookingForm(time)
-                            }
-                            disabled={mode === 'book' && status !== 'available'}
-                            className={cn(
-                              "px-4 py-3 rounded text-lg",
-                              status === 'available' && mode === 'block' && "bg-white hover:bg-gray-100 border",
-                              status === 'available' && mode === 'book' && "bg-white hover:bg-green-50 border",
-                              status === 'blocked' && "bg-red-100 text-red-800 hover:bg-red-200",
-                              status === 'deposit_wait' && "bg-blue-100 text-blue-800",
-                              status === 'confirmed' && "bg-green-100 text-green-800",
-                              status === 'cancelled' && "bg-gray-100 text-gray-500",
-                              (mode === 'book' && status !== 'available') && "cursor-not-allowed opacity-70"
-                            )}
-                          >
-                            {time}
-                          </button>
-                        );
-                      })}
+  
+                {loading ? (
+                  <div className="flex justify-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {/* 오전 시간대 */}
+                    <div>
+                      <h5 className="font-medium mb-2">오전</h5>
+                      <div className="grid grid-cols-3 gap-2">
+                        {AVAILABLE_TIMES.filter(time => parseInt(time) < 12).map(time => {
+                          const status = getSlotStatus(time);
+                          return (
+                            <button
+                              key={time}
+                              onClick={() => mode === 'block' 
+                                ? handleBlockSlot(time) 
+                                : status === 'available' && handleOpenBookingForm(time)
+                              }
+                              disabled={mode === 'book' && status !== 'available'}
+                              className={cn(
+                                "px-4 py-3 rounded text-lg",
+                                status === 'available' && mode === 'block' && "bg-white hover:bg-gray-100 border",
+                                status === 'available' && mode === 'book' && "bg-white hover:bg-green-50 border",
+                                status === 'blocked' && "bg-red-100 text-red-800 hover:bg-red-200",
+                                status === 'deposit_wait' && "bg-blue-100 text-blue-800",
+                                status === 'confirmed' && "bg-green-100 text-green-800",
+                                status === 'cancelled' && "bg-gray-100 text-gray-500",
+                                (mode === 'book' && status !== 'available') && "cursor-not-allowed opacity-70"
+                              )}
+                            >
+                              {time}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+  
+                    {/* 오후 시간대 */}
+                    <div>
+                      <h5 className="font-medium mb-2">오후</h5>
+                      <div className="grid grid-cols-3 gap-2">
+                        {AVAILABLE_TIMES.filter(time => parseInt(time) >= 12).map(time => {
+                          const status = getSlotStatus(time);
+                          return (
+                            <button
+                              key={time}
+                              onClick={() => mode === 'block' 
+                                ? handleBlockSlot(time) 
+                                : status === 'available' && handleOpenBookingForm(time)
+                              }
+                              disabled={mode === 'book' && status !== 'available'}
+                              className={cn(
+                                "px-4 py-3 rounded text-lg",
+                                status === 'available' && mode === 'block' && "bg-white hover:bg-gray-100 border",
+                                status === 'available' && mode === 'book' && "bg-white hover:bg-green-50 border",
+                                status === 'blocked' && "bg-red-100 text-red-800 hover:bg-red-200",
+                                status === 'deposit_wait' && "bg-blue-100 text-blue-800",
+                                status === 'confirmed' && "bg-green-100 text-green-800",
+                                status === 'cancelled' && "bg-gray-100 text-gray-500",
+                                (mode === 'book' && status !== 'available') && "cursor-not-allowed opacity-70"
+                              )}
+                            >
+                              {parseInt(time) > 12 ? `${parseInt(time) - 12}:${time.split(':')[1]}` : time}
+                            </button>
+                          );
+                        })}
+                      </div>
                     </div>
                   </div>
-
-                  {/* 오후 시간대 */}
-                  <div>
-                    <h5 className="font-medium mb-2">오후</h5>
-                    <div className="grid grid-cols-3 gap-2">
-                      {AVAILABLE_TIMES.filter(time => parseInt(time) >= 12).map(time => {
-                        const status = getSlotStatus(time);
-                        return (
-                          <button
-                            key={time}
-                            onClick={() => mode === 'block' 
-                              ? handleBlockSlot(time) 
-                              : status === 'available' && handleOpenBookingForm(time)
-                            }
-                            disabled={mode === 'book' && status !== 'available'}
-                            className={cn(
-                              "px-4 py-3 rounded text-lg",
-                              status === 'available' && mode === 'block' && "bg-white hover:bg-gray-100 border",
-                              status === 'available' && mode === 'book' && "bg-white hover:bg-green-50 border",
-                              status === 'blocked' && "bg-red-100 text-red-800 hover:bg-red-200",
-                              status === 'deposit_wait' && "bg-blue-100 text-blue-800",
-                              status === 'confirmed' && "bg-green-100 text-green-800",
-                              status === 'cancelled' && "bg-gray-100 text-gray-500",
-                              (mode === 'book' && status !== 'available') && "cursor-not-allowed opacity-70"
-                            )}
-                          >
-                            {parseInt(time) > 12 ? `${parseInt(time) - 12}:${time.split(':')[1]}` : time}
-                          </button>
-                        );
-                      })}
-                    </div>
-                    </div>
-                </div>
                 )}
-            </div>
+              </div>
             ) : (
-            <div className="border rounded-lg p-8 text-center text-gray-500">
+              <div className="border rounded-lg p-8 text-center text-gray-500">
                 날짜를 선택하면 시간대가 표시됩니다.
-            </div>
+              </div>
             )}
-
-            {/* 예약 목록 */}
+  
+            {/* 예약 목록 섹션은 시간 UI 아래로 이동 */}
             {bookings.length > 0 && (
               <div className="mt-6 border rounded-lg p-4">
                 <h3 className="font-medium mb-4">
@@ -555,7 +555,7 @@ export default function SlotManagementList({ onRefresh }: SlotManagementListProp
           </div>
         )}
       </div>
-
+  
       {/* 예약 생성 폼 다이얼로그 */}
       <Dialog isOpen={isFormOpen} onClose={() => setIsFormOpen(false)}>
         <div className="space-y-4">
@@ -568,7 +568,7 @@ export default function SlotManagementList({ onRefresh }: SlotManagementListProp
               <p>시간: {selectedSlot}</p>
             </div>
           </div>
-
+  
           <div className="space-y-4">
             <div>
               <Label htmlFor="serviceType">시술 종류</Label>
@@ -588,7 +588,7 @@ export default function SlotManagementList({ onRefresh }: SlotManagementListProp
                 ))}
               </select>
             </div>
-
+  
             <div>
               <Label htmlFor="customerName">고객명 (선택)</Label>
               <Input
@@ -598,7 +598,7 @@ export default function SlotManagementList({ onRefresh }: SlotManagementListProp
                 placeholder="고객 이름"
               />
             </div>
-
+  
             <div>
               <Label htmlFor="customerPhone">연락처 (선택)</Label>
               <Input
@@ -608,7 +608,7 @@ export default function SlotManagementList({ onRefresh }: SlotManagementListProp
                 placeholder="010-0000-0000"
               />
             </div>
-
+  
             <div>
               <Label htmlFor="notes">메모 (선택)</Label>
               <Textarea
@@ -619,7 +619,7 @@ export default function SlotManagementList({ onRefresh }: SlotManagementListProp
                 rows={3}
               />
             </div>
-
+  
             <div>
               <Label htmlFor="status">예약 상태</Label>
               <select
@@ -636,7 +636,7 @@ export default function SlotManagementList({ onRefresh }: SlotManagementListProp
               </select>
             </div>
           </div>
-
+  
           <div className="flex justify-end space-x-3 mt-6">
             <Button variant="outline" onClick={() => setIsFormOpen(false)}>
               취소
@@ -647,7 +647,7 @@ export default function SlotManagementList({ onRefresh }: SlotManagementListProp
           </div>
         </div>
       </Dialog>
-
+  
       {/* 일괄 차단 다이얼로그 */}
       <Dialog isOpen={isBulkBlockDialogOpen} onClose={() => setIsBulkBlockDialogOpen(false)}>
         <div className="space-y-4">
@@ -674,7 +674,7 @@ export default function SlotManagementList({ onRefresh }: SlotManagementListProp
               />
             </div>
           </div>
-
+  
           <div>
             <Label htmlFor="reason">사유</Label>
             <Input
@@ -684,7 +684,7 @@ export default function SlotManagementList({ onRefresh }: SlotManagementListProp
               placeholder="휴무일, 개인 일정 등"
             />
           </div>
-
+  
           <div>
             <div className="flex justify-between items-center mb-2">
               <Label>차단할 시간대</Label>
@@ -728,7 +728,7 @@ export default function SlotManagementList({ onRefresh }: SlotManagementListProp
               ))}
             </div>
           </div>
-
+  
           <div className="flex justify-end space-x-3 mt-6">
             <Button variant="outline" onClick={() => setIsBulkBlockDialogOpen(false)}>
               취소
@@ -743,5 +743,4 @@ export default function SlotManagementList({ onRefresh }: SlotManagementListProp
         </div>
       </Dialog>
     </div>
-  );
-}
+  )}
