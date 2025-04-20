@@ -168,26 +168,31 @@ export default function AvailableSlotsCalendar({
             const isSelected = selectedDate ? isSameDay(day, selectedDate) : false;
    
             return (
-              <div
+                <div
                 key={day.toString()}
                 onClick={() => handleDateClick(day)}
                 className={cn(
-                  "flex items-center justify-center aspect-square text-lg",
-                  !isCurrentMonth && "text-gray-400",
-                  isPastDate(day) && "text-gray-400 bg-gray-50",
-                  !isPastDate(day) && isCurrentMonth && "cursor-pointer hover:bg-gray-50 text-gray-900",
-                  isSelected && "bg-green-50 font-bold",
-                  isAvailable && !isPastDate(day) && isCurrentMonth && "bg-green-50 text-gray-900",
-                  "border rounded-lg"
+                    "flex items-center justify-center aspect-square text-lg",
+                    !isCurrentMonth && "text-gray-400",
+                    isPastDate(day) && "text-gray-400 bg-gray-50", // 텍스트 컬러를 회색으로 변경
+                    !isPastDate(day) && isCurrentMonth && "cursor-pointer hover:bg-gray-50 text-gray-900",
+                    isSelected && "bg-green-50 font-bold",
+                    isAvailable && !isPastDate(day) && isCurrentMonth && "bg-green-50 text-gray-900",
+                    "border rounded-lg"
                 )}
-              >
+                >
                 <div className="flex flex-col items-center justify-center w-full h-full py-2">
-                <span className="text-lg font-bold text-gray-900">{format(day, 'd')}</span>
-                {isAvailable && !isPastDate(day) && isCurrentMonth && (
+                    <span className={cn(
+                    "text-lg",
+                    isPastDate(day) ? "text-gray-400 font-normal" : "text-gray-900 font-bold" // 여기서 폰트 두께와 텍스트 컬러 조정
+                    )}>
+                    {format(day, 'd')}
+                    </span>
+                    {isAvailable && !isPastDate(day) && isCurrentMonth && (
                     <div className="w-2 h-2 bg-green-500 rounded-full mx-auto mt-1"></div>
-                )}
+                    )}
                 </div>
-              </div>
+                </div>
             );
           })}
         </div>

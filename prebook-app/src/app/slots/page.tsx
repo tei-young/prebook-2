@@ -47,8 +47,9 @@ export default function AvailableSlotsPage() {
   
     // 월 변경 시 새로운 월의 데이터를 로드하는 함수 추가
     const handleMonthChange = (newMonth: Date) => {
-      loadAvailableSlotsForMonth(newMonth.getFullYear(), newMonth.getMonth() + 1);
-    };
+        console.log('월 변경:', format(newMonth, 'yyyy-MM')); // 디버깅용
+        loadAvailableSlotsForMonth(newMonth.getFullYear(), newMonth.getMonth() + 1);
+      };
   
     // 특정 날짜에 대한 예약 가능 시간 로드
     const handleDateSelect = async (date: Date) => {
