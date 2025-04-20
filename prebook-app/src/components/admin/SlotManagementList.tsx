@@ -380,13 +380,13 @@ export default function SlotManagementList({ onRefresh }: SlotManagementListProp
   
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <h3 className="text-lg font-medium mb-4">날짜 선택</h3>
+        <h3 className="text-lg font-medium mb-4" style={{ color: '#000', fontWeight: 'bold' }}>날짜 선택</h3>
           {/* 날짜 선택용 캘린더 컴포넌트 */}
           <div className="border rounded-lg p-4">
             <div className="flex justify-between items-center mb-4">
-              <h4 className="font-medium">
-                {selectedDate ? format(selectedDate, 'yyyy년 M월 d일', { locale: ko }) : '날짜를 선택하세요'}
-              </h4>
+            <h4 className="font-medium" style={{ color: '#000', fontWeight: 'bold' }}>
+            {selectedDate ? format(selectedDate, 'yyyy년 M월 d일', { locale: ko }) : '날짜를 선택하세요'}
+            </h4>
             </div>
             <Calendar
               bookedSlots={[]}
@@ -402,13 +402,13 @@ export default function SlotManagementList({ onRefresh }: SlotManagementListProp
   
         {selectedDate && (
           <div>
-            <h3 className="text-lg font-medium mb-4">시간대 관리</h3>
+            <h3 className="text-lg font-medium mb-4" style={{ color: '#000', fontWeight: 'bold' }}>시간대 관리</h3>
             {selectedDate ? (
               <div className="border rounded-lg p-4">
                 <div className="mb-4">
-                  <h4 className="font-medium">
+                    <h4 className="font-medium" style={{ color: '#000', fontWeight: 'bold' }}>
                     {format(selectedDate, 'yyyy년 M월 d일', { locale: ko })} 시간대
-                  </h4>
+                    </h4>
                   <p className="text-sm text-gray-500 mt-1">
                     {mode === 'block' 
                       ? '시간을 클릭하여 차단/해제하세요' 
@@ -424,7 +424,7 @@ export default function SlotManagementList({ onRefresh }: SlotManagementListProp
                   <div className="space-y-4">
                     {/* 오전 시간대 */}
                     <div>
-                        <h5 className="font-medium mb-2 text-lg">오전</h5>
+                    <h5 className="font-medium mb-2 text-lg" style={{ color: '#000', fontWeight: 'bold' }}>오전</h5>
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                             {AVAILABLE_TIMES.filter(time => parseInt(time) < 12).map(time => {
                             const status = getSlotStatus(time);
@@ -456,7 +456,7 @@ export default function SlotManagementList({ onRefresh }: SlotManagementListProp
   
                     {/* 오후 시간대 */}
                     <div>
-                        <h5 className="font-medium mb-2 text-lg">오후</h5>
+                    <h5 className="font-medium mb-2 text-lg" style={{ color: '#000', fontWeight: 'bold' }}>오후</h5>
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                             {AVAILABLE_TIMES.filter(time => parseInt(time) >= 12).map(time => {
                             const status = getSlotStatus(time);
