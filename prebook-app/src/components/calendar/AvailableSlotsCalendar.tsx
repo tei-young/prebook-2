@@ -227,8 +227,8 @@ export default function AvailableSlotsCalendar({
                       
                       return (
                         <div
-                          key={slot.time}
-                          className="px-4 py-4 rounded-lg text-lg bg-green-50 border border-green-300 text-green-800 text-center font-medium"
+                        key={slot.time}
+                        className="px-4 py-4 rounded-lg text-lg bg-green-100 border border-green-400 text-green-900 text-center font-bold"
                         >
                           {displayTime}
                         </div>
