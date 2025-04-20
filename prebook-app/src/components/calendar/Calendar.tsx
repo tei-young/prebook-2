@@ -202,7 +202,7 @@ export default function Calendar({
         })}
      </div>
 
-     {selectedDate && !hideTimeSelection && (
+     {selectedDate && (hideTimeSelection === true ? null : (
        <div className="mt-6">
          <h3 className="text-lg font-medium mb-4">
            {format(selectedDate, 'M월 d일', { locale: ko })} 시술 시간 선택
@@ -269,7 +269,7 @@ export default function Calendar({
            </div>
          </div>
        </div>
-     )}
+     ))}
    </div>
  );
 }

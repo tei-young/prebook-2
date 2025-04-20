@@ -404,6 +404,7 @@ export default function SlotManagementList({ onRefresh }: SlotManagementListProp
                     }}
                     maxSelections={1}
                     serviceType="natural"
+                    hideTimeSelection={true}
                   />
                 </div>
               </div>
@@ -495,11 +496,6 @@ export default function SlotManagementList({ onRefresh }: SlotManagementListProp
                   </div>
                 )}
               </div>
-            ) : (
-              <div className="border rounded-lg p-8 text-center text-gray-500">
-                날짜를 선택하면 시간대가 표시됩니다.
-              </div>
-            ))
   
             {/* 예약 목록 섹션은 시간 UI 아래로 이동 */}
             {bookings.length > 0 && (
