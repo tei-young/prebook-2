@@ -121,37 +121,39 @@ export default function AvailableSlotsCalendar({
       <div className="space-y-4">
         {/* 월 네비게이션 */}
         <div className="flex justify-between items-center p-3 border-b">
-          <button 
-            onClick={() => {
-              const newMonth = subMonths(currentMonth, 1);
-              setCurrentMonth(newMonth);
-              // 상위 컴포넌트에 월 변경 알림
-              if (onMonthChange) {
-                onMonthChange(newMonth);
-              }
-            }}
-            className="p-3 hover:bg-gray-100 rounded text-gray-900 text-xl font-medium w-12 h-12 flex items-center justify-center"
-            aria-label="이전 달"
-          >
-            &lt;
-          </button>
+            <button 
+                onClick={() => {
+                    const newMonth = subMonths(currentMonth, 1);
+                    setCurrentMonth(newMonth);
+                    console.log("이전 달 버튼 클릭:", format(newMonth, 'yyyy-MM'));
+                    if (onMonthChange) {
+                    // 비동기 처리를 방지하기 위해 직접 새 Date 객체 전달
+                    onMonthChange(new Date(newMonth));
+                    }
+                }}
+                className="p-3 hover:bg-gray-100 rounded text-gray-900 text-xl font-medium w-12 h-12 flex items-center justify-center"
+                aria-label="이전 달"
+                >
+                &lt;
+            </button>
           <h2 className="text-xl font-semibold text-gray-900">
             {format(currentMonth, 'yyyy.M', { locale: ko })}
           </h2>
-          <button 
-            onClick={() => {
-              const newMonth = addMonths(currentMonth, 1);
-              setCurrentMonth(newMonth);
-              // 상위 컴포넌트에 월 변경 알림
-              if (onMonthChange) {
-                onMonthChange(newMonth);
-              }
-            }}
-            className="p-3 hover:bg-gray-100 rounded text-gray-900 text-xl font-medium w-12 h-12 flex items-center justify-center"
-            aria-label="다음 달"
-          >
-            &gt;
-          </button>
+            <button 
+                onClick={() => {
+                    const newMonth = addMonths(currentMonth, 1);
+                    setCurrentMonth(newMonth);
+                    console.log("다음 달 버튼 클릭:", format(newMonth, 'yyyy-MM'));
+                    if (onMonthChange) {
+                    // 비동기 처리를 방지하기 위해 직접 새 Date 객체 전달
+                    onMonthChange(new Date(newMonth));
+                    }
+                }}
+                className="p-3 hover:bg-gray-100 rounded text-gray-900 text-xl font-medium w-12 h-12 flex items-center justify-center"
+                aria-label="다음 달"
+                >
+                &gt;
+            </button>
         </div>
    
         {/* 요일 헤더 */}
