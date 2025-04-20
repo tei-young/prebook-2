@@ -55,6 +55,7 @@ interface CalendarProps {
  onRemoveSlot?: (slot: TimeSlot) => void;
  maxSelections?: number;
  serviceType?: string;
+ hideTimeSelection?: boolean;
 }
 
 const AVAILABLE_TIMES = [
@@ -69,7 +70,8 @@ export default function Calendar({
  onSelectSlot,
  onRemoveSlot,
  maxSelections = 3,
- serviceType 
+ serviceType,
+ hideTimeSelection = false 
 }: CalendarProps) {
  const [currentMonth, setCurrentMonth] = useState(new Date());
  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -200,7 +202,7 @@ export default function Calendar({
         })}
      </div>
 
-     {selectedDate && (
+     {selectedDate && !hideTimeSelection && (
        <div className="mt-6">
          <h3 className="text-lg font-medium mb-4">
            {format(selectedDate, 'M월 d일', { locale: ko })} 시술 시간 선택
