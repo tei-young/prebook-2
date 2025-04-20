@@ -404,7 +404,7 @@ export default function SlotManagementList({ onRefresh }: SlotManagementListProp
                     }}
                     maxSelections={1}
                     serviceType="natural"
-                    hideTimeSelection={true}
+                    // hideTimeSelection={true}
                   />
                 </div>
               </div>
