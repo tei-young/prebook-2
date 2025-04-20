@@ -392,8 +392,10 @@ export default function SlotManagementList({ onRefresh }: SlotManagementListProp
                     bookedSlots={[]}
                     selectedSlots={[]}
                     onSelectSlot={(slot) => {
-                    setSelectedDate(new Date(slot.date));
-                    
+                    // 날짜만 설정
+                    const selectedDate = new Date(slot.date);
+                    setSelectedDate(selectedDate);
+                                    
                     // 시간대 관리 섹션으로 자동 스크롤 추가
                     setTimeout(() => {
                         const timeManagementSection = document.getElementById('time-management-section');
@@ -404,7 +406,7 @@ export default function SlotManagementList({ onRefresh }: SlotManagementListProp
                     }}
                     maxSelections={1}
                     serviceType="natural"
-                    // hideTimeSelection={true}
+                    hideTimeSelection={true}
                   />
                 </div>
               </div>
