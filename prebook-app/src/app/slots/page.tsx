@@ -7,37 +7,40 @@ import AvailableSlotsCalendar, { AvailableTimeSlot } from '@/components/calendar
 import { getAvailableSlots, getAvailableSlotsForMonth } from '@/lib/supabaseApi';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 
-// 사용 가능한 시간대 상수 추가
-const AVAILABLE_TIMES = [
-  '10:00', '11:00',                       // 오전
-  '13:00', '14:00', '15:00', '16:00',     // 오후
-  '17:00', '18:00', '19:00'               // 저녁
-];
-
 export default function AvailableSlotsPage() {
+    // 월 상태를 상위 컴포넌트로 끌어올림
+    const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
     const [availableSlots, setAvailableSlots] = useState<AvailableTimeSlot[]>([]);
     const [datesWithAvailableSlots, setDatesWithAvailableSlots] = useState<string[]>([]);
     const [loading, setLoading] = useState(true);
   
-    // 현재 월에 대한 예약 가능 날짜 로드
+    // 컴포넌트 마운트 시 현재 월 데이터 로드
     useEffect(() => {
       const today = new Date();
       loadAvailableSlotsForMonth(today.getFullYear(), today.getMonth() + 1);
     }, []);
   
-    // 월별 예약 가능 날짜 로드
+    // 월별 예약 가능 날짜 로드 함수
     const loadAvailableSlotsForMonth = async (year: number, month: number) => {
       try {
         setLoading(true);
+        console.log(`로딩 ${year}년 ${month}월 데이터...`);
+        
         const monthData = await getAvailableSlotsForMonth(year, month);
         
         // 예약 가능한 슬롯이 있는 날짜만 필터링
         const availableDates = monthData
-          .filter(dateInfo => dateInfo.hasAvailableSlot)
-          .map(dateInfo => dateInfo.date);
+          .filter((dateInfo: { hasAvailableSlot: boolean; date: string }) => dateInfo.hasAvailableSlot)
+          .map((dateInfo: { date: string }) => dateInfo.date);
         
+        console.log(`${year}년 ${month}월 가용 날짜:`, availableDates);
         setDatesWithAvailableSlots(availableDates);
+        
+        // 선택된 날짜가 있으면 해당 날짜 데이터도 로드
+        if (selectedDate) {
+          handleDateSelect(selectedDate);
+        }
       } catch (error) {
         console.error('월별 예약 가능 시간 조회 오류:', error);
       } finally {
@@ -45,19 +48,20 @@ export default function AvailableSlotsPage() {
       }
     };
   
-    // 월 상태를 페이지 컴포넌트로 끌어올림
-    const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
-
-    // 월 변경 시 새로운 월의 데이터를 로드하는 함수 추가
+    // 월 변경 핸들러 - 컴포넌트 상태와 API 데이터 모두 업데이트
     const handleMonthChange = (newMonth: Date) => {
-        console.log("월 변경:", format(newMonth, 'yyyy-MM'));
-        setCurrentMonth(newMonth); // 상태 업데이트
-        loadAvailableSlotsForMonth(newMonth.getFullYear(), newMonth.getMonth() + 1)
-          .then(() => {
-            console.log("새 월 데이터 로드 완료:", format(newMonth, 'yyyy-MM'));
-            setSelectedDate(null);
-          });
-      };
+      console.log('월 변경 호출됨:', format(newMonth, 'yyyy-MM'));
+      
+      // 컴포넌트 상태 업데이트
+      setCurrentMonth(newMonth);
+      
+      // 새로운 월 데이터 로드
+      loadAvailableSlotsForMonth(newMonth.getFullYear(), newMonth.getMonth() + 1);
+      
+      // 날짜 선택 초기화 (선택적)
+      setSelectedDate(null);
+      setAvailableSlots([]);
+    };
   
     // 특정 날짜에 대한 예약 가능 시간 로드
     const handleDateSelect = async (date: Date) => {
@@ -66,7 +70,10 @@ export default function AvailableSlotsPage() {
         setLoading(true);
         
         const dateStr = format(date, 'yyyy-MM-dd');
+        console.log('날짜 선택:', dateStr);
+        
         const slotsForDate = await getAvailableSlots(dateStr);
+        console.log('선택 날짜 가용 슬롯:', slotsForDate);
         
         // 가능한 시간만 필터링
         const availableOnlySlots = slotsForDate.filter(slot => slot.available);
@@ -75,13 +82,7 @@ export default function AvailableSlotsPage() {
         setAvailableSlots(availableOnlySlots.length > 0 ? availableOnlySlots : slotsForDate);
       } catch (error) {
         console.error('날짜별 예약 가능 시간 조회 오류:', error);
-        // 오류 발생 시에도 기본 시간대 표시 (모두 available: true로 설정)
-        const defaultSlots = AVAILABLE_TIMES.map(time => ({
-          date: format(date, 'yyyy-MM-dd'),
-          time: time,
-          available: true
-        }));
-        setAvailableSlots(defaultSlots);
+        setAvailableSlots([]);
       } finally {
         setLoading(false);
       }
@@ -107,11 +108,11 @@ export default function AvailableSlotsPage() {
                   selectedDate={selectedDate}
                   datesWithAvailableSlots={datesWithAvailableSlots}
                   onMonthChange={handleMonthChange}
-                  currentMonth={currentMonth}
+                  currentMonth={currentMonth} // 월 상태 전달
                 />
                 
                 <div className="mt-8 text-center text-gray-800">
-                  <p className="text-lg mb-2">예약을 원하시면 아래 연락처로 문의해주세요.</p>
+                  <p className="text-lg mb-2 font-medium">예약을 원하시면 아래 연락처로 문의해주세요.</p>
                   <div className="flex flex-col sm:flex-row justify-center gap-4 mt-4">
                     <a 
                       href="https://open.kakao.com/o/sXXXXXXX" 
