@@ -11,6 +11,12 @@ export interface UnavailableSlot {
   updated_at?: string;
 }
 
+interface MonthlyAvailabilityInfo {
+    date: string;
+    hasAvailableSlot: boolean;
+    availableTimes: string[];
+  }
+
 export type BookingStatus = 'available' | 'deposit_wait' | 'confirmed' | 'cancelled';
 
 export const SERVICE_MAP: Record<string, { name: string, duration: 1 | 2 }> = {
@@ -291,4 +297,93 @@ export const getAvailableSlots = async (date: string) => {
       // 오류 발생 시에도 기본 가용 슬롯 반환 (모두 available: true)
       return allSlots;
     }
+  };
+  
+  // getAvailableSlotsForMonth 함수도 수정 - 동일한 2시간짜리 예약 처리 추가
+  export const getAvailableSlotsForMonth = async (year: number, month: number) => {
+    // 해당 월의 모든 날짜 생성
+    const daysInMonth = new Date(year, month, 0).getDate();
+    const dates = Array.from({ length: daysInMonth }, (_, i) => {
+      const day = i + 1;
+      return `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+    });
+    
+    // 예약 불가능 시간 조회
+    const startDate = `${year}-${month.toString().padStart(2, '0')}-01`;
+    const endDate = `${year}-${month.toString().padStart(2, '0')}-${daysInMonth}`;
+    
+    const { data: unavailableSlots, error: unavailableError } = await supabase
+      .from('unavailable_slots')
+      .select('*')
+      .gte('date', startDate)
+      .lte('date', endDate);
+    
+    if (unavailableError) {
+      console.error('예약 불가능 시간 조회 오류:', unavailableError);
+      throw unavailableError;
+    }
+    
+    // 예약된 시간 조회
+    const { data: bookings, error: bookingsError } = await supabase
+      .from('bookings')
+      .select('*')
+      .gte('date', startDate)
+      .lte('date', endDate)
+      .in('status', ['deposit_wait', 'confirmed']);
+    
+    if (bookingsError) {
+      console.error('예약 조회 오류:', bookingsError);
+      throw bookingsError;
+    }
+    
+    // 날짜별 가용 여부 확인
+    const result = dates.map(date => {
+      // 해당 날짜의 예약 불가능 시간
+      const dateUnavailableSlots = unavailableSlots.filter(slot => slot.date === date);
+      
+      // 해당 날짜의 예약된 시간
+      const dateBookings = bookings.filter(booking => booking.date === date);
+      
+      // 모든 시간 슬롯이 예약 불가능한지 확인
+      const AVAILABLE_TIMES = [
+        '10:00', '11:00',                       // 오전
+        '13:00', '14:00', '15:00', '16:00',     // 오후
+        '17:00', '18:00', '19:00'               // 저녁
+      ];
+      
+      const availableTimes = AVAILABLE_TIMES.filter(time => {
+        const currentHour = parseInt(time.split(':')[0]);
+        
+        // 예약 불가능 시간인지 확인
+        const isUnavailable = dateUnavailableSlots.some(slot => slot.time === time);
+        if (isUnavailable) return false;
+        
+        // 직접 예약된 시간인지 확인
+        const directlyBooked = dateBookings.some(booking => booking.time === time);
+        if (directlyBooked) return false;
+        
+        // 이전 시간에 2시간짜리 예약이 있는지 확인
+        const overlappingBooking = dateBookings.some(booking => {
+          const bookingHour = parseInt(booking.time.split(':')[0]);
+          // 안전하게 SERVICE_MAP 속성 접근
+          const serviceType = booking.service_type || '';
+          const serviceInfo = SERVICE_MAP[serviceType as keyof typeof SERVICE_MAP];
+          const bookingDuration = serviceInfo ? serviceInfo.duration : 1;
+          
+          // 현재 시간이 이전 예약 시간 + 소요시간 범위 내에 있는지 확인
+          return bookingHour < currentHour && 
+                 bookingHour + bookingDuration > currentHour;
+        });
+        
+        return !overlappingBooking;
+      });
+      
+      return {
+        date,
+        hasAvailableSlot: availableTimes.length > 0,
+        availableTimes
+      };
+    });
+    
+    return result;
   };
