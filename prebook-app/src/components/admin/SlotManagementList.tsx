@@ -21,7 +21,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import Calendar from '@/components/calendar/Calendar';
+import AdminCalendar from '@/components/admin/AdminCalendar';
 import Dialog from '@/components/ui/dialog';
 
 // 예약 서비스 타입 (기존 Calendar 컴포넌트에서 가져옴)
@@ -388,29 +388,21 @@ export default function SlotManagementList({ onRefresh }: SlotManagementListProp
                     {selectedDate ? format(selectedDate, 'yyyy년 M월 d일', { locale: ko }) : '날짜를 선택하세요'}
                     </h4>
                 </div>
-                <Calendar
-                    bookedSlots={[]}
-                    selectedSlots={[]}
-                    onSelectSlot={(slot) => {
-                    // 날짜만 설정
-                    const selectedDate = new Date(slot.date);
-                    setSelectedDate(selectedDate);
-                    // 날짜 선택 시 해당 날짜의 시간 슬롯 데이터 로드
-                    loadSlotsData(format(selectedDate, 'yyyy-MM-dd'));
+                <AdminCalendar
+                    selectedDate={selectedDate}
+                    onDateSelect={(date) => {
+                    setSelectedDate(date);
+                    loadSlotsData(format(date, 'yyyy-MM-dd'));
                     
-                    // 시간대 관리 섹션으로 자동 스크롤 추가
                     setTimeout(() => {
                         const timeManagementSection = document.getElementById('time-management-section');
                         if (timeManagementSection) {
-                          timeManagementSection.scrollIntoView({ behavior: 'smooth' });
+                        timeManagementSection.scrollIntoView({ behavior: 'smooth' });
                         }
-                      }, 100);
+                    }, 100);
                     }}
-                    maxSelections={1}
-                    serviceType="natural"
-                  />
+                />
                 </div>
-              </div>
             
               {selectedDate && (
                 <div id="time-management-section">
@@ -502,80 +494,80 @@ export default function SlotManagementList({ onRefresh }: SlotManagementListProp
   
             {/* 예약 목록 섹션은 시간 UI 아래로 이동 */}
             {bookings.length > 0 && (
-  <div className="mt-6 border rounded-lg p-4">
-    <h3 className="font-medium mb-4 text-lg">
-      {format(selectedDate, 'yyyy년 M월 d일', { locale: ko })} 예약 목록
-    </h3>
-    
-    <div className="space-y-4">
-      {bookings.map(booking => (
-        <div 
-          key={booking.id} 
-          className={cn(
-            "p-4 rounded-lg border",
-            booking.status === 'deposit_wait' && "border-blue-200 bg-blue-50",
-            booking.status === 'confirmed' && "border-green-200 bg-green-50",
-            booking.status === 'cancelled' && "border-gray-200 bg-gray-50"
-          )}
-        >
-          <div className="flex flex-col sm:flex-row justify-between items-start">
-            <div>
-              <div className="font-medium text-lg">
-                {booking.time} - {SERVICE_MAP[booking.service_type as keyof typeof serviceTypes]?.name || booking.service_type}
-              </div>
-              {booking.customer_name && (
-                <div className="text-base mt-1">고객명: {booking.customer_name}</div>
-              )}
-              {booking.customer_phone && (
-                <div className="text-base">연락처: {booking.customer_phone}</div>
-              )}
-              {booking.notes && (
-                <div className="text-base mt-2 text-gray-600">{booking.notes}</div>
-              )}
+            <div className="mt-6 border rounded-lg p-4">
+                <h3 className="font-medium mb-4 text-lg">
+                {format(selectedDate, 'yyyy년 M월 d일', { locale: ko })} 예약 목록
+                </h3>
+                
+                <div className="space-y-4">
+                {bookings.map(booking => (
+                    <div 
+                    key={booking.id} 
+                    className={cn(
+                        "p-4 rounded-lg border",
+                        booking.status === 'deposit_wait' && "border-blue-200 bg-blue-50",
+                        booking.status === 'confirmed' && "border-green-200 bg-green-50",
+                        booking.status === 'cancelled' && "border-gray-200 bg-gray-50"
+                    )}
+                    >
+                    <div className="flex flex-col sm:flex-row justify-between items-start">
+                        <div>
+                        <div className="font-medium text-lg">
+                            {booking.time} - {SERVICE_MAP[booking.service_type as keyof typeof serviceTypes]?.name || booking.service_type}
+                        </div>
+                        {booking.customer_name && (
+                            <div className="text-base mt-1">고객명: {booking.customer_name}</div>
+                        )}
+                        {booking.customer_phone && (
+                            <div className="text-base">연락처: {booking.customer_phone}</div>
+                        )}
+                        {booking.notes && (
+                            <div className="text-base mt-2 text-gray-600">{booking.notes}</div>
+                        )}
+                        </div>
+                        <div className="flex space-x-2 mt-3 sm:mt-0">
+                        {booking.status === 'deposit_wait' && (
+                            <>
+                            <Button 
+                                size="sm"
+                                className="text-base py-3 px-4"
+                                onClick={() => handleUpdateBookingStatus(booking.id!, 'confirmed')}
+                            >
+                                확정
+                            </Button>
+                            <Button 
+                                size="sm"
+                                variant="destructive"
+                                className="text-base py-3 px-4"
+                                onClick={() => handleUpdateBookingStatus(booking.id!, 'cancelled')}
+                            >
+                                취소
+                            </Button>
+                            </>
+                        )}
+                        {booking.status === 'confirmed' && (
+                            <Button 
+                            size="sm"
+                            variant="destructive"
+                            className="text-base py-3 px-4"
+                            onClick={() => handleUpdateBookingStatus(booking.id!, 'cancelled')}
+                            >
+                            취소
+                            </Button>
+                        )}
+                        {booking.status === 'cancelled' && (
+                            <span className="text-base text-gray-500 px-3 py-2 bg-gray-100 rounded-lg">취소됨</span>
+                        )}
+                        </div>
+                    </div>
+                    </div>
+                ))}
+                </div>
             </div>
-            <div className="flex space-x-2 mt-3 sm:mt-0">
-              {booking.status === 'deposit_wait' && (
-                <>
-                  <Button 
-                    size="sm"
-                    className="text-base py-3 px-4"
-                    onClick={() => handleUpdateBookingStatus(booking.id!, 'confirmed')}
-                  >
-                    확정
-                  </Button>
-                  <Button 
-                    size="sm"
-                    variant="destructive"
-                    className="text-base py-3 px-4"
-                    onClick={() => handleUpdateBookingStatus(booking.id!, 'cancelled')}
-                  >
-                    취소
-                  </Button>
-                </>
-              )}
-              {booking.status === 'confirmed' && (
-                <Button 
-                  size="sm"
-                  variant="destructive"
-                  className="text-base py-3 px-4"
-                  onClick={() => handleUpdateBookingStatus(booking.id!, 'cancelled')}
-                >
-                  취소
-                </Button>
-              )}
-              {booking.status === 'cancelled' && (
-                <span className="text-base text-gray-500 px-3 py-2 bg-gray-100 rounded-lg">취소됨</span>
-              )}
+            )}
             </div>
-          </div>
-        </div>
-      ))}
-    </div>
-  </div>
-)}
-</div>
-        )}
-</div>
+                    )}
+            </div>
   
       {/* 예약 생성 폼 다이얼로그 */}
       <Dialog isOpen={isFormOpen} onClose={() => setIsFormOpen(false)}>
@@ -763,5 +755,6 @@ export default function SlotManagementList({ onRefresh }: SlotManagementListProp
           </div>
         </div>
       </Dialog>
+    </div>
     </div>
   )}
