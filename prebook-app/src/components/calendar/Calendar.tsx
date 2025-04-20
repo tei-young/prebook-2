@@ -90,6 +90,7 @@ export default function Calendar({
 
   // 선택된 시간의 Date 객체 생성
   const targetDateTime = new Date(`${format(date, 'yyyy-MM-dd')}T${time}`);
+  const targetHour = targetDateTime.getHours();
   
   // 현재 선택한 시술의 소요시간 (1시간 또는 2시간)
   const selectedServiceDuration = SERVICE_MAP[serviceType as keyof typeof serviceTypes]?.duration || 1;
@@ -102,27 +103,21 @@ export default function Calendar({
       slot.selected_slot?.date
     ) {
       const bookedDateTime = new Date(`${slot.selected_slot.date}T${slot.selected_slot.time}`);
+      const bookedHour = bookedDateTime.getHours();
       const bookedService = slot.serviceType;
       const bookedDuration = SERVICE_MAP[bookedService as keyof typeof serviceTypes]?.duration || 1;
 
-      // 두 가지 충돌 상황 검사:
+      // 날짜가 같은지 먼저 확인
+      if (!isSameDay(targetDateTime, bookedDateTime)) return false;
       
-      // 1. 기존 예약시간과 새 예약시간이 겹치는 경우
-      // 예약된 시간부터 시술 소요시간 동안의 시간대 체크
-      for (let i = 0; i < bookedDuration; i++) {
-        const checkBookedTime = new Date(bookedDateTime);
-        checkBookedTime.setHours(checkBookedTime.getHours() + i);
-        
-        // 새로 선택하는 시술이 기존 예약과 겹치는지 확인
-        for (let j = 0; j < selectedServiceDuration; j++) {
-          const checkTargetTime = new Date(targetDateTime);
-          checkTargetTime.setHours(checkTargetTime.getHours() + j);
-          
-          if (isSameDay(checkBookedTime, checkTargetTime) && 
-              checkBookedTime.getHours() === checkTargetTime.getHours()) {
-            return true; // 겹치면 사용 불가
-          }
-        }
+      // 케이스 1: 내가 선택한 시간이 기존 예약 시간 범위에 겹치는 경우
+      if (targetHour >= bookedHour && targetHour < bookedHour + bookedDuration) {
+        return true; // 겹침: 사용 불가
+      }
+      
+      // 케이스 2: 내가 선택한 시간 + 시술 소요시간이 기존 예약 시간과 겹치는 경우
+      if (bookedHour >= targetHour && bookedHour < targetHour + selectedServiceDuration) {
+        return true; // 겹침: 사용 불가
       }
     }
     return false;

@@ -328,12 +328,29 @@ export default function SlotManagementList({ onRefresh }: SlotManagementListProp
     
     if (isBlocked) return 'blocked';
     
-    // 예약된 시간인지 확인
-    const booking = bookings.find(
+    // 예약된 시간 확인 - 현재 시간이 예약 시작 시간인 경우
+    const directBooking = bookings.find(
       booking => booking.date === date && booking.time === time
     );
     
-    if (booking) return booking.status;
+    if (directBooking) return directBooking.status;
+    
+    // 예약 시간 + 시술 소요시간 확인 (2시간짜리 예약인 경우 다음 시간도 체크)
+    const hourOfCurrent = parseInt(time.split(':')[0]);
+    
+    // 이전 시간에 2시간짜리 예약이 있는지 확인
+    const previousHourBooking = bookings.find(booking => {
+      if (booking.date !== date) return false;
+      
+      const bookingHour = parseInt(booking.time.split(':')[0]);
+      const bookingDuration = SERVICE_MAP[booking.service_type as keyof typeof SERVICE_MAP]?.duration || 1;
+      
+      // 현재 시간이 이전 예약 시간 + 소요시간 범위 내에 있는지 확인
+      return bookingHour < hourOfCurrent && 
+             bookingHour + bookingDuration > hourOfCurrent;
+    });
+    
+    if (previousHourBooking) return previousHourBooking.status;
     
     return 'available';
   };
