@@ -174,30 +174,30 @@ export default function Calendar({
        ))}
        
        {days.map(day => {
-         const isCurrentMonth = isSameMonth(day, currentMonth);
-         const hasAvailableSlot = AVAILABLE_TIMES.some(time => 
-           isTimeSlotAvailable(day, time)
-         );
-         const isDisabled = isPastDate(day) || !hasAvailableSlot || !isCurrentMonth;
-         const isSelected = selectedDate ? isSameDay(day, selectedDate) : false;
+          const isCurrentMonth = isSameMonth(day, currentMonth);
+          const hasAvailableSlot = AVAILABLE_TIMES.some(time => 
+            isTimeSlotAvailable(day, time)
+          );
+          const isDisabled = isPastDate(day) || !hasAvailableSlot || !isCurrentMonth;
+          const isSelected = selectedDate ? isSameDay(day, selectedDate) : false;
 
-         return (
-           <div
-             key={day.toString()}
-             onClick={() => !isDisabled && handleDateClick(day)}
-             className={cn(
-               "p-4 text-center",
-               !isCurrentMonth && "text-gray-300",
-               isPastDate(day) && "text-gray-300 bg-gray-50",
-               !isPastDate(day) && !isDisabled && "cursor-pointer hover:bg-gray-50",
-               isSelected && "bg-green-50 font-bold",
-               "border rounded-lg"
-             )}
-           >
-             <span>{format(day, 'd')}</span>
-           </div>
-         );
-       })}
+          return (
+            <div
+              key={day.toString()}
+              onClick={() => !isDisabled && handleDateClick(day)}
+              className={cn(
+                "p-4 text-center",
+                !isCurrentMonth && "text-gray-300",
+                isPastDate(day) && "text-gray-300 bg-gray-50", // 지난 날짜 스타일
+                !isPastDate(day) && !isDisabled && "cursor-pointer hover:bg-gray-50 text-gray-900 font-medium", // 활성화된 날짜 스타일 강화
+                isSelected && "bg-green-50 font-bold text-gray-900", // 선택된 날짜 스타일 강화
+                "border rounded-lg"
+              )}
+            >
+              <span>{format(day, 'd')}</span>
+            </div>
+          );
+        })}
      </div>
 
      {selectedDate && (
@@ -210,7 +210,37 @@ export default function Calendar({
           <div>
             <h4 className="font-medium mb-2">오전</h4>
             <div className="grid grid-cols-4 gap-2">  {/* grid-cols-2에서 grid-cols-4로 변경 */}
-              {AVAILABLE_TIMES.filter(time => parseInt(time) < 12).map(time => {
+            {AVAILABLE_TIMES.filter(time => parseInt(time) < 12).map(time => {
+              const isAvailable = isTimeSlotAvailable(selectedDate, time);
+              const isSelected = selectedSlots.some(slot => 
+                isSameDay(new Date(slot.date), selectedDate) && slot.time === time
+              );
+              
+              return (
+                <button
+                  key={time}
+                  onClick={() => isAvailable && !isSelected && handleTimeClick(time)}
+                  className={cn(
+                    "px-4 py-3 rounded text-lg",
+                    isSelected && "bg-green-500 text-white font-medium", // 선택된 시간 스타일
+                    !isAvailable && !isSelected && "bg-gray-200 text-gray-400", // 불가능한 시간 스타일
+                    isAvailable && !isSelected && "bg-white hover:bg-green-50 border text-gray-900 font-medium", // 가능한 시간 스타일 강화
+                    (!isAvailable || isSelected) && "cursor-not-allowed"
+                  )}
+                  disabled={!isAvailable || (selectedSlots.length >= maxSelections && !isSelected)}
+                >
+                  {time}
+                </button>
+              );
+            })}
+            </div>
+          </div>
+
+           {/* 오후 시간대 */}
+           <div>
+             <h4 className="font-medium mb-2">오후</h4>
+             <div className="grid grid-cols-4 gap-2">
+             {AVAILABLE_TIMES.filter(time => parseInt(time) >= 12).map(time => {
                 const isAvailable = isTimeSlotAvailable(selectedDate, time);
                 const isSelected = selectedSlots.some(slot => 
                   isSameDay(new Date(slot.date), selectedDate) && slot.time === time
@@ -222,47 +252,17 @@ export default function Calendar({
                     onClick={() => isAvailable && !isSelected && handleTimeClick(time)}
                     className={cn(
                       "px-4 py-3 rounded text-lg",
-                      isSelected && "bg-green-500 text-white",
+                      isSelected && "bg-green-500 text-white font-medium",
                       !isAvailable && !isSelected && "bg-gray-200 text-gray-400",
-                      isAvailable && !isSelected && "bg-white hover:bg-green-50 border",
+                      isAvailable && !isSelected && "bg-white hover:bg-green-50 border text-gray-900 font-medium", // 가능한 시간 스타일 강화
                       (!isAvailable || isSelected) && "cursor-not-allowed"
                     )}
                     disabled={!isAvailable || (selectedSlots.length >= maxSelections && !isSelected)}
                   >
-                    {time}
+                    {parseInt(time) > 12 ? `${parseInt(time) - 12}:${time.split(':')[1]}` : time}
                   </button>
                 );
               })}
-            </div>
-          </div>
-
-           {/* 오후 시간대 */}
-           <div>
-             <h4 className="font-medium mb-2">오후</h4>
-             <div className="grid grid-cols-4 gap-2">
-               {AVAILABLE_TIMES.filter(time => parseInt(time) >= 12).map(time => {
-                 const isAvailable = isTimeSlotAvailable(selectedDate, time);
-                 const isSelected = selectedSlots.some(slot => 
-                   isSameDay(new Date(slot.date), selectedDate) && slot.time === time
-                 );
-                 
-                 return (
-                   <button
-                     key={time}
-                     onClick={() => isAvailable && !isSelected && handleTimeClick(time)}
-                     className={cn(
-                       "px-4 py-3 rounded text-lg",
-                       isSelected && "bg-green-500 text-white",
-                       !isAvailable && !isSelected && "bg-gray-200 text-gray-400",
-                       isAvailable && !isSelected && "bg-white hover:bg-green-50 border",
-                       (!isAvailable || isSelected) && "cursor-not-allowed"
-                     )}
-                     disabled={!isAvailable || (selectedSlots.length >= maxSelections && !isSelected)}
-                   >
-                     {parseInt(time) > 12 ? `${parseInt(time) - 12}:${time.split(':')[1]}` : time}
-                   </button>
-                 );
-               })}
              </div>
            </div>
          </div>
