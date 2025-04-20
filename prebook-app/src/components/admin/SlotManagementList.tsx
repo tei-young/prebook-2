@@ -395,7 +395,9 @@ export default function SlotManagementList({ onRefresh }: SlotManagementListProp
                     // 날짜만 설정
                     const selectedDate = new Date(slot.date);
                     setSelectedDate(selectedDate);
-                                    
+                    // 날짜 선택 시 해당 날짜의 시간 슬롯 데이터 로드
+                    loadSlotsData(format(selectedDate, 'yyyy-MM-dd'));
+                    
                     // 시간대 관리 섹션으로 자동 스크롤 추가
                     setTimeout(() => {
                         const timeManagementSection = document.getElementById('time-management-section');
@@ -406,7 +408,6 @@ export default function SlotManagementList({ onRefresh }: SlotManagementListProp
                     }}
                     maxSelections={1}
                     serviceType="natural"
-                    hideTimeSelection={true}
                   />
                 </div>
               </div>
