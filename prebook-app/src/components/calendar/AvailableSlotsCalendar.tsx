@@ -182,10 +182,10 @@ export default function AvailableSlotsCalendar({
                 )}
               >
                 <div className="flex flex-col items-center justify-center w-full h-full py-2">
-                  <span className="text-lg font-medium">{format(day, 'd')}</span>
-                  {isAvailable && !isPastDate(day) && isCurrentMonth && (
+                <span className="text-lg font-bold text-gray-900">{format(day, 'd')}</span>
+                {isAvailable && !isPastDate(day) && isCurrentMonth && (
                     <div className="w-2 h-2 bg-green-500 rounded-full mx-auto mt-1"></div>
-                  )}
+                )}
                 </div>
               </div>
             );
@@ -205,10 +205,10 @@ export default function AvailableSlotsCalendar({
                   <h4 className="font-medium mb-2 text-lg text-gray-900">오전</h4>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                     {availableTimesForSelectedDate.morning.map(slot => (
-                      <div
+                        <div
                         key={slot.time}
-                        className="px-4 py-4 rounded-lg text-lg bg-green-50 border border-green-300 text-green-800 text-center font-medium"
-                      >
+                        className="px-4 py-4 rounded-lg text-lg bg-green-100 border border-green-400 text-green-900 text-center font-bold"
+                        >
                         {slot.time}
                       </div>
                     ))}

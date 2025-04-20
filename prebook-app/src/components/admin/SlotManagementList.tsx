@@ -370,7 +370,6 @@ export default function SlotManagementList({ onRefresh }: SlotManagementListProp
             </Button>
         </div>
 
-        // 휴무일 일괄 설정 버튼도 수정
         <Button 
             onClick={() => setIsBulkBlockDialogOpen(true)}
             className="text-base py-5 px-4 w-full sm:w-auto bg-green-500 text-white hover:bg-green-600"
