@@ -1,10 +1,10 @@
-'use client';
+// src/components/calendar/AvailableSlotsCalendar.tsx
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { 
- format, startOfMonth, endOfMonth, eachDayOfInterval, 
- isSameDay, addMonths, subMonths, startOfWeek, 
- endOfWeek, isSameMonth
+  format, startOfMonth, endOfMonth, eachDayOfInterval, 
+  isSameDay, addMonths, subMonths, startOfWeek, 
+  endOfWeek, isSameMonth
 } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -22,12 +22,13 @@ interface AvailableSlotsCalendarProps {
   selectedDate?: Date | null;
   datesWithAvailableSlots?: string[]; // 예약 가능한 슬롯이 있는 날짜 목록
   onMonthChange?: (month: Date) => void; // 월 변경 이벤트
+  currentMonth?: Date; // 추가된 prop
 }
 
 const AVAILABLE_TIMES = [
- '10:00', '11:00',                         // 오전
- '13:00', '14:00', '15:00', '16:00',      // 오후
- '17:00', '18:00', '19:00'                // 저녁
+  '10:00', '11:00',                       // 오전
+  '13:00', '14:00', '15:00', '16:00',     // 오후
+  '17:00', '18:00', '19:00'               // 저녁
 ];
 
 export default function AvailableSlotsCalendar({ 
@@ -35,19 +36,31 @@ export default function AvailableSlotsCalendar({
     onDateSelect,
     selectedDate,
     datesWithAvailableSlots = [],
-    onMonthChange
-   }: AvailableSlotsCalendarProps) {
-    const [currentMonth, setCurrentMonth] = useState(new Date());
+    onMonthChange,
+    currentMonth: propCurrentMonth
+}: AvailableSlotsCalendarProps) {
+    // 내부 상태는 prop이 제공되지 않을 경우에만 기본값 사용
+    const [internalCurrentMonth, setInternalCurrentMonth] = useState(new Date());
+    
+    // 실제 사용할 월 - prop이 있으면 prop 사용, 없으면 내부 상태 사용
+    const effectiveCurrentMonth = propCurrentMonth || internalCurrentMonth;
+    
+    // currentMonth prop이 변경되면 내부 상태도 업데이트
+    useEffect(() => {
+      if (propCurrentMonth) {
+        setInternalCurrentMonth(propCurrentMonth);
+      }
+    }, [propCurrentMonth]);
     
     // 현재 보여지는 날짜들 계산
     const days = useMemo(() => {
-      const start = startOfMonth(currentMonth);
+      const start = startOfMonth(effectiveCurrentMonth);
       const startWeek = startOfWeek(start);
-      const end = endOfMonth(currentMonth);
+      const end = endOfMonth(effectiveCurrentMonth);
       const endWeek = endOfWeek(end);
    
       return eachDayOfInterval({ start: startWeek, end: endWeek });
-    }, [currentMonth]);
+    }, [effectiveCurrentMonth]);
    
     // 날짜가 과거인지 확인
     const isPastDate = (date: Date) => {
@@ -58,6 +71,11 @@ export default function AvailableSlotsCalendar({
    
     // 날짜에 예약 가능한 시간이 있는지 확인
     const hasAvailableSlot = (date: Date) => {
+      // 과거 날짜는 항상 false 반환
+      if (isPastDate(date)) {
+        return false;
+      }
+      
       const dateStr = format(date, 'yyyy-MM-dd');
       return datesWithAvailableSlots.includes(dateStr);
     };
@@ -67,9 +85,9 @@ export default function AvailableSlotsCalendar({
         // 과거 날짜 제외
         if (!isPastDate(date) && onDateSelect) {
           // 다른 달 날짜 클릭 시 그 달로 이동
-          if (!isSameMonth(date, currentMonth)) {
+          if (!isSameMonth(date, effectiveCurrentMonth)) {
             console.log('다른 달 날짜 선택:', format(date, 'yyyy-MM-dd'));
-            setCurrentMonth(date); // 선택한 날짜의 달로 명확하게 변경
+            setInternalCurrentMonth(date); // 내부 상태 업데이트
             
             // 상위 컴포넌트에 월 변경 알림
             if (onMonthChange) {
@@ -78,7 +96,7 @@ export default function AvailableSlotsCalendar({
           }
           onDateSelect(date);
         }
-      };
+    };
    
     // 시간대 그룹화 함수
     const groupTimesByPeriod = (times: AvailableTimeSlot[]) => {
@@ -117,43 +135,46 @@ export default function AvailableSlotsCalendar({
       return groupTimesByPeriod(slotsForDate);
     }, [selectedDate, availableSlots]);
    
+    // 월 이동 핸들러 수정
+    const handlePrevMonth = () => {
+      const newMonth = subMonths(effectiveCurrentMonth, 1);
+      setInternalCurrentMonth(newMonth);
+      console.log("이전 달 버튼 클릭:", format(newMonth, 'yyyy-MM'));
+      if (onMonthChange) {
+        onMonthChange(newMonth);
+      }
+    };
+
+    const handleNextMonth = () => {
+      const newMonth = addMonths(effectiveCurrentMonth, 1);
+      setInternalCurrentMonth(newMonth);
+      console.log("다음 달 버튼 클릭:", format(newMonth, 'yyyy-MM'));
+      if (onMonthChange) {
+        onMonthChange(newMonth);
+      }
+    };
+
     return (
       <div className="space-y-4">
         {/* 월 네비게이션 */}
         <div className="flex justify-between items-center p-3 border-b">
-            <button 
-                onClick={() => {
-                    const newMonth = subMonths(currentMonth, 1);
-                    setCurrentMonth(newMonth);
-                    console.log("이전 달 버튼 클릭:", format(newMonth, 'yyyy-MM'));
-                    if (onMonthChange) {
-                    // 비동기 처리를 방지하기 위해 직접 새 Date 객체 전달
-                    onMonthChange(new Date(newMonth));
-                    }
-                }}
-                className="p-3 hover:bg-gray-100 rounded text-gray-900 text-xl font-medium w-12 h-12 flex items-center justify-center"
-                aria-label="이전 달"
-                >
-                &lt;
-            </button>
+          <button 
+            onClick={handlePrevMonth}
+            className="p-3 hover:bg-gray-100 rounded text-gray-900 text-xl font-medium w-12 h-12 flex items-center justify-center"
+            aria-label="이전 달"
+          >
+            &lt;
+          </button>
           <h2 className="text-xl font-semibold text-gray-900">
-            {format(currentMonth, 'yyyy.M', { locale: ko })}
+            {format(effectiveCurrentMonth, 'yyyy.M', { locale: ko })}
           </h2>
-            <button 
-                onClick={() => {
-                    const newMonth = addMonths(currentMonth, 1);
-                    setCurrentMonth(newMonth);
-                    console.log("다음 달 버튼 클릭:", format(newMonth, 'yyyy-MM'));
-                    if (onMonthChange) {
-                    // 비동기 처리를 방지하기 위해 직접 새 Date 객체 전달
-                    onMonthChange(new Date(newMonth));
-                    }
-                }}
-                className="p-3 hover:bg-gray-100 rounded text-gray-900 text-xl font-medium w-12 h-12 flex items-center justify-center"
-                aria-label="다음 달"
-                >
-                &gt;
-            </button>
+          <button 
+            onClick={handleNextMonth}
+            className="p-3 hover:bg-gray-100 rounded text-gray-900 text-xl font-medium w-12 h-12 flex items-center justify-center"
+            aria-label="다음 달"
+          >
+            &gt;
+          </button>
         </div>
    
         {/* 요일 헤더 */}
@@ -164,37 +185,37 @@ export default function AvailableSlotsCalendar({
           
           {/* 날짜 그리드 */}
           {days.map(day => {
-            const isCurrentMonth = isSameMonth(day, currentMonth);
+            const isCurrentMonth = isSameMonth(day, effectiveCurrentMonth);
             const isAvailable = hasAvailableSlot(day);
             const isDisabled = isPastDate(day) || !isAvailable || !isCurrentMonth;
             const isSelected = selectedDate ? isSameDay(day, selectedDate) : false;
    
             return (
-                <div
+              <div
                 key={day.toString()}
                 onClick={() => handleDateClick(day)}
                 className={cn(
-                    "flex items-center justify-center aspect-square text-lg",
-                    !isCurrentMonth && "text-gray-400",
-                    isPastDate(day) && "text-gray-400 bg-gray-50", // 텍스트 컬러를 회색으로 변경
-                    !isPastDate(day) && isCurrentMonth && "cursor-pointer hover:bg-gray-50 text-gray-900",
-                    isSelected && "bg-green-50 font-bold",
-                    isAvailable && !isPastDate(day) && isCurrentMonth && "bg-green-50 text-gray-900",
-                    "border rounded-lg"
+                  "flex items-center justify-center aspect-square text-lg",
+                  !isCurrentMonth && "text-gray-400",
+                  isPastDate(day) && "text-gray-400 bg-gray-50",
+                  !isPastDate(day) && isCurrentMonth && "cursor-pointer hover:bg-gray-50 text-gray-900",
+                  isSelected && "bg-green-50 font-bold",
+                  isAvailable && !isPastDate(day) && isCurrentMonth && "bg-green-50 text-gray-900",
+                  "border rounded-lg"
                 )}
-                >
+              >
                 <div className="flex flex-col items-center justify-center w-full h-full py-2">
-                    <span className={cn(
+                  <span className={cn(
                     "text-lg",
-                    isPastDate(day) ? "text-gray-400 font-normal" : "text-gray-900 font-bold" // 여기서 폰트 두께와 텍스트 컬러 조정
-                    )}>
+                    isPastDate(day) ? "text-gray-400 font-normal" : "text-gray-900 font-bold"
+                  )}>
                     {format(day, 'd')}
-                    </span>
-                    {isAvailable && !isPastDate(day) && isCurrentMonth && (
+                  </span>
+                  {isAvailable && !isPastDate(day) && isCurrentMonth && (
                     <div className="w-2 h-2 bg-green-500 rounded-full mx-auto mt-1"></div>
-                    )}
+                  )}
                 </div>
-                </div>
+              </div>
             );
           })}
         </div>
@@ -212,10 +233,10 @@ export default function AvailableSlotsCalendar({
                   <h4 className="font-medium mb-2 text-lg text-gray-900">오전</h4>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                     {availableTimesForSelectedDate.morning.map(slot => (
-                        <div
+                      <div
                         key={slot.time}
                         className="px-4 py-4 rounded-lg text-lg bg-green-100 border border-green-400 text-green-900 text-center font-bold"
-                        >
+                      >
                         {slot.time}
                       </div>
                     ))}
@@ -234,8 +255,8 @@ export default function AvailableSlotsCalendar({
                       
                       return (
                         <div
-                        key={slot.time}
-                        className="px-4 py-4 rounded-lg text-lg bg-green-100 border border-green-400 text-green-900 text-center font-bold"
+                          key={slot.time}
+                          className="px-4 py-4 rounded-lg text-lg bg-green-100 border border-green-400 text-green-900 text-center font-bold"
                         >
                           {displayTime}
                         </div>
