@@ -378,43 +378,50 @@ export default function SlotManagementList({ onRefresh }: SlotManagementListProp
         </Button>
         </div>
   
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-        <h3 className="text-lg font-medium mb-4" style={{ color: '#000', fontWeight: 'bold' }}>날짜 선택</h3>
-          {/* 날짜 선택용 캘린더 컴포넌트 */}
-          <div className="border rounded-lg p-4">
-            <div className="flex justify-between items-center mb-4">
-            <h4 className="font-medium" style={{ color: '#000', fontWeight: 'bold' }}>
-            {selectedDate ? format(selectedDate, 'yyyy년 M월 d일', { locale: ko }) : '날짜를 선택하세요'}
-            </h4>
-            </div>
-            <Calendar
-              bookedSlots={[]}
-              selectedSlots={[]}
-              onSelectSlot={(slot) => {
-                setSelectedDate(new Date(slot.date));
-              }}
-              maxSelections={1}
-              serviceType="natural"
-            />
-          </div>
-        </div>
-  
-        {selectedDate && (
-          <div>
-            <h3 className="text-lg font-medium mb-4" style={{ color: '#000', fontWeight: 'bold' }}>시간대 관리</h3>
-            {selectedDate ? (
-              <div className="border rounded-lg p-4">
-                <div className="mb-4">
-                    <h4 className="font-medium" style={{ color: '#000', fontWeight: 'bold' }}>
-                    {format(selectedDate, 'yyyy년 M월 d일', { locale: ko })} 시간대
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <h3 className="text-lg font-bold text-gray-900 mb-4">날짜 선택</h3>
+                {/* 날짜 선택용 캘린더 컴포넌트 */}
+                <div className="border rounded-lg p-4">
+                <div className="flex justify-between items-center mb-4">
+                    <h4 className="font-bold text-gray-900">
+                    {selectedDate ? format(selectedDate, 'yyyy년 M월 d일', { locale: ko }) : '날짜를 선택하세요'}
                     </h4>
-                  <p className="text-sm text-gray-500 mt-1">
-                    {mode === 'block' 
-                      ? '시간을 클릭하여 차단/해제하세요' 
-                      : '시간을 클릭하여 예약을 생성하세요'}
-                  </p>
                 </div>
+                <Calendar
+                    bookedSlots={[]}
+                    selectedSlots={[]}
+                    onSelectSlot={(slot) => {
+                    setSelectedDate(new Date(slot.date));
+                    
+                    // 시간대 관리 섹션으로 자동 스크롤 추가
+                    setTimeout(() => {
+                        const timeManagementSection = document.getElementById('time-management-section');
+                        if (timeManagementSection) {
+                          timeManagementSection.scrollIntoView({ behavior: 'smooth' });
+                        }
+                      }, 100);
+                    }}
+                    maxSelections={1}
+                    serviceType="natural"
+                  />
+                </div>
+              </div>
+            
+              {selectedDate && (
+                <div id="time-management-section">
+                  <h3 className="text-lg font-bold text-gray-900 mb-4">시간대 관리</h3>
+                  <div className="border rounded-lg p-4">
+                    <div className="mb-4">
+                      <h4 className="font-bold text-gray-900">
+                        {format(selectedDate, 'yyyy년 M월 d일', { locale: ko })} 시간대
+                      </h4>
+                      <p className="text-sm text-gray-900 font-medium mt-1">
+                        {mode === 'block' 
+                          ? '시간을 클릭하여 차단/해제하세요' 
+                          : '시간을 클릭하여 예약을 생성하세요'}
+                      </p>
+                    </div>            
   
                 {loading ? (
                   <div className="flex justify-center py-8">
@@ -424,7 +431,7 @@ export default function SlotManagementList({ onRefresh }: SlotManagementListProp
                   <div className="space-y-4">
                     {/* 오전 시간대 */}
                     <div>
-                    <h5 className="font-medium mb-2 text-lg" style={{ color: '#000', fontWeight: 'bold' }}>오전</h5>
+                    <h5 className="font-bold mb-2 text-lg text-gray-900">오전</h5>
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                             {AVAILABLE_TIMES.filter(time => parseInt(time) < 12).map(time => {
                             const status = getSlotStatus(time);
@@ -456,7 +463,7 @@ export default function SlotManagementList({ onRefresh }: SlotManagementListProp
   
                     {/* 오후 시간대 */}
                     <div>
-                    <h5 className="font-medium mb-2 text-lg" style={{ color: '#000', fontWeight: 'bold' }}>오후</h5>
+                    <h5 className="font-bold mb-2 text-lg text-gray-900">오후</h5>
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                             {AVAILABLE_TIMES.filter(time => parseInt(time) >= 12).map(time => {
                             const status = getSlotStatus(time);
@@ -492,7 +499,7 @@ export default function SlotManagementList({ onRefresh }: SlotManagementListProp
               <div className="border rounded-lg p-8 text-center text-gray-500">
                 날짜를 선택하면 시간대가 표시됩니다.
               </div>
-            )}
+            ))
   
             {/* 예약 목록 섹션은 시간 UI 아래로 이동 */}
             {bookings.length > 0 && (
