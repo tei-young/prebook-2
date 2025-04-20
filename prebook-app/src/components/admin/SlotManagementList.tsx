@@ -351,21 +351,29 @@ export default function SlotManagementList({ onRefresh }: SlotManagementListProp
             <Button 
             variant={mode === 'block' ? 'default' : 'outline'} 
             onClick={() => setMode('block')}
-            className="text-base py-5 px-4 w-full sm:w-auto"
+            className={cn(
+                "text-base py-5 px-4 w-full sm:w-auto",
+                mode === 'block' ? "bg-blue-500 text-white hover:bg-blue-600" : "bg-white text-gray-800 hover:bg-gray-100"
+            )}
             >
             시간 차단 모드
             </Button>
             <Button 
             variant={mode === 'book' ? 'default' : 'outline'} 
             onClick={() => setMode('book')}
-            className="text-base py-5 px-4 w-full sm:w-auto"
+            className={cn(
+                "text-base py-5 px-4 w-full sm:w-auto",
+                mode === 'book' ? "bg-blue-500 text-white hover:bg-blue-600" : "bg-white text-gray-800 hover:bg-gray-100"
+            )}
             >
             예약 생성 모드
             </Button>
         </div>
+
+        // 휴무일 일괄 설정 버튼도 수정
         <Button 
             onClick={() => setIsBulkBlockDialogOpen(true)}
-            className="text-base py-5 px-4 w-full sm:w-auto"
+            className="text-base py-5 px-4 w-full sm:w-auto bg-green-500 text-white hover:bg-green-600"
         >
             휴무일 일괄 설정
         </Button>
