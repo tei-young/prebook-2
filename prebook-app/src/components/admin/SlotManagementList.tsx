@@ -446,16 +446,16 @@ export default function SlotManagementList({ onRefresh }: SlotManagementListProp
                     <div>
                     <h5 className="font-bold mb-2 text-lg text-gray-900">오전</h5>
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                            {AVAILABLE_TIMES.filter(time => parseInt(time) < 12).map(time => {
+                        {AVAILABLE_TIMES.filter(time => parseInt(time) < 12).map(time => {
                             const status = getSlotStatus(time);
                             return (
                                 <button
                                 key={time}
                                 onClick={() => mode === 'block' 
                                     ? handleBlockSlot(time) 
-                                    : status === 'available' && handleOpenBookingForm(time)
+                                    : (status === 'available' || status === 'cancelled') && handleOpenBookingForm(time) // 취소된 시간도 클릭 가능하도록 수정
                                 }
-                                disabled={mode === 'book' && status !== 'available'}
+                                disabled={mode === 'book' && status !== 'available' && status !== 'cancelled'} // 여기도 수정
                                 className={cn(
                                     "px-4 py-4 rounded-lg text-lg flex items-center justify-center",
                                     status === 'available' && mode === 'block' && "bg-white hover:bg-gray-100 border",
@@ -463,8 +463,8 @@ export default function SlotManagementList({ onRefresh }: SlotManagementListProp
                                     status === 'blocked' && "bg-red-100 text-red-800 hover:bg-red-200",
                                     status === 'deposit_wait' && "bg-blue-100 text-blue-800",
                                     status === 'confirmed' && "bg-green-100 text-green-800",
-                                    status === 'cancelled' && "bg-gray-100 text-gray-500",
-                                    (mode === 'book' && status !== 'available') && "cursor-not-allowed opacity-70"
+                                    status === 'cancelled' && "bg-gray-100 text-gray-500 hover:bg-gray-200", // 호버 효과 추가
+                                    (mode === 'book' && status !== 'available' && status !== 'cancelled') && "cursor-not-allowed opacity-70" // 여기도 수정
                                 )}
                                 >
                                 {time}
@@ -479,30 +479,30 @@ export default function SlotManagementList({ onRefresh }: SlotManagementListProp
                     <h5 className="font-bold mb-2 text-lg text-gray-900">오후</h5>
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                             {AVAILABLE_TIMES.filter(time => parseInt(time) >= 12).map(time => {
-                            const status = getSlotStatus(time);
-                            return (
-                                <button
-                                key={time}
-                                onClick={() => mode === 'block' 
-                                    ? handleBlockSlot(time) 
-                                    : status === 'available' && handleOpenBookingForm(time)
-                                }
-                                disabled={mode === 'book' && status !== 'available'}
-                                className={cn(
-                                    "px-4 py-4 rounded-lg text-lg flex items-center justify-center",
-                                    status === 'available' && mode === 'block' && "bg-white hover:bg-gray-100 border",
-                                    status === 'available' && mode === 'book' && "bg-white hover:bg-green-50 border",
-                                    status === 'blocked' && "bg-red-100 text-red-800 hover:bg-red-200",
-                                    status === 'deposit_wait' && "bg-blue-100 text-blue-800",
-                                    status === 'confirmed' && "bg-green-100 text-green-800",
-                                    status === 'cancelled' && "bg-gray-100 text-gray-500",
-                                    (mode === 'book' && status !== 'available') && "cursor-not-allowed opacity-70"
-                                )}
-                                >
-                                {parseInt(time) > 12 ? `${parseInt(time) - 12}:${time.split(':')[1]}` : time}
-                                </button>
-                            );
-                            })}
+                                const status = getSlotStatus(time);
+                                return (
+                                    <button
+                                    key={time}
+                                    onClick={() => mode === 'block' 
+                                        ? handleBlockSlot(time) 
+                                        : (status === 'available' || status === 'cancelled') && handleOpenBookingForm(time) // 취소된 시간도 클릭 가능하도록 수정
+                                    }
+                                    disabled={mode === 'book' && status !== 'available' && status !== 'cancelled'} // 여기도 수정
+                                    className={cn(
+                                        "px-4 py-4 rounded-lg text-lg flex items-center justify-center",
+                                        status === 'available' && mode === 'block' && "bg-white hover:bg-gray-100 border",
+                                        status === 'available' && mode === 'book' && "bg-white hover:bg-green-50 border",
+                                        status === 'blocked' && "bg-red-100 text-red-800 hover:bg-red-200",
+                                        status === 'deposit_wait' && "bg-blue-100 text-blue-800",
+                                        status === 'confirmed' && "bg-green-100 text-green-800",
+                                        status === 'cancelled' && "bg-gray-100 text-gray-500 hover:bg-gray-200", // 호버 효과 추가
+                                        (mode === 'book' && status !== 'available' && status !== 'cancelled') && "cursor-not-allowed opacity-70" // 여기도 수정
+                                    )}
+                                    >
+                                    {parseInt(time) > 12 ? `${parseInt(time) - 12}:${time.split(':')[1]}` : time}
+                                    </button>
+                                );
+                                })}
                         </div>
                         </div>
                   </div>
