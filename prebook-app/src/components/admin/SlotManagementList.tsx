@@ -347,6 +347,8 @@ export default function SlotManagementList({ onRefresh }: SlotManagementListProp
     const previousHourBooking = bookings.find(booking => {
       if (booking.date !== date) return false;
       
+       // 취소된 예약은 고려하지 않음 (available로 취급)
+    if (booking.status === 'cancelled') return false;
       const bookingHour = parseInt(booking.time.split(':')[0]);
       const bookingDuration = SERVICE_MAP[booking.service_type as keyof typeof SERVICE_MAP]?.duration || 1;
       
