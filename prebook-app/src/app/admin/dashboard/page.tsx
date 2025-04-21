@@ -189,40 +189,61 @@ async function fetchReservations() {
   }
 };
 
-  const handleStatusChange = async (reservationId: string, newStatus: ReservationStatus) => {
-    if (!selectedReservation) return;
-  
-    try {
-      let updateSuccessful = false;
+const handleStatusChange = async (reservationId: string, newStatus: ReservationStatus) => {
+  if (!selectedReservation) return;
+
+  try {
+    let updateSuccessful = false;
+    
+    // 원장 생성 예약인지 확인 (source 프로퍼티로 구분)
+    if ((selectedReservation as any).source === 'owner') {
+      // 먼저 bookings 테이블에서 해당 ID의 레코드가 있는지 확인
+      const { data: existingBooking, error: checkError } = await supabase
+        .from('bookings')
+        .select('*')
+        .eq('id', reservationId)
+        .single();
       
-      // 원장 생성 예약인지 확인 (source 프로퍼티로 구분)
-      if ((selectedReservation as any).source === 'owner') {
-        // bookings 테이블에서 사용하는 상태값으로 변환
-        const bookingStatus = 
-          newStatus === 'confirmed' ? 'confirmed' : 
-          newStatus === 'rejected' ? 'cancelled' : 
-          newStatus === 'deposit_wait' ? 'deposit_wait' : 'pending';
-        
-        console.log(`원장 생성 예약 업데이트: ID=${reservationId}, 상태=${bookingStatus}`);
-        
-        // bookings 테이블 업데이트 - 원장 생성 예약
-        const { data, error } = await supabase
-          .from('bookings')
-          .update({ 
-            status: bookingStatus,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', reservationId)
-          .select();
-  
-        if (error) {
-          console.error('bookings 테이블 업데이트 오류:', error);
-          throw error;
-        }
-        
-        console.log('bookings 테이블 업데이트 결과:', data);
-        updateSuccessful = data && data.length > 0;
-      } else {
+      if (checkError) {
+        console.error('bookings 테이블 조회 오류:', checkError);
+        console.log('조회된 ID:', reservationId);
+        console.log('조회 쿼리:', `FROM bookings WHERE id = ${reservationId}`);
+        throw new Error(`예약 조회 실패: ${checkError.message}`);
+      }
+      
+      if (!existingBooking) {
+        console.error('해당 ID의 예약을 찾을 수 없음:', reservationId);
+        throw new Error('해당 ID의 예약을 찾을 수 없습니다.');
+      }
+      
+      console.log('조회된 예약 정보:', existingBooking);
+      
+      // bookings 테이블에서 사용하는 상태값으로 변환
+      const bookingStatus = 
+        newStatus === 'confirmed' ? 'confirmed' : 
+        newStatus === 'rejected' ? 'cancelled' : 
+        newStatus === 'deposit_wait' ? 'deposit_wait' : 'pending';
+      
+      console.log(`원장 생성 예약 업데이트: ID=${reservationId}, 상태=${bookingStatus}`);
+      
+      // bookings 테이블 업데이트 - 원장 생성 예약
+      const { data, error } = await supabase
+        .from('bookings')
+        .update({ 
+          status: bookingStatus,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', reservationId)
+        .select();
+
+      if (error) {
+        console.error('bookings 테이블 업데이트 오류:', error);
+        throw error;
+      }
+      
+      console.log('bookings 테이블 업데이트 결과:', data);
+      updateSuccessful = data && data.length > 0;
+    } else {
         // reservations 테이블 업데이트 - 고객 예약
         const { data, error } = await supabase
           .from('reservations')
@@ -241,7 +262,7 @@ async function fetchReservations() {
         console.log('reservations 테이블 업데이트 결과:', data);
         updateSuccessful = data && data.length > 0;
       }
-  
+
       if (!updateSuccessful) {
         console.error('데이터베이스 업데이트 실패: 변경된 레코드 없음');
         throw new Error('업데이트된 레코드가 없습니다.');
