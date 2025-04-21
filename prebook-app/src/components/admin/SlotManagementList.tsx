@@ -149,6 +149,44 @@ export default function SlotManagementList({ onRefresh }: SlotManagementListProp
     }
   };
 
+  // 예약 시간 관리 탭 - 예약 목록 UI에서 확정, 취소 버튼동작 핸들러
+  const handleStatusChange = async (bookingId: string, newStatus: 'confirmed' | 'cancelled') => {
+    try {
+      setLoading(true);
+      
+      // 서버 측 API 라우트 호출
+      const response = await fetch('/api/bookings/update', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: bookingId,
+          status: newStatus
+        }),
+      });
+      
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.error || '업데이트에 실패했습니다');
+      }
+      
+      console.log('예약 상태 변경 성공:', result);
+      
+      // 데이터 새로고침
+      await loadSlotsData(format(selectedDate!, 'yyyy-MM-dd'));
+      
+      // 성공 메시지
+      alert(newStatus === 'confirmed' ? '예약이 확정되었습니다.' : '예약이 취소되었습니다.');
+    } catch (error) {
+      console.error('예약 상태 변경 중 오류 발생:', error);
+      alert('상태 변경 중 오류가 발생했습니다.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // 예약 생성 폼 열기
   const handleOpenBookingForm = (time: string) => {
     setSelectedSlot(time);
@@ -522,77 +560,77 @@ export default function SlotManagementList({ onRefresh }: SlotManagementListProp
   
             {/* 예약 목록 섹션은 시간 UI 아래로 이동 */}
             {bookings.length > 0 && (
-            <div className="mt-6 border rounded-lg p-4">
-                <h3 className="font-medium mb-4 text-lg">
-                {format(selectedDate, 'yyyy년 M월 d일', { locale: ko })} 예약 목록
-                </h3>
-                
-                <div className="space-y-4">
-                {bookings.map(booking => (
-                    <div 
-                    key={booking.id} 
-                    className={cn(
-                        "p-4 rounded-lg border",
-                        booking.status === 'deposit_wait' && "border-blue-200 bg-blue-50",
-                        booking.status === 'confirmed' && "border-green-200 bg-green-50",
-                        booking.status === 'cancelled' && "border-gray-200 bg-gray-50"
-                    )}
-                    >
-                    <div className="flex flex-col sm:flex-row justify-between items-start">
-                        <div>
-                        <div className="font-medium text-lg">
-                            {booking.time} - {SERVICE_MAP[booking.service_type as keyof typeof serviceTypes]?.name || booking.service_type}
-                        </div>
-                        {booking.customer_name && (
-                            <div className="text-base mt-1">고객명: {booking.customer_name}</div>
+                <div className="mt-6 border rounded-lg p-4">
+                    <h3 className="font-medium mb-4 text-lg">
+                    {format(selectedDate, 'yyyy년 M월 d일', { locale: ko })} 예약 목록
+                    </h3>
+                    
+                    <div className="space-y-4">
+                    {bookings.map(booking => (
+                        <div 
+                        key={booking.id} 
+                        className={cn(
+                            "p-4 rounded-lg border",
+                            booking.status === 'deposit_wait' && "border-blue-200 bg-blue-50",
+                            booking.status === 'confirmed' && "border-green-200 bg-green-50",
+                            booking.status === 'cancelled' && "border-gray-200 bg-gray-50"
                         )}
-                        {booking.customer_phone && (
-                            <div className="text-base">연락처: {booking.customer_phone}</div>
-                        )}
-                        {booking.notes && (
-                            <div className="text-base mt-2 text-gray-600">{booking.notes}</div>
-                        )}
-                        </div>
-                        <div className="flex space-x-2 mt-3 sm:mt-0">
-                        {booking.status === 'deposit_wait' && (
-                            <>
-                            <Button 
-                                size="sm"
-                                className="text-base py-3 px-4"
-                                onClick={() => handleUpdateBookingStatus(booking.id!, 'confirmed')}
-                            >
-                                확정
-                            </Button>
-                            <Button 
+                        >
+                        <div className="flex flex-col sm:flex-row justify-between items-start">
+                            <div>
+                            <div className="font-medium text-lg">
+                                {booking.time} - {SERVICE_MAP[booking.service_type as keyof typeof serviceTypes]?.name || booking.service_type}
+                            </div>
+                            {booking.customer_name && (
+                                <div className="text-base mt-1">고객명: {booking.customer_name}</div>
+                            )}
+                            {booking.customer_phone && (
+                                <div className="text-base">연락처: {booking.customer_phone}</div>
+                            )}
+                            {booking.notes && (
+                                <div className="text-base mt-2 text-gray-600">{booking.notes}</div>
+                            )}
+                            </div>
+                            <div className="flex space-x-2 mt-3 sm:mt-0">
+                            {booking.status === 'deposit_wait' && (
+                                <>
+                                <Button 
+                                    size="sm"
+                                    className="text-base py-3 px-4"
+                                    onClick={() => handleStatusChange(booking.id!, 'confirmed')}
+                                >
+                                    확정
+                                </Button>
+                                <Button 
+                                    size="sm"
+                                    variant="destructive"
+                                    className="text-base py-3 px-4"
+                                    onClick={() => handleStatusChange(booking.id!, 'cancelled')}
+                                >
+                                    취소
+                                </Button>
+                                </>
+                            )}
+                            {booking.status === 'confirmed' && (
+                                <Button 
                                 size="sm"
                                 variant="destructive"
                                 className="text-base py-3 px-4"
-                                onClick={() => handleUpdateBookingStatus(booking.id!, 'cancelled')}
-                            >
+                                onClick={() => handleStatusChange(booking.id!, 'cancelled')}
+                                >
                                 취소
-                            </Button>
-                            </>
-                        )}
-                        {booking.status === 'confirmed' && (
-                            <Button 
-                            size="sm"
-                            variant="destructive"
-                            className="text-base py-3 px-4"
-                            onClick={() => handleUpdateBookingStatus(booking.id!, 'cancelled')}
-                            >
-                            취소
-                            </Button>
-                        )}
-                        {booking.status === 'cancelled' && (
-                            <span className="text-base text-gray-500 px-3 py-2 bg-gray-100 rounded-lg">취소됨</span>
-                        )}
+                                </Button>
+                            )}
+                            {booking.status === 'cancelled' && (
+                                <span className="text-base text-gray-500 px-3 py-2 bg-gray-100 rounded-lg">취소됨</span>
+                            )}
+                            </div>
                         </div>
+                        </div>
+                    ))}
                     </div>
-                    </div>
-                ))}
                 </div>
-            </div>
-            )}
+                )}
             </div>
                     )}
             </div>
