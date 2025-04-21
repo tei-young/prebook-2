@@ -328,39 +328,43 @@ export default function SlotManagementList({ onRefresh }: SlotManagementListProp
     
     if (isBlocked) return 'blocked';
     
-    // 예약된 시간 확인 - 현재 시간이 예약 시작 시간인 경우
-    const directBooking = bookings.find(
-      booking => booking.date === date && booking.time === time
+    // 해당 시간의 모든 예약 찾기 (취소된 것 포함)
+    const allBookingsForTime = bookings.filter(
+        booking => booking.date === date && booking.time === time
     );
     
-    if (directBooking) {
-        if (directBooking.status === 'cancelled') {
-          return 'available'; // cancelled를 available로 처리
-        }
-        return directBooking.status;
-      }
+    // 취소되지 않은 예약이 있는지 확인 (deposit_wait, confirmed 상태)
+    const activeBooking = allBookingsForTime.find(
+        booking => booking.status === 'deposit_wait' || booking.status === 'confirmed'
+    );
     
-    // 예약 시간 + 시술 소요시간 확인 (2시간짜리 예약인 경우 다음 시간도 체크)
+    // 활성 예약이 있으면 그 상태를 반환
+    if (activeBooking) {
+        return activeBooking.status;
+    }
+  
+    // 현재 시간의 시간(hour) 부분
     const hourOfCurrent = parseInt(time.split(':')[0]);
     
-    // 이전 시간에 2시간짜리 예약이 있는지 확인
+    // 이전 시간에 2시간짜리 예약이 있는지 확인 (취소된 예약은 제외)
     const previousHourBooking = bookings.find(booking => {
-      if (booking.date !== date) return false;
-      
-       // 취소된 예약은 고려하지 않음 (available로 취급)
+        if (booking.date !== date) return false;
+        
+    // 취소된 예약은 고려하지 않음
     if (booking.status === 'cancelled') return false;
-      const bookingHour = parseInt(booking.time.split(':')[0]);
-      const bookingDuration = SERVICE_MAP[booking.service_type as keyof typeof SERVICE_MAP]?.duration || 1;
-      
-      // 현재 시간이 이전 예약 시간 + 소요시간 범위 내에 있는지 확인
-      return bookingHour < hourOfCurrent && 
-             bookingHour + bookingDuration > hourOfCurrent;
-    });
     
-    if (previousHourBooking) return previousHourBooking.status;
+    const bookingHour = parseInt(booking.time.split(':')[0]);
+    const bookingDuration = SERVICE_MAP[booking.service_type as keyof typeof SERVICE_MAP]?.duration || 1;
     
-    return 'available';
-  };
+    // 현재 시간이 이전 예약 시간 + 소요시간 범위 내에 있는지 확인
+    return bookingHour < hourOfCurrent && 
+           bookingHour + bookingDuration > hourOfCurrent;
+  });
+  
+  if (previousHourBooking) return previousHourBooking.status;
+  
+  return 'available';
+};
 
   const AVAILABLE_TIMES = [
     '10:00', '11:00',                       // 오전
