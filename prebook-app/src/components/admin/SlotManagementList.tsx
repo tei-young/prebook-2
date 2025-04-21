@@ -55,7 +55,7 @@ export default function SlotManagementList({ onRefresh }: SlotManagementListProp
   const [unavailableSlots, setUnavailableSlots] = useState<UnavailableSlot[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(false);
-  const [mode, setMode] = useState<'block' | 'book'>('block');
+  const [mode, setMode] = useState<'block' | 'book'>('book');
   
   // 예약 폼 상태
   const [isFormOpen, setIsFormOpen] = useState(false);
