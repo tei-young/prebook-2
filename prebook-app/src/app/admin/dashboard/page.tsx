@@ -129,6 +129,12 @@ export default function AdminDashboard() {
   const handleApproveWithSlot = async (reservationId: string) => {
     if (!selectedSlot || !selectedReservation) return;
     
+    // 원장 생성 예약이면 이 함수를 사용하지 않도록 함
+    if ((selectedReservation as any).source === 'owner') {
+      alert('원장 생성 예약은 이 방식으로 변경할 수 없습니다.');
+      return;
+    }
+
     try {
       const { error } = await supabase
         .from('reservations')
@@ -185,15 +191,31 @@ export default function AdminDashboard() {
     if (!selectedReservation) return;
   
     try {
-      const { error } = await supabase
-        .from('reservations')
-        .update({ 
-          status: newStatus,
-          status_updated_at: new Date().toISOString()
-        })
-        .eq('id', reservationId);
+      // 원장 생성 예약인지 확인 (source 프로퍼티로 구분)
+      if ((selectedReservation as any).source === 'owner') {
+        // bookings 테이블 업데이트 - 원장 생성 예약
+        const { error } = await supabase
+          .from('bookings')
+          .update({ 
+            status: newStatus === 'confirmed' ? 'confirmed' : 
+                   newStatus === 'rejected' ? 'cancelled' : newStatus,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', reservationId);
   
-      if (error) throw error;
+        if (error) throw error;
+      } else {
+        // reservations 테이블 업데이트 - 고객 예약
+        const { error } = await supabase
+          .from('reservations')
+          .update({ 
+            status: newStatus,
+            status_updated_at: new Date().toISOString()
+          })
+          .eq('id', reservationId);
+  
+        if (error) throw error;
+      }
   
       // 상태별 자동화 처리
       if (newStatus === 'confirmed' && selectedReservation.selected_slot) {
@@ -248,33 +270,35 @@ export default function AdminDashboard() {
         }
       }
   
-      setReservations(prev =>
-        prev.map(reservation =>
-          reservation.id === reservationId
-            ? { 
-                ...reservation, 
-                status: newStatus,
-                status_updated_at: new Date().toISOString()
-              }
-            : reservation
-        )
+    // 예약 목록 업데이트
+    setReservations(prev =>
+      prev.map(reservation =>
+        reservation.id === reservationId
+          ? { 
+              ...reservation, 
+              status: newStatus,
+              status_updated_at: new Date().toISOString()
+            }
+          : reservation
+      )
+    );
+
+    // 선택된 예약 업데이트
+    if (selectedReservation?.id === reservationId) {
+      setSelectedReservation(prev => 
+        prev ? { 
+          ...prev, 
+          status: newStatus,
+          status_updated_at: new Date().toISOString()
+        } : null
       );
-  
-      if (selectedReservation?.id === reservationId) {
-        setSelectedReservation(prev => 
-          prev ? { 
-            ...prev, 
-            status: newStatus,
-            status_updated_at: new Date().toISOString()
-          } : null
-        );
-      }
-  
-    } catch (error) {
-      console.error('상태 변경 중 오류 발생:', error);
-      alert('상태 변경 중 오류가 발생했습니다.');
     }
-  };
+
+      } catch (error) {
+        console.error('상태 변경 중 오류 발생:', error);
+        alert('상태 변경 중 오류가 발생했습니다.');
+      }
+    };
 
   return (
     <div className="min-h-screen bg-gray-50 p-4">
