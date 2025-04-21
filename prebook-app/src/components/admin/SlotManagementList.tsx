@@ -333,7 +333,12 @@ export default function SlotManagementList({ onRefresh }: SlotManagementListProp
       booking => booking.date === date && booking.time === time
     );
     
-    if (directBooking) return directBooking.status;
+    if (directBooking) {
+        if (directBooking.status === 'cancelled') {
+          return 'available'; // cancelled를 available로 처리
+        }
+        return directBooking.status;
+      }
     
     // 예약 시간 + 시술 소요시간 확인 (2시간짜리 예약인 경우 다음 시간도 체크)
     const hourOfCurrent = parseInt(time.split(':')[0]);
