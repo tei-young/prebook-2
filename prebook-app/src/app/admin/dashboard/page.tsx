@@ -193,31 +193,8 @@ const handleStatusChange = async (reservationId: string, newStatus: ReservationS
   if (!selectedReservation) return;
 
   try {
-    let updateSuccessful = false;
-    
     // 원장 생성 예약인지 확인 (source 프로퍼티로 구분)
     if ((selectedReservation as any).source === 'owner') {
-      // 먼저 bookings 테이블에서 해당 ID의 레코드가 있는지 확인
-      const { data: existingBooking, error: checkError } = await supabase
-        .from('bookings')
-        .select('*')
-        .eq('id', reservationId)
-        .single();
-      
-      if (checkError) {
-        console.error('bookings 테이블 조회 오류:', checkError);
-        console.log('조회된 ID:', reservationId);
-        console.log('조회 쿼리:', `FROM bookings WHERE id = ${reservationId}`);
-        throw new Error(`예약 조회 실패: ${checkError.message}`);
-      }
-      
-      if (!existingBooking) {
-        console.error('해당 ID의 예약을 찾을 수 없음:', reservationId);
-        throw new Error('해당 ID의 예약을 찾을 수 없습니다.');
-      }
-      
-      console.log('조회된 예약 정보:', existingBooking);
-      
       // bookings 테이블에서 사용하는 상태값으로 변환
       const bookingStatus = 
         newStatus === 'confirmed' ? 'confirmed' : 
@@ -226,23 +203,25 @@ const handleStatusChange = async (reservationId: string, newStatus: ReservationS
       
       console.log(`원장 생성 예약 업데이트: ID=${reservationId}, 상태=${bookingStatus}`);
       
-      // bookings 테이블 업데이트 - 원장 생성 예약
-      const { data, error } = await supabase
-        .from('bookings')
-        .update({ 
-          status: bookingStatus,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', reservationId)
-        .select();
-
-      if (error) {
-        console.error('bookings 테이블 업데이트 오류:', error);
-        throw error;
+      // 서버 측 API 라우트 호출
+      const response = await fetch('/api/bookings/update', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: reservationId,
+          status: bookingStatus
+        }),
+      });
+      
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.error || '업데이트에 실패했습니다');
       }
       
-      console.log('bookings 테이블 업데이트 결과:', data);
-      updateSuccessful = data && data.length > 0;
+      console.log('업데이트 결과:', result);
     } else {
         // reservations 테이블 업데이트 - 고객 예약
         const { data, error } = await supabase
