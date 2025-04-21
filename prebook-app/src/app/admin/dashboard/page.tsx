@@ -193,8 +193,16 @@ const handleStatusChange = async (reservationId: string, newStatus: ReservationS
   if (!selectedReservation) return;
 
   try {
+    let updateSuccessful = false; // 변수 선언
+    
     // 원장 생성 예약인지 확인 (source 프로퍼티로 구분)
     if ((selectedReservation as any).source === 'owner') {
+      // 먼저 bookings 테이블에서 해당 ID의 레코드가 있는지 확인
+      const { data: existingBooking, error: checkError } = await supabase
+        .from('bookings')
+        .select('*')
+        .eq('id', reservationId)
+        .single();
       // bookings 테이블에서 사용하는 상태값으로 변환
       const bookingStatus = 
         newStatus === 'confirmed' ? 'confirmed' : 
