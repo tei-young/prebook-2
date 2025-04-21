@@ -54,68 +54,70 @@ export default function AdminDashboard() {
     fetchReservations();
   }, []);
   
-  async function fetchReservations() {
-    try {
-      setLoading(true);
-      
-      // 1. 고객 예약 요청 불러오기 (reservation 테이블)
-      const { data: customerReservations, error: customerError } = await supabase
-        .from('reservations')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      if (customerError) throw customerError;
-      
-      // 2. 원장 생성 예약 불러오기 (bookings 테이블)
-      const { data: ownerBookings, error: ownerError } = await supabase
-        .from('bookings')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      if (ownerError) throw ownerError;
-  
-      // 3. bookings 데이터를 reservation 형식으로 변환
-      const convertedBookings = ownerBookings.map(booking => {
-        return {
-          id: booking.id,
-          customer_name: booking.customer_name || '원장 생성 예약',
-          gender: '-',  // 원장 생성 예약에는 없는 필드
-          age: 0,       // 원장 생성 예약에는 없는 필드
-          phone: booking.customer_phone || '-',
-          desired_service: booking.service_type,
-          referral_source: null,
-          desired_slots: [], // 원장 생성 예약에는 없는 필드
-          selected_slot: {
-            date: booking.date,
-            time: booking.time
-          },
-          prior_experience: null,
-          front_photo_url: null,
-          closed_photo_url: null,
-          status: booking.status === 'deposit_wait' ? 'deposit_wait' : 
-                 booking.status === 'confirmed' ? 'confirmed' : 
-                 booking.status === 'cancelled' ? 'rejected' : 'pending',
-          status_updated_at: booking.updated_at,
-          created_at: booking.created_at,
-          // bookings 테이블에서 온 데이터 표시
-          source: 'owner' // 원장 생성 예약 표시
-        };
-      });
-      
-      // 4. 두 데이터 합치기
-      const allReservations = [...customerReservations, ...convertedBookings];
-      // 생성일 기준 내림차순 정렬
-      allReservations.sort((a, b) => 
-        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-      );
-      
-      setReservations(allReservations);
-    } catch (error) {
-      console.error('예약 목록 조회 중 오류 발생:', error);
-    } finally {
-      setLoading(false);
-    }
+// 예약 목록 새로고침 함수 수정
+async function fetchReservations() {
+  try {
+    setLoading(true);
+    
+    // 1. 고객 예약 요청 불러오기 (reservation 테이블)
+    const { data: customerReservations, error: customerError } = await supabase
+      .from('reservations')
+      .select('*')
+      .order('created_at', { ascending: false });
+    
+    if (customerError) throw customerError;
+    
+    // 2. 원장 생성 예약 불러오기 (bookings 테이블)
+    const { data: ownerBookings, error: ownerError } = await supabase
+      .from('bookings')
+      .select('*')
+      .order('created_at', { ascending: false });
+    
+    if (ownerError) throw ownerError;
+
+    // 3. bookings 데이터를 reservation 형식으로 변환
+    const convertedBookings = ownerBookings.map(booking => {
+      return {
+        id: booking.id,
+        customer_name: booking.customer_name || '원장 생성 예약',
+        gender: '-',  // 원장 생성 예약에는 없는 필드
+        age: 0,       // 원장 생성 예약에는 없는 필드
+        phone: booking.customer_phone || '-',
+        desired_service: booking.service_type,
+        referral_source: null,
+        desired_slots: [], // 원장 생성 예약에는 없는 필드
+        selected_slot: {
+          date: booking.date,
+          time: booking.time
+        },
+        prior_experience: null,
+        front_photo_url: null,
+        closed_photo_url: null,
+        status: booking.status === 'deposit_wait' ? 'deposit_wait' : 
+               booking.status === 'confirmed' ? 'confirmed' : 
+               booking.status === 'cancelled' ? 'rejected' : 'pending',
+        status_updated_at: booking.updated_at,
+        created_at: booking.created_at,
+        // bookings 테이블에서 온 데이터 표시
+        source: 'owner' // 원장 생성 예약 표시
+      };
+    });
+    
+    // 4. 두 데이터 합치기
+    const allReservations = [...customerReservations, ...convertedBookings];
+    // 생성일 기준 내림차순 정렬
+    allReservations.sort((a, b) => 
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    );
+    
+    setReservations(allReservations);
+    console.log('예약 목록 새로고침 완료:', allReservations.length);
+  } catch (error) {
+    console.error('예약 목록 조회 중 오류 발생:', error);
+  } finally {
+    setLoading(false);
   }
+}
 
   const handleReservationClick = (reservation: Reservation) => {
     setSelectedReservation(reservation);
@@ -170,51 +172,79 @@ export default function AdminDashboard() {
         )
       );
 
-      if (selectedReservation?.id === reservationId) {
-        setSelectedReservation(prev => 
-          prev ? { 
-            ...prev, 
-            status: 'deposit_wait', 
-            selected_slot: selectedSlot,
-            status_updated_at: new Date().toISOString()
-          } : null
-        );
-      }
+    // 업데이트 성공 후 전체 예약 목록 새로고침
+    await fetchReservations();
 
-    } catch (error) {
-      console.error('예약 승인 중 오류 발생:', error);
-      alert('예약 승인 중 오류가 발생했습니다.');
+    // 상태 변경된 예약 선택 상태 유지
+    if (selectedReservation?.id === reservationId) {
+      const updatedReservation = reservations.find(r => r.id === reservationId);
+      if (updatedReservation) {
+        setSelectedReservation(updatedReservation);
+      }
     }
-  };
+
+  } catch (error) {
+    console.error('상태 변경 중 오류 발생:', error);
+    alert('상태 변경 중 오류가 발생했습니다.');
+  }
+};
 
   const handleStatusChange = async (reservationId: string, newStatus: ReservationStatus) => {
     if (!selectedReservation) return;
   
     try {
+      let updateSuccessful = false;
+      
       // 원장 생성 예약인지 확인 (source 프로퍼티로 구분)
       if ((selectedReservation as any).source === 'owner') {
+        // bookings 테이블에서 사용하는 상태값으로 변환
+        const bookingStatus = 
+          newStatus === 'confirmed' ? 'confirmed' : 
+          newStatus === 'rejected' ? 'cancelled' : 
+          newStatus === 'deposit_wait' ? 'deposit_wait' : 'pending';
+        
+        console.log(`원장 생성 예약 업데이트: ID=${reservationId}, 상태=${bookingStatus}`);
+        
         // bookings 테이블 업데이트 - 원장 생성 예약
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from('bookings')
           .update({ 
-            status: newStatus === 'confirmed' ? 'confirmed' : 
-                   newStatus === 'rejected' ? 'cancelled' : newStatus,
+            status: bookingStatus,
             updated_at: new Date().toISOString()
           })
-          .eq('id', reservationId);
+          .eq('id', reservationId)
+          .select();
   
-        if (error) throw error;
+        if (error) {
+          console.error('bookings 테이블 업데이트 오류:', error);
+          throw error;
+        }
+        
+        console.log('bookings 테이블 업데이트 결과:', data);
+        updateSuccessful = data && data.length > 0;
       } else {
         // reservations 테이블 업데이트 - 고객 예약
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from('reservations')
           .update({ 
             status: newStatus,
             status_updated_at: new Date().toISOString()
           })
-          .eq('id', reservationId);
+          .eq('id', reservationId)
+          .select();
   
-        if (error) throw error;
+        if (error) {
+          console.error('reservations 테이블 업데이트 오류:', error);
+          throw error;
+        }
+        
+        console.log('reservations 테이블 업데이트 결과:', data);
+        updateSuccessful = data && data.length > 0;
+      }
+  
+      if (!updateSuccessful) {
+        console.error('데이터베이스 업데이트 실패: 변경된 레코드 없음');
+        throw new Error('업데이트된 레코드가 없습니다.');
       }
   
       // 상태별 자동화 처리
