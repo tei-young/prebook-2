@@ -235,8 +235,7 @@ export default function AvailableSlotsCalendar({
                     {availableTimesForSelectedDate.morning.map(slot => (
                       <div
                         key={slot.time}
-                        className="px-4 py-4 rounded-lg text-lg bg-green-100 border border-green-400 text-green-900 text-center font-bold"
-                      >
+                        className="px-3 py-2 rounded-lg text-base border border-gray-300 text-gray-900 text-center font-medium"                       >
                         {slot.time}
                       </div>
                     ))}
@@ -256,8 +255,7 @@ export default function AvailableSlotsCalendar({
                       return (
                         <div
                           key={slot.time}
-                          className="px-4 py-4 rounded-lg text-lg bg-green-100 border border-green-400 text-green-900 text-center font-bold"
-                        >
+                          className="px-3 py-2 rounded-lg text-base border border-gray-300 text-gray-900 text-center font-medium"                         >
                           {displayTime}
                         </div>
                       );
