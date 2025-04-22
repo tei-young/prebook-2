@@ -199,7 +199,7 @@ export default function AvailableSlotsCalendar({
                     !isCurrentMonth && "text-gray-400",
                     isPastDate(day) && "text-gray-400 bg-gray-50",
                     !isPastDate(day) && isCurrentMonth && "cursor-pointer hover:bg-gray-50 text-gray-900",
-                    isSelected && "bg-green-50 font-bold", // 선택했을 때만 초록색 배경
+                    isSelected && "bg-green-200 font-bold", // 선택했을 때만 초록색 배경
                     "border rounded-lg"
                     // isAvailable && !isPastDate(day) && isCurrentMonth && "bg-green-50 text-gray-900" 제거
                   )}
