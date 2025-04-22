@@ -365,30 +365,30 @@ const handleStatusChange = async (reservationId: string, newStatus: ReservationS
                     <Card 
                       key={reservation.id} 
                       className={cn(
-                        "p-4 cursor-pointer hover:shadow-lg transition-shadow",
-                        reservation.source === 'owner' && "border-blue-300" // 원장 생성 예약 강조
+                        "p-2 cursor-pointer hover:shadow-lg transition-shadow", // p-4에서 p-2로 수정하여 패딩 줄임
+                        reservation.source === 'owner' && "border-blue-300"
                       )}
                       onClick={() => handleReservationClick(reservation)}
                     >
                       <div className="flex flex-col sm:flex-row justify-between items-start">
                         <div>
-                          <h3 className="font-medium text-lg text-gray-900">
+                          <h3 className="font-medium text-base text-gray-900"> {/* text-lg에서 text-base로 변경 */}
                             {reservation.customer_name}
                             {reservation.source === 'owner' && (
-                              <span className="ml-2 text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
+                              <span className="ml-2 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded"> {/* py-1에서 py-0.5로 변경 */}
                                 원장 생성
                               </span>
                             )}
                           </h3>
-                          <p className="text-sm text-gray-800 mt-1">
+                          <p className="text-xs text-gray-800 mt-0.5"> {/* text-sm에서 text-xs로, mt-1에서 mt-0.5로 변경 */}
                             {new Date(reservation.created_at).toLocaleDateString()}
                           </p>
-                          <p className="text-base text-gray-800 mt-1">희망 시술: {SERVICE_MAP[reservation.desired_service as keyof typeof serviceTypes]?.name || reservation.desired_service}</p>
+                          <p className="text-sm text-gray-800 mt-0.5">희망 시술: {SERVICE_MAP[reservation.desired_service as keyof typeof serviceTypes]?.name || reservation.desired_service}</p> {/* text-base에서 text-sm으로 변경 */}
                         </div>
-                        <div className="text-right mt-3 sm:mt-0">
+                        <div className="text-right mt-1 sm:mt-0"> {/* mt-3에서 mt-1로 변경 */}
                           <span 
                             className={cn(
-                              "px-3 py-2 rounded text-base font-medium",
+                              "px-2 py-1 rounded text-sm font-medium", // px-3, py-2, text-base에서 크기 줄임
                               {
                                 'bg-yellow-100 text-yellow-800': reservation.status === 'pending',
                                 'bg-blue-100 text-blue-800': reservation.status === 'deposit_wait',
