@@ -191,29 +191,30 @@ export default function AvailableSlotsCalendar({
             const isSelected = selectedDate ? isSameDay(day, selectedDate) : false;
    
             return (
-              <div
-                key={day.toString()}
-                onClick={() => handleDateClick(day)}
-                className={cn(
-                  "flex items-center justify-center aspect-square text-lg",
-                  !isCurrentMonth && "text-gray-400",
-                  isPastDate(day) && "text-gray-400 bg-gray-50",
-                  !isPastDate(day) && isCurrentMonth && "cursor-pointer hover:bg-gray-50 text-gray-900",
-                  isSelected && "bg-green-50 font-bold",
-                  isAvailable && !isPastDate(day) && isCurrentMonth && "bg-green-50 text-gray-900",
-                  "border rounded-lg"
-                )}
-              >
+                <div
+                  key={day.toString()}
+                  onClick={() => handleDateClick(day)}
+                  className={cn(
+                    "flex items-center justify-center aspect-square text-lg",
+                    !isCurrentMonth && "text-gray-400",
+                    isPastDate(day) && "text-gray-400 bg-gray-50",
+                    !isPastDate(day) && isCurrentMonth && "cursor-pointer hover:bg-gray-50 text-gray-900",
+                    isSelected && "bg-green-50 font-bold", // 선택했을 때만 초록색 배경
+                    "border rounded-lg"
+                    // isAvailable && !isPastDate(day) && isCurrentMonth && "bg-green-50 text-gray-900" 제거
+                  )}
+                >
                 <div className="flex flex-col items-center justify-center w-full h-full py-2">
                   <span className={cn(
                     "text-lg",
                     isPastDate(day) ? "text-gray-400 font-normal" : "text-gray-900 font-bold"
                   )}>
                     {format(day, 'd')}
-                  </span>
-                  {isAvailable && !isPastDate(day) && isCurrentMonth && (
+                    </span>
+                    {/* 초록색 동그라미 표시 제거
+                    {isAvailable && !isPastDate(day) && isCurrentMonth && (
                     <div className="w-2 h-2 bg-green-500 rounded-full mx-auto mt-1"></div>
-                  )}
+                    )} */}
                 </div>
               </div>
             );
