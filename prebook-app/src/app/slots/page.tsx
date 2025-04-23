@@ -92,14 +92,14 @@ export default function AvailableSlotsPage() {
         <div className="min-h-screen bg-[#FAF6F2] p-4"> {/* 페이지 배경색 */}
           <div className="max-w-lg mx-auto">
             <div className="pb-4"> {/* Card 컴포넌트 대신 일반 div 사용 */}
-              <div className="text-center pb-8"> {/* 여백 늘림 */}
+              <div className="text-center pb-8">
                 {/* MaruBuri 폰트가 자동으로 적용됨 */}
-                <h1 className="brand-title text-4xl mb-1" style={{ color: '#4A332D' }}>
+                <h1 className="brand-title text-5xl mb-1" style={{ color: '#4A332D' }}>
                   Kimuu
                 </h1>
                 {/* SUIT 폰트가 자동으로 적용됨 */}
-                <h2 className="text-xl font-medium" style={{ color: '#4A332D' }}>
-                  예약 캘린더
+                <h2 className="brand-title text-xl font-medium" style={{ color: '#4A332D' }}>
+                  예약 현황
                 </h2>
               </div>
               <div className="p-0"> {/* CardContent 대신 일반 div 사용 */}
