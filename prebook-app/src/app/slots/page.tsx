@@ -93,7 +93,9 @@ export default function AvailableSlotsPage() {
           <div className="max-w-lg mx-auto">
             <Card className="shadow-md bg-white border-none"> {/* 카드 스타일 변경 */}
               <CardHeader className="pb-3 border-b border-[#E0D0C5]"> {/* 헤더 테두리 추가 */}
-                <CardTitle className="text-center text-2xl text-[#4A332D] font-bold">Kimuu 예약 캘린더</CardTitle>
+                <CardTitle style={{ color: '#4A332D' }} className="text-center text-2xl font-bold">
+                    Kimuu 예약 캘린더
+                </CardTitle>
               </CardHeader>
               <CardContent className="pt-4">
                 {loading ? (
@@ -113,7 +115,9 @@ export default function AvailableSlotsPage() {
                     />
                     
                     <div className="mt-8 text-center text-[#4A332D]"> {/* 텍스트 색상 변경 */}
-                      <p className="text-lg mb-2 font-medium">예약을 원하시면 아래 연락처로 문의해주세요.</p>
+                        <p style={{ color: '#4A332D' }} className="text-lg mb-2 font-medium">
+                        예약을 원하시면 아래 연락처로 문의해주세요.
+                        </p>
                       <div className="flex flex-col sm:flex-row justify-center gap-4 mt-4">
                         <a 
                           href="https://open.kakao.com/o/sXXXXXXX" 

@@ -167,8 +167,8 @@ export default function AvailableSlotsCalendar({
             >
               &lt;
             </button>
-            <h2 className={`text-xl font-semibold text-[${themeColor}]`}>
-              {format(effectiveCurrentMonth, 'yyyy.M', { locale: ko })}
+            <h2 style={{ color: themeColor }} className="text-xl font-semibold">
+            {format(effectiveCurrentMonth, 'yyyy.M', { locale: ko })}
             </h2>
             <button 
               onClick={handleNextMonth}
@@ -182,7 +182,9 @@ export default function AvailableSlotsCalendar({
           {/* 요일 헤더 */}
           <div className="grid grid-cols-7 gap-1">
             {['일', '월', '화', '수', '목', '금', '토'].map(day => (
-              <div key={day} className={`text-center py-3 font-medium text-[${themeColor}] text-lg`}>{day}</div>
+            <div key={day} style={{ color: themeColor }} className="text-center py-3 font-medium text-lg">
+                {day}
+            </div>
             ))}
             
             {/* 날짜 그리드 */}
@@ -206,11 +208,9 @@ export default function AvailableSlotsCalendar({
                   )}
                 >
                   <div className="flex flex-col items-center justify-center w-full h-full py-2">
-                    <span className={cn(
-                      "text-lg",
-                      isPastDate(day) ? "text-gray-400 font-normal" : `text-[${themeColor}] font-medium`
-                    )}>
-                      {format(day, 'd')}
+                    <span style={{ color: isPastDate(day) ? '#9CA3AF' : themeColor }} 
+                    className={`text-lg ${isPastDate(day) ? 'font-normal' : 'font-medium'}`}>
+                    {format(day, 'd')}
                     </span>
                   </div>
                 </div>
@@ -226,9 +226,9 @@ export default function AvailableSlotsCalendar({
               <path d="M12 2C6.5 2 2 6.5 2 12C2 17.5 6.5 22 12 22C17.5 22 22 17.5 22 12C22 6.5 17.5 2 12 2ZM12 20C7.6 20 4 16.4 4 12C4 7.6 7.6 4 12 4C16.4 4 20 7.6 20 12C20 16.4 16.4 20 12 20Z" fill={themeColor}/>
               <path d="M12 12H18V14H10V6H12V12Z" fill={themeColor}/>
             </svg>
-            <h3 className={`ml-2 text-xl font-medium text-[${themeColor}]`}>
-              {format(selectedDate, 'M월 d일', { locale: ko })} 예약 가능 시간
-            </h3>
+                <h3 style={{ color: themeColor }} className="ml-2 text-xl font-medium">
+                {format(selectedDate, 'M월 d일', { locale: ko })} 예약 가능 시간
+                </h3>
           </div>
           
           {/* 오전 시간대 */}
@@ -239,7 +239,7 @@ export default function AvailableSlotsCalendar({
                   <circle cx="12" cy="12" r="10" stroke={themeColor} strokeWidth="2"/>
                   <path d="M12 6V12L8 10" stroke={themeColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
-                <span className={`ml-2 font-medium text-[${themeColor}]`}>오전</span>
+                <span style={{ color: themeColor }} className="ml-2 font-medium">오전</span>
               </div>
               <div className="flex flex-wrap gap-3">
                 {availableTimesForSelectedDate.morning.map(slot => (
@@ -262,7 +262,7 @@ export default function AvailableSlotsCalendar({
                   <circle cx="12" cy="12" r="10" stroke={themeColor} strokeWidth="2"/>
                   <path d="M12 6V12L16 14" stroke={themeColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
-                <span className={`ml-2 font-medium text-[${themeColor}]`}>오후</span>
+                <span style={{ color: themeColor }} className="ml-2 font-medium">오후</span>
               </div>
               <div className="flex flex-wrap gap-3">
                 {availableTimesForSelectedDate.afternoon.map(slot => {
@@ -270,11 +270,9 @@ export default function AvailableSlotsCalendar({
                   const displayTime = hour > 12 ? `${hour - 12}:${slot.time.split(':')[1]}` : slot.time;
                   
                   return (
-                    <div
-                      key={slot.time}
-                      className={`px-4 py-2 border border-[#E0D0C5] rounded-lg text-[${themeColor}]`}
-                    >
-                      {displayTime}
+                    <div key={slot.time} style={{ color: themeColor }} 
+                    className="px-4 py-2 border border-[#E0D0C5] rounded-lg">
+                    {slot.time}
                     </div>
                   );
                 })}
