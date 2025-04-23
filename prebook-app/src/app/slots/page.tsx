@@ -91,16 +91,16 @@ export default function AvailableSlotsPage() {
     return (
         <div className="min-h-screen bg-[#FAF6F2] p-4"> {/* 페이지 배경색 */}
           <div className="max-w-lg mx-auto">
-          <Card className="shadow-md border-none"> {/* 카드 테두리 제거 */}
-          <CardHeader className="pb-3 border-b border-[#E0D0C5] bg-white"> {/* 흰색 배경 명시 */}
-                <CardTitle style={{ color: '#4A332D' }} className="text-center text-2xl font-bold">
-                    Kimuu 예약 캘린더
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="bg-[#FAF6F2] p-0"> {/* 배경색 추가, 패딩 제거 */}
+            <div className="pb-4"> {/* Card 컴포넌트 대신 일반 div 사용 */}
+              <div className="text-center pb-4"> {/* CardHeader 대신 일반 div 사용 */}
+                <h1 style={{ color: '#4A332D' }} className="text-2xl font-bold">
+                  Kimuu 예약 캘린더
+                </h1>
+              </div>
+              <div className="p-0"> {/* CardContent 대신 일반 div 사용 */}
                 {loading ? (
                   <div className="flex justify-center py-8">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#4A332D]"></div> {/* 로딩 스피너 색상 변경 */}
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#4A332D]"></div>
                   </div>
                 ) : (
                   <>
@@ -114,38 +114,29 @@ export default function AvailableSlotsPage() {
                       themeColor="#4A332D"
                     />
                     
-                    <div className="mt-8 text-center text-[#4A332D] px-4 pb-4 bg-white rounded-b-lg"> {/* 흰색 배경 추가 */}
-                        <p style={{ color: '#4A332D' }} className="text-lg mb-2 font-medium">
+                    <div className="mt-8 text-center pb-4">
+                      <p style={{ color: '#4A332D' }} className="text-lg mb-4 font-medium">
                         예약을 원하시면 아래 연락처로 문의해주세요.
-                        </p>
+                      </p>
                       <div className="flex flex-col sm:flex-row justify-center gap-4 mt-4">
                         <a 
                           href="https://open.kakao.com/o/sXXXXXXX" 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="px-6 py-3 bg-[#FAE100] text-[#3C1E1E] rounded-full font-medium text-base flex items-center justify-center"
+                          className="px-6 py-3 bg-[#FAE100] text-[#3C1E1E] rounded-full font-medium"
                         >
-                          <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M12 3C7.03 3 3 6.13 3 10C3 12.41 4.43 14.52 6.65 15.73V19L10.09 17.28C10.69 17.42 11.33 17.5 12 17.5C16.97 17.5 21 14.37 21 10.5C21 6.63 16.97 3 12 3Z"/>
-                          </svg>
                           카카오톡 문의
                         </a>
                         <a 
                           href="tel:010-XXXX-XXXX" 
-                          className="px-6 py-3 bg-[#4A332D] text-white rounded-full font-medium text-base flex items-center justify-center"
+                          className="px-6 py-3 bg-[#4A332D] text-white rounded-full font-medium"
                         >
-                          <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M20 15.5C18.75 15.5 17.55 15.3 16.43 14.93C16.08 14.82 15.69 14.9 15.41 15.17L13.21 17.37C10.38 15.93 8.06 13.62 6.62 10.79L8.82 8.58C9.1 8.31 9.18 7.92 9.07 7.57C8.7 6.45 8.5 5.25 8.5 4C8.5 3.45 8.05 3 7.5 3H4C3.45 3 3 3.45 3 4C3 13.39 10.61 21 20 21C20.55 21 21 20.55 21 20V16.5C21 15.95 20.55 15.5 20 15.5Z"/>
-                          </svg>
                           전화 문의
                         </a>
                       </div>
                     </div>
                   </>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </div>
         </div>
-      );
-}
+      );}
