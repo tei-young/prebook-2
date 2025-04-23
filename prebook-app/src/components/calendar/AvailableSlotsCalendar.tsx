@@ -157,9 +157,9 @@ export default function AvailableSlotsCalendar({
     };
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6"> {/* 여백 늘리고 배경색 제거 */}
           {/* 월 네비게이션 */}
-          <div className="flex justify-between items-center py-3">            
+          <div className="flex justify-between items-center py-3">
             <button 
               onClick={handlePrevMonth}
               className="p-3 hover:bg-[#F0E6DD] rounded-full text-[#4A332D] text-xl font-medium w-12 h-12 flex items-center justify-center"
@@ -167,8 +167,8 @@ export default function AvailableSlotsCalendar({
             >
               &lt;
             </button>
-            <h2 style={{ color: '#4A332D' }} className="text-xl font-semibold">
-            {format(effectiveCurrentMonth, 'yyyy.M', { locale: ko })}
+            <h2 style={{ color: '#4A332D' }} className="text-2xl font-medium">
+              {format(effectiveCurrentMonth, 'yyyy.M', { locale: ko })}
             </h2>
             <button 
               onClick={handleNextMonth}
@@ -178,13 +178,13 @@ export default function AvailableSlotsCalendar({
               &gt;
             </button>
           </div>
-       
+         
           {/* 요일 헤더 */}
           <div className="grid grid-cols-7 gap-1">
-          {['일', '월', '화', '수', '목', '금', '토'].map(day => (
-            <div key={day} style={{ color: '#4A332D' }} className="text-center py-3 font-medium text-lg">
+            {['일', '월', '화', '수', '목', '금', '토'].map(day => (
+              <div key={day} style={{ color: '#4A332D' }} className="text-center py-3 font-medium text-base">
                 {day}
-            </div>
+              </div>
             ))}
             
             {/* 날짜 그리드 */}
@@ -214,27 +214,27 @@ export default function AvailableSlotsCalendar({
                         "border-none" // 테두리 제거
                       )}
                     >
-                    <div className="flex flex-col items-center justify-center w-full h-full py-2">
-                    <span 
-                        className={cn(
-                        "text-lg",
-                        isPast || !isCurrentMonth 
-                            ? "text-gray-400 font-normal"
-                            : "font-medium",
-                        isDisabled && !isPast && isCurrentMonth 
-                            ? "text-gray-500"
-                            : isCurrentMonth && !isDisabled 
-                            ? "text-[#4A332D]"
-                            : ""
-                        )}
-                    >
-                        {format(day, 'd')}
-                    </span>
+                      <div className="flex flex-col items-center justify-center w-full h-full py-2">
+                        <span 
+                          className={cn(
+                            "text-lg",
+                            isPast || !isCurrentMonth 
+                              ? "text-gray-400 font-normal"
+                              : "font-medium",
+                            isDisabled && !isPast && isCurrentMonth 
+                              ? "text-gray-500"
+                              : isCurrentMonth && !isDisabled 
+                                ? "text-[#4A332D]"
+                                : ""
+                          )}
+                        >
+                          {format(day, 'd')}
+                        </span>
+                      </div>
                     </div>
-                </div>
-                );
-            })}
-            </div>
+                  );
+                })}
+              </div>
       {/* 선택된 날짜의 가능한 시간 표시 */}
       {selectedDate && (
       <div className="mt-6">

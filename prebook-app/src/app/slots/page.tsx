@@ -92,10 +92,15 @@ export default function AvailableSlotsPage() {
         <div className="min-h-screen bg-[#FAF6F2] p-4"> {/* 페이지 배경색 */}
           <div className="max-w-lg mx-auto">
             <div className="pb-4"> {/* Card 컴포넌트 대신 일반 div 사용 */}
-              <div className="text-center pb-4"> {/* CardHeader 대신 일반 div 사용 */}
-                <h1 style={{ color: '#4A332D' }} className="text-2xl font-bold">
-                  Kimuu 예약 캘린더
+              <div className="text-center pb-8"> {/* 여백 늘림 */}
+                {/* MaruBuri 폰트가 자동으로 적용됨 */}
+                <h1 className="brand-title text-4xl mb-1" style={{ color: '#4A332D' }}>
+                  Kimuu
                 </h1>
+                {/* SUIT 폰트가 자동으로 적용됨 */}
+                <h2 className="text-xl font-medium" style={{ color: '#4A332D' }}>
+                  예약 캘린더
+                </h2>
               </div>
               <div className="p-0"> {/* CardContent 대신 일반 div 사용 */}
                 {loading ? (
@@ -114,29 +119,30 @@ export default function AvailableSlotsPage() {
                       themeColor="#4A332D"
                     />
                     
-                    <div className="mt-8 text-center pb-4">
-                      <p style={{ color: '#4A332D' }} className="text-lg mb-4 font-medium">
-                        예약을 원하시면 아래 연락처로 문의해주세요.
-                      </p>
-                      <div className="flex flex-col sm:flex-row justify-center gap-4 mt-4">
-                        <a 
-                          href="https://open.kakao.com/o/sXXXXXXX" 
-                          className="px-6 py-3 bg-[#FAE100] text-[#3C1E1E] rounded-full font-medium"
-                        >
-                          카카오톡 문의
-                        </a>
-                        <a 
-                          href="tel:010-XXXX-XXXX" 
-                          className="px-6 py-3 bg-[#4A332D] text-white rounded-full font-medium"
-                        >
-                          전화 문의
-                        </a>
-                      </div>
-                    </div>
-                  </>
-                )}
-              </div>
-            </div>
+                    <div className="mt-10 text-center pb-4"> {/* 여백 더 늘림 */}
+                  <p style={{ color: '#4A332D' }} className="text-lg mb-6 font-medium">
+                    예약을 원하시면 아래 연락처로 문의해주세요.
+                  </p>
+                  <div className="flex flex-col sm:flex-row justify-center gap-4">
+                    <a 
+                      href="https://open.kakao.com/o/sXXXXXXX" 
+                      className="px-8 py-4 bg-[#FAE100] text-[#3C1E1E] rounded-full font-bold text-lg"
+                    >
+                      카카오톡 문의
+                    </a>
+                    <a 
+                      href="tel:010-XXXX-XXXX" 
+                      className="px-8 py-4 bg-[#4A332D] text-white rounded-full font-bold text-lg"
+                    >
+                      전화 문의
+                    </a>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
-      );}
+      </div>
+    </div>
+  );
+}

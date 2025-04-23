@@ -1,6 +1,18 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@import url('https://fonts.googleapis.com/css2?family=MaruBuri:wght@700&family=SUIT&display=swap');
+
+body {
+  font-family: 'SUIT', sans-serif;
+  color: var(--foreground);
+  background: var(--background);
+}
+
+h1, .brand-title {
+  font-family: 'MaruBuri', serif;
+  font-weight: 700;
+}
 
 :root {
   --background: #ffffff;
