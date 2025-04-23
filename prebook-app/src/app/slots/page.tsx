@@ -89,15 +89,15 @@ export default function AvailableSlotsPage() {
     };
 
     return (
-        <div className="min-h-screen bg-[#FAF6F2] p-4"> {/* 배경색 변경 */}
+        <div className="min-h-screen bg-[#FAF6F2] p-4"> {/* 페이지 배경색 */}
           <div className="max-w-lg mx-auto">
-            <Card className="shadow-md bg-white border-none"> {/* 카드 스타일 변경 */}
-              <CardHeader className="pb-3 border-b border-[#E0D0C5]"> {/* 헤더 테두리 추가 */}
+          <Card className="shadow-md border-none"> {/* 카드 테두리 제거 */}
+          <CardHeader className="pb-3 border-b border-[#E0D0C5] bg-white"> {/* 흰색 배경 명시 */}
                 <CardTitle style={{ color: '#4A332D' }} className="text-center text-2xl font-bold">
                     Kimuu 예약 캘린더
                 </CardTitle>
               </CardHeader>
-              <CardContent className="pt-4">
+              <CardContent className="bg-[#FAF6F2] p-0"> {/* 배경색 추가, 패딩 제거 */}
                 {loading ? (
                   <div className="flex justify-center py-8">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#4A332D]"></div> {/* 로딩 스피너 색상 변경 */}
@@ -114,7 +114,7 @@ export default function AvailableSlotsPage() {
                       themeColor="#4A332D"
                     />
                     
-                    <div className="mt-8 text-center text-[#4A332D]"> {/* 텍스트 색상 변경 */}
+                    <div className="mt-8 text-center text-[#4A332D] px-4 pb-4 bg-white rounded-b-lg"> {/* 흰색 배경 추가 */}
                         <p style={{ color: '#4A332D' }} className="text-lg mb-2 font-medium">
                         예약을 원하시면 아래 연락처로 문의해주세요.
                         </p>

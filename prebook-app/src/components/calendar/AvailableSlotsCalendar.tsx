@@ -157,9 +157,9 @@ export default function AvailableSlotsCalendar({
     };
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-4 bg-[#FAF6F2] p-4 rounded-lg">
           {/* 월 네비게이션 */}
-          <div className="flex justify-between items-center p-3 border-b border-[#E0D0C5]">
+          <div className="flex justify-between items-center p-3 border-b border-[#E0D0C5] bg-white rounded-t-lg"> {/* 흰색 배경 추가 */}
             <button 
               onClick={handlePrevMonth}
               className={`p-3 hover:bg-[#FAF6F2] rounded text-[${themeColor}] text-xl font-medium w-12 h-12 flex items-center justify-center`}
@@ -180,7 +180,7 @@ export default function AvailableSlotsCalendar({
           </div>
        
           {/* 요일 헤더 */}
-          <div className="grid grid-cols-7 gap-1">
+          <div className="grid grid-cols-7 gap-1 bg-white p-3 rounded-lg"> {/* 흰색 배경 추가 */}
             {['일', '월', '화', '수', '목', '금', '토'].map(day => (
             <div key={day} style={{ color: themeColor }} className="text-center py-3 font-medium text-lg">
                 {day}
@@ -189,38 +189,57 @@ export default function AvailableSlotsCalendar({
             
             {/* 날짜 그리드 */}
             {days.map(day => {
-              const isCurrentMonth = isSameMonth(day, effectiveCurrentMonth);
-              const isAvailable = hasAvailableSlot(day);
-              const isDisabled = isPastDate(day) || !isAvailable || !isCurrentMonth;
-              const isSelected = selectedDate ? isSameDay(day, selectedDate) : false;
-       
-              return (
-                <div
-                  key={day.toString()}
-                  onClick={() => handleDateClick(day)}
-                  className={cn(
-                    "flex items-center justify-center aspect-square text-lg",
-                    !isCurrentMonth && "text-gray-400",
-                    isPastDate(day) && "text-gray-400 bg-gray-50",
-                    !isPastDate(day) && isCurrentMonth && "cursor-pointer hover:bg-[#FAF6F2] text-[#4A332D]",
-                    isSelected && "bg-[#FFE6E6] font-bold", // 연한 분홍색 배경
-                    "border border-[#E0D0C5] rounded-lg"
-                  )}
-                >
-                  <div className="flex flex-col items-center justify-center w-full h-full py-2">
-                    <span style={{ color: isPastDate(day) ? '#9CA3AF' : themeColor }} 
-                    className={`text-lg ${isPastDate(day) ? 'font-normal' : 'font-medium'}`}>
-                    {format(day, 'd')}
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
+                const isCurrentMonth = isSameMonth(day, effectiveCurrentMonth);
+                const isAvailable = hasAvailableSlot(day);
+                // 오늘 날짜는 선택 가능하게 하기 위해 isPastDate 함수 조정
+                const isPast = (() => {
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    const checkDate = new Date(day);
+                    checkDate.setHours(0, 0, 0, 0);
+                    return checkDate < today; // 오늘은 과거로 취급하지 않음
+                })();
+                const isDisabled = isPast || !isAvailable || !isCurrentMonth;
+                const isSelected = selectedDate ? isSameDay(day, selectedDate) : false;
+
+                return (
+                    <div
+                      key={day.toString()}
+                      onClick={() => !isDisabled && handleDateClick(day)}
+                      className={cn(
+                        "flex items-center justify-center aspect-square text-lg",
+                        !isCurrentMonth && "opacity-40", // 다른 달 날짜는 투명도로 구분
+                        isDisabled ? "cursor-default" : "cursor-pointer hover:bg-[#FAF6F2]",
+                        isSelected && "bg-[#FFE6E6] font-bold", // 선택된 날짜 배경색
+                        !isDisabled && !isSelected && "bg-white", // 선택 가능한 날짜에 흰색 배경
+                        "border border-[#E0D0C5] rounded-lg"
+                      )}
+                    >
+                      <div className="flex flex-col items-center justify-center w-full h-full py-2">
+                        <span 
+                          className={cn(
+                            "text-lg",
+                            isPast || !isCurrentMonth 
+                              ? "text-gray-400 font-normal" // 과거 날짜와 다른 달 날짜는 확실한 회색으로
+                              : "font-medium",
+                            isDisabled && !isPast && isCurrentMonth 
+                              ? "text-gray-500" // 예약 불가능한 현재 달 날짜는 약간 진한 회색으로
+                              : isCurrentMonth && !isDisabled 
+                                ? "text-[#4A332D]" // 선택 가능한 날짜는 주 테마 색상으로
+                                : ""
+                          )}
+                        >
+                          {format(day, 'd')}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
           </div>
    
       {/* 선택된 날짜의 가능한 시간 표시 */}
       {selectedDate && (
-        <div className="mt-6">
+        <div className="mt-6 bg-white p-4 rounded-lg"> {/* 흰색 배경 추가 */}
           <div className="flex items-center mb-4">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M12 2C6.5 2 2 6.5 2 12C2 17.5 6.5 22 12 22C17.5 22 22 17.5 22 12C22 6.5 17.5 2 12 2ZM12 20C7.6 20 4 16.4 4 12C4 7.6 7.6 4 12 4C16.4 4 20 7.6 20 12C20 16.4 16.4 20 12 20Z" fill={themeColor}/>
