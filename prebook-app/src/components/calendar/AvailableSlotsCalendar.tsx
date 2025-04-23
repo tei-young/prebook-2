@@ -22,7 +22,8 @@ interface AvailableSlotsCalendarProps {
   selectedDate?: Date | null;
   datesWithAvailableSlots?: string[]; // 예약 가능한 슬롯이 있는 날짜 목록
   onMonthChange?: (month: Date) => void; // 월 변경 이벤트
-  currentMonth?: Date; // 추가된 prop
+  currentMonth?: Date;
+  themeColor?: string;
 }
 
 const AVAILABLE_TIMES = [
@@ -37,7 +38,8 @@ export default function AvailableSlotsCalendar({
     selectedDate,
     datesWithAvailableSlots = [],
     onMonthChange,
-    currentMonth: propCurrentMonth
+    currentMonth: propCurrentMonth,
+    themeColor = "#4A332D"
 }: AvailableSlotsCalendarProps) {
     // 내부 상태는 prop이 제공되지 않을 경우에만 기본값 사용
     const [internalCurrentMonth, setInternalCurrentMonth] = useState(new Date());
@@ -155,42 +157,42 @@ export default function AvailableSlotsCalendar({
     };
 
     return (
-      <div className="space-y-4">
-        {/* 월 네비게이션 */}
-        <div className="flex justify-between items-center p-3 border-b">
-          <button 
-            onClick={handlePrevMonth}
-            className="p-3 hover:bg-gray-100 rounded text-gray-900 text-xl font-medium w-12 h-12 flex items-center justify-center"
-            aria-label="이전 달"
-          >
-            &lt;
-          </button>
-          <h2 className="text-xl font-semibold text-gray-900">
-            {format(effectiveCurrentMonth, 'yyyy.M', { locale: ko })}
-          </h2>
-          <button 
-            onClick={handleNextMonth}
-            className="p-3 hover:bg-gray-100 rounded text-gray-900 text-xl font-medium w-12 h-12 flex items-center justify-center"
-            aria-label="다음 달"
-          >
-            &gt;
-          </button>
-        </div>
-   
-        {/* 요일 헤더 */}
-        <div className="grid grid-cols-7 gap-1">
-          {['일', '월', '화', '수', '목', '금', '토'].map(day => (
-            <div key={day} className="text-center py-3 font-medium text-gray-900 text-lg">{day}</div>
-          ))}
-          
-          {/* 날짜 그리드 */}
-          {days.map(day => {
-            const isCurrentMonth = isSameMonth(day, effectiveCurrentMonth);
-            const isAvailable = hasAvailableSlot(day);
-            const isDisabled = isPastDate(day) || !isAvailable || !isCurrentMonth;
-            const isSelected = selectedDate ? isSameDay(day, selectedDate) : false;
-   
-            return (
+        <div className="space-y-4">
+          {/* 월 네비게이션 */}
+          <div className="flex justify-between items-center p-3 border-b border-[#E0D0C5]">
+            <button 
+              onClick={handlePrevMonth}
+              className={`p-3 hover:bg-[#FAF6F2] rounded text-[${themeColor}] text-xl font-medium w-12 h-12 flex items-center justify-center`}
+              aria-label="이전 달"
+            >
+              &lt;
+            </button>
+            <h2 className={`text-xl font-semibold text-[${themeColor}]`}>
+              {format(effectiveCurrentMonth, 'yyyy.M', { locale: ko })}
+            </h2>
+            <button 
+              onClick={handleNextMonth}
+              className={`p-3 hover:bg-[#FAF6F2] rounded text-[${themeColor}] text-xl font-medium w-12 h-12 flex items-center justify-center`}
+              aria-label="다음 달"
+            >
+              &gt;
+            </button>
+          </div>
+       
+          {/* 요일 헤더 */}
+          <div className="grid grid-cols-7 gap-1">
+            {['일', '월', '화', '수', '목', '금', '토'].map(day => (
+              <div key={day} className={`text-center py-3 font-medium text-[${themeColor}] text-lg`}>{day}</div>
+            ))}
+            
+            {/* 날짜 그리드 */}
+            {days.map(day => {
+              const isCurrentMonth = isSameMonth(day, effectiveCurrentMonth);
+              const isAvailable = hasAvailableSlot(day);
+              const isDisabled = isPastDate(day) || !isAvailable || !isCurrentMonth;
+              const isSelected = selectedDate ? isSameDay(day, selectedDate) : false;
+       
+              return (
                 <div
                   key={day.toString()}
                   onClick={() => handleDateClick(day)}
@@ -198,83 +200,97 @@ export default function AvailableSlotsCalendar({
                     "flex items-center justify-center aspect-square text-lg",
                     !isCurrentMonth && "text-gray-400",
                     isPastDate(day) && "text-gray-400 bg-gray-50",
-                    !isPastDate(day) && isCurrentMonth && "cursor-pointer hover:bg-gray-50 text-gray-900",
-                    isSelected && "bg-green-200 font-bold", // 선택했을 때만 초록색 배경
-                    "border rounded-lg"
-                    // isAvailable && !isPastDate(day) && isCurrentMonth && "bg-green-50 text-gray-900" 제거
+                    !isPastDate(day) && isCurrentMonth && "cursor-pointer hover:bg-[#FAF6F2] text-[#4A332D]",
+                    isSelected && "bg-[#FFE6E6] font-bold", // 연한 분홍색 배경
+                    "border border-[#E0D0C5] rounded-lg"
                   )}
                 >
-                <div className="flex flex-col items-center justify-center w-full h-full py-2">
-                  <span className={cn(
-                    "text-lg",
-                    isPastDate(day) ? "text-gray-400 font-normal" : "text-gray-900 font-bold"
-                  )}>
-                    {format(day, 'd')}
+                  <div className="flex flex-col items-center justify-center w-full h-full py-2">
+                    <span className={cn(
+                      "text-lg",
+                      isPastDate(day) ? "text-gray-400 font-normal" : `text-[${themeColor}] font-medium`
+                    )}>
+                      {format(day, 'd')}
                     </span>
-                    {/* 초록색 동그라미 표시 제거
-                    {isAvailable && !isPastDate(day) && isCurrentMonth && (
-                    <div className="w-2 h-2 bg-green-500 rounded-full mx-auto mt-1"></div>
-                    )} */}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
    
-        {/* 선택된 날짜의 가능한 시간 표시 */}
-        {selectedDate && (
-          <div className="mt-6">
-            <h3 className="text-xl font-medium text-gray-900 mb-4">
+      {/* 선택된 날짜의 가능한 시간 표시 */}
+      {selectedDate && (
+        <div className="mt-6">
+          <div className="flex items-center mb-4">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2C6.5 2 2 6.5 2 12C2 17.5 6.5 22 12 22C17.5 22 22 17.5 22 12C22 6.5 17.5 2 12 2ZM12 20C7.6 20 4 16.4 4 12C4 7.6 7.6 4 12 4C16.4 4 20 7.6 20 12C20 16.4 16.4 20 12 20Z" fill={themeColor}/>
+              <path d="M12 12H18V14H10V6H12V12Z" fill={themeColor}/>
+            </svg>
+            <h3 className={`ml-2 text-xl font-medium text-[${themeColor}]`}>
               {format(selectedDate, 'M월 d일', { locale: ko })} 예약 가능 시간
             </h3>
-            <div className="space-y-4">
-              {/* 오전 시간대 */}
-              {availableTimesForSelectedDate.morning.length > 0 && (
-                <div>
-                  <h4 className="font-medium mb-2 text-lg text-gray-900">오전</h4>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                    {availableTimesForSelectedDate.morning.map(slot => (
-                      <div
-                        key={slot.time}
-                        className="px-3 py-2 rounded-lg text-base border border-gray-300 text-gray-900 text-center font-medium"                       >
-                        {slot.time}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-   
-              {/* 오후 시간대 */}
-              {availableTimesForSelectedDate.afternoon.length > 0 && (
-                <div>
-                  <h4 className="font-medium mb-2 text-lg text-gray-900">오후</h4>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                    {availableTimesForSelectedDate.afternoon.map(slot => {
-                      const hour = parseInt(slot.time.split(':')[0]);
-                      const displayTime = hour > 12 ? `${hour - 12}:${slot.time.split(':')[1]}` : slot.time;
-                      
-                      return (
-                        <div
-                          key={slot.time}
-                          className="px-3 py-2 rounded-lg text-base border border-gray-300 text-gray-900 text-center font-medium"                         >
-                          {displayTime}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-   
-              {/* 예약 가능한 시간이 없는 경우 */}
-              {availableTimesForSelectedDate.morning.length === 0 && 
-               availableTimesForSelectedDate.afternoon.length === 0 && (
-                <div className="text-center py-6 text-gray-800 text-lg">
-                  예약 가능한 시간이 없습니다.
-                </div>
-              )}
-            </div>
           </div>
-        )}
-      </div>
-    );
+          
+          {/* 오전 시간대 */}
+          {availableTimesForSelectedDate.morning.length > 0 && (
+            <div className="mb-6">
+              <div className="flex items-center mb-3">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="12" cy="12" r="10" stroke={themeColor} strokeWidth="2"/>
+                  <path d="M12 6V12L8 10" stroke={themeColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                <span className={`ml-2 font-medium text-[${themeColor}]`}>오전</span>
+              </div>
+              <div className="flex flex-wrap gap-3">
+                {availableTimesForSelectedDate.morning.map(slot => (
+                  <div
+                    key={slot.time}
+                    className={`px-4 py-2 border border-[#E0D0C5] rounded-lg text-[${themeColor}]`}
+                  >
+                    {slot.time}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+   
+          {/* 오후 시간대 */}
+          {availableTimesForSelectedDate.afternoon.length > 0 && (
+            <div>
+              <div className="flex items-center mb-3">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="12" cy="12" r="10" stroke={themeColor} strokeWidth="2"/>
+                  <path d="M12 6V12L16 14" stroke={themeColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                <span className={`ml-2 font-medium text-[${themeColor}]`}>오후</span>
+              </div>
+              <div className="flex flex-wrap gap-3">
+                {availableTimesForSelectedDate.afternoon.map(slot => {
+                  const hour = parseInt(slot.time.split(':')[0]);
+                  const displayTime = hour > 12 ? `${hour - 12}:${slot.time.split(':')[1]}` : slot.time;
+                  
+                  return (
+                    <div
+                      key={slot.time}
+                      className={`px-4 py-2 border border-[#E0D0C5] rounded-lg text-[${themeColor}]`}
+                    >
+                      {displayTime}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+   
+          {/* 예약 가능한 시간이 없는 경우 */}
+          {availableTimesForSelectedDate.morning.length === 0 && 
+           availableTimesForSelectedDate.afternoon.length === 0 && (
+            <div className="text-center py-6 text-gray-500 text-lg">
+              예약 가능한 시간이 없습니다.
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
 }
