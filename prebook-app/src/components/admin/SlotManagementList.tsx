@@ -506,15 +506,15 @@ export default function SlotManagementList({ onRefresh }: SlotManagementListProp
                                 }
                                 disabled={mode === 'book' && status !== 'available' && status !== 'cancelled'} // 여기도 수정
                                 className={cn(
-                                    "px-4 py-4 rounded-lg text-lg flex items-center justify-center",
-                                    status === 'available' && mode === 'block' && "bg-white hover:bg-gray-100 border",
-                                    status === 'available' && mode === 'book' && "bg-white hover:bg-green-50 border",
+                                    "px-4 py-4 rounded-lg text-lg flex items-center justify-center font-medium",
+                                    status === 'available' && mode === 'block' && "bg-white hover:bg-gray-100 border text-gray-900",
+                                    status === 'available' && mode === 'book' && "bg-white hover:bg-green-50 border text-gray-900",
                                     status === 'blocked' && "bg-red-100 text-red-800 hover:bg-red-200",
                                     status === 'deposit_wait' && "bg-blue-100 text-blue-800",
                                     status === 'confirmed' && "bg-green-100 text-green-800",
-                                    status === 'cancelled' && "bg-gray-100 text-gray-500 hover:bg-gray-200", // 호버 효과 추가
-                                    (mode === 'book' && status !== 'available' && status !== 'cancelled') && "cursor-not-allowed opacity-70" // 여기도 수정
-                                )}
+                                    status === 'cancelled' && "bg-gray-100 text-gray-700", // 더 진한 색상으로 변경
+                                    (mode === 'book' && status !== 'available' && status !== 'cancelled') && "cursor-not-allowed opacity-90" // 투명도 줄임
+                                  )}
                                 >
                                 {time}
                                 </button>
@@ -561,7 +561,7 @@ export default function SlotManagementList({ onRefresh }: SlotManagementListProp
             {/* 예약 목록 섹션은 시간 UI 아래로 이동 */}
             {bookings.length > 0 && (
                 <div className="mt-6 border rounded-lg p-4">
-                    <h3 className="font-medium mb-4 text-lg">
+                    <h3 className="font-bold text-gray-900 mb-4 text-lg">
                     {format(selectedDate, 'yyyy년 M월 d일', { locale: ko })} 예약 목록
                     </h3>
                     
@@ -578,7 +578,7 @@ export default function SlotManagementList({ onRefresh }: SlotManagementListProp
                         >
                         <div className="flex flex-col sm:flex-row justify-between items-start">
                             <div>
-                            <div className="font-medium text-lg">
+                            <div className="font-medium text-gray-900 text-lg">
                                 {booking.time} - {SERVICE_MAP[booking.service_type as keyof typeof serviceTypes]?.name || booking.service_type}
                             </div>
                             {booking.customer_name && (
@@ -637,29 +637,29 @@ export default function SlotManagementList({ onRefresh }: SlotManagementListProp
   
       {/* 예약 생성 폼 다이얼로그 */}
       <Dialog isOpen={isFormOpen} onClose={() => setIsFormOpen(false)}>
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold mb-4">새 예약 생성</h2>
-          
-          <div className="mb-4">
-            <h3 className="font-medium text-gray-700">예약 정보</h3>
-            <div className="mt-2">
-              <p>날짜: {selectedDate ? format(selectedDate, 'yyyy년 M월 d일', { locale: ko }) : ''}</p>
-              <p>시간: {selectedSlot}</p>
+      <div className="space-y-4">
+        <h2 className="text-xl font-bold text-gray-900 mb-4">새 예약 생성</h2>
+        
+        <div className="mb-4">
+            <h3 className="font-bold text-gray-900">예약 정보</h3>
+            <div className="mt-2 text-gray-900">
+            <p>날짜: {selectedDate ? format(selectedDate, 'yyyy년 M월 d일', { locale: ko }) : ''}</p>
+            <p>시간: {selectedSlot}</p>
             </div>
-          </div>
+        </div>
   
           <div className="space-y-4">
             <div>
-              <Label htmlFor="serviceType">시술 종류</Label>
-              <select
-                id="serviceType"
-                className="w-full h-10 px-3 border rounded-md mt-1"
-                value={bookingForm.serviceType}
-                onChange={(e) => setBookingForm(prev => ({ 
-                  ...prev, 
-                  serviceType: e.target.value as keyof typeof serviceTypes 
-                }))}
-              >
+                <Label htmlFor="serviceType" className="font-medium text-gray-900">시술 종류</Label>
+                <select
+                    id="serviceType"
+                    className="w-full h-10 px-3 border border-gray-300 rounded-md bg-white text-gray-900"
+                    value={bookingForm.serviceType}
+                    onChange={(e) => setBookingForm(prev => ({ 
+                    ...prev, 
+                    serviceType: e.target.value as keyof typeof serviceTypes 
+                    }))}
+                >
                 {Object.entries(SERVICE_MAP).map(([key, value]) => (
                   <option key={key} value={key}>
                     {value.name} ({value.duration}시간)
@@ -669,47 +669,50 @@ export default function SlotManagementList({ onRefresh }: SlotManagementListProp
             </div>
   
             <div>
-              <Label htmlFor="customerName">고객명 (선택)</Label>
-              <Input
-                id="customerName"
-                value={bookingForm.customerName}
+                <Label htmlFor="customerName" className="font-medium text-gray-900">고객명 (선택)</Label>
+                    <Input
+                        id="customerName"
+                        value={bookingForm.customerName}
                 onChange={(e) => setBookingForm(prev => ({ ...prev, customerName: e.target.value }))}
                 placeholder="고객 이름"
-              />
+                className="bg-white text-gray-900 border-gray-300"
+                />
             </div>
   
             <div>
-              <Label htmlFor="customerPhone">연락처 (선택)</Label>
-              <Input
-                id="customerPhone"
-                value={bookingForm.customerPhone}
-                onChange={(e) => setBookingForm(prev => ({ ...prev, customerPhone: e.target.value }))}
-                placeholder="010-0000-0000"
-              />
+                <Label htmlFor="customerPhone" className="font-medium text-gray-900">연락처 (선택)</Label>
+                    <Input
+                        id="customerPhone"
+                        value={bookingForm.customerPhone}
+                    onChange={(e) => setBookingForm(prev => ({ ...prev, customerPhone: e.target.value }))}
+                    placeholder="010-0000-0000"
+                    className="bg-white text-gray-900 border-gray-300"
+                />
             </div>
   
             <div>
-              <Label htmlFor="notes">메모 (선택)</Label>
-              <Textarea
-                id="notes"
-                value={bookingForm.notes}
-                onChange={(e) => setBookingForm(prev => ({ ...prev, notes: e.target.value }))}
-                placeholder="예약 관련 메모"
-                rows={3}
-              />
+                <Label htmlFor="notes" className="font-medium text-gray-900">메모 (선택)</Label>
+                    <Textarea
+                        id="notes"
+                        value={bookingForm.notes}
+                    onChange={(e) => setBookingForm(prev => ({ ...prev, notes: e.target.value }))}
+                    placeholder="예약 관련 메모"
+                    rows={3}
+                    className="bg-white text-gray-900 border-gray-300"
+                    />
             </div>
   
             <div>
-              <Label htmlFor="status">예약 상태</Label>
-              <select
-                id="status"
-                className="w-full h-10 px-3 border rounded-md mt-1"
-                value={bookingForm.status}
-                onChange={(e) => setBookingForm(prev => ({ 
-                  ...prev, 
-                  status: e.target.value as BookingStatus
-                }))}
-              >
+                <Label htmlFor="status" className="font-medium text-gray-900">예약 상태</Label>
+                    <select
+                        id="status"
+                        className="w-full h-10 px-3 border border-gray-300 rounded-md bg-white text-gray-900"
+                        value={bookingForm.status}
+                        onChange={(e) => setBookingForm(prev => ({ 
+                        ...prev, 
+                        status: e.target.value as BookingStatus
+                        }))}
+                    >
                 <option value="deposit_wait">예약금 대기</option>
                 <option value="confirmed">예약 확정</option>
               </select>
@@ -717,13 +720,13 @@ export default function SlotManagementList({ onRefresh }: SlotManagementListProp
           </div>
   
           <div className="flex justify-end space-x-3 mt-6">
-            <Button variant="outline" onClick={() => setIsFormOpen(false)}>
-              취소
+            <Button variant="outline" onClick={() => setIsFormOpen(false)} className="text-gray-900">
+            취소
             </Button>
-            <Button onClick={handleCreateBooking} disabled={loading}>
-              {loading ? '처리 중...' : '예약 생성'}
+            <Button onClick={handleCreateBooking} disabled={loading} className="bg-blue-600 text-white hover:bg-blue-700">
+            {loading ? '처리 중...' : '예약 생성'}
             </Button>
-          </div>
+        </div>
         </div>
       </Dialog>
   
