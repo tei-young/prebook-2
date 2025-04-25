@@ -89,20 +89,18 @@ export default function AvailableSlotsPage() {
     };
 
     return (
-        <div className="min-h-screen bg-[#FAF6F2] p-4"> {/* 페이지 배경색 */}
-          <div className="max-w-lg mx-auto">
-            <div className="pb-4"> {/* Card 컴포넌트 대신 일반 div 사용 */}
-              <div className="text-center pb-8">
-                {/* MaruBuri 폰트가 자동으로 적용됨 */}
-                <h1 className="brand-title text-5xl mb-1" style={{ color: '#4A332D' }}>
-                  Kimuu
-                </h1>
-                {/* SUIT 폰트가 자동으로 적용됨 */}
-                <h2 className="brand-title text-xl font-medium" style={{ color: '#4A332D' }}>
-                  예약 현황
-                </h2>
-              </div>
-              <div className="p-0"> {/* CardContent 대신 일반 div 사용 */}
+        <div className="min-h-screen bg-[#FAF6F2] py-6 px-3"> 
+            <div className="max-w-sm mx-auto"> 
+                <div className="bg-white rounded-2xl shadow-sm p-5"> 
+                <div className="text-center pb-6"> 
+                    <h1 className="brand-title text-4xl mb-1" style={{ color: '#4A332D' }}>
+                    Kimuu
+                    </h1>
+                    <h2 className="brand-title text-lg font-medium" style={{ color: '#4A332D' }}>
+                    예약 현황
+                    </h2>
+                </div>
+                <div className="p-0">
                 {loading ? (
                   <div className="flex justify-center py-8">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#4A332D]"></div>
@@ -119,11 +117,11 @@ export default function AvailableSlotsPage() {
                       themeColor="#4A332D"
                     />
                     
-                    <div className="mt-10 text-center pb-4"> {/* 여백 더 늘림 */}
-                  <p style={{ color: '#4A332D' }} className="text-lg mb-6 font-medium">
-                    예약을 원하시면 아래 연락처로 문의해주세요.
-                  </p>
-                  <div className="flex flex-col sm:flex-row justify-center gap-4">
+                    <div className="mt-8 text-center pb-2"> 
+                        <p style={{ color: '#4A332D' }} className="text-base mb-4 font-medium">
+                            예약을 원하시면 아래 연락처로 문의해주세요.
+                        </p>
+                        <div className="flex flex-col gap-3">
                     <a 
                       href="https://open.kakao.com/o/sXXXXXXX" 
                       className="px-8 py-4 bg-[#FAE100] text-[#3C1E1E] rounded-full font-bold text-lg"
