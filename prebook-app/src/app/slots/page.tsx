@@ -91,9 +91,9 @@ export default function AvailableSlotsPage() {
     return (
         <div className="min-h-screen bg-[#FAF6F2] py-6 px-3"> 
             <div className="max-w-sm mx-auto"> 
-                <div className="bg-white rounded-2xl shadow-sm p-5"> 
-                <div className="text-center pb-6"> 
-                    <h1 className="brand-title text-4xl mb-1" style={{ color: '#4A332D' }}>
+                <div className="pb-4"> 
+                <div className="text-center pb-6">
+                    <h1 className="brand-title text-4xl mb-1" style={{ color: '#4A332D' }}> 
                     Kimuu
                     </h1>
                     <h2 className="brand-title text-lg font-medium" style={{ color: '#4A332D' }}>
